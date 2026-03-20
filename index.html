@@ -174,6 +174,22 @@ textarea::placeholder { color: #c0bab4; font-style: italic; }
 .btn-export { background: white; color: var(--ink); border: 1px solid var(--border); }
 .btn-export:hover { background: var(--bg); }
 .btn-export:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-generate { background: #fff8ee; color: #8a5e12; border: 1px solid #f9c97a; font-weight: 500; }
+.btn-generate:hover { background: #fcefd0; }
+.btn-generate.active { background: #f9c97a; color: #5a3a00; }
+#generateBox input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  outline: none;
+  margin-top: 8px;
+  background: #fefefe;
+  color: var(--ink);
+}
+#generateBox input:focus { border-color: var(--accent); }
 
 .status-msg { font-size: 0.7rem; color: var(--muted); text-align: center; min-height: 16px; }
 .status-msg.ok { color: var(--accent); }
@@ -427,6 +443,13 @@ textarea::placeholder { color: #c0bab4; font-style: italic; }
       <div class="btn-group">
         <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
         <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-generate" id="generateBtn" onclick="toggleGenerateMode()">✎ Aus Thema generieren</button>
+      </div>
+      <div id="generateBox" style="display:none">
+        <input type="text" id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg, Pythagoras..." />
+        <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()" style="margin-top:8px">✦ Lernzettel generieren</button>
       </div>
       <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
       <div class="status-msg" id="status"></div>
@@ -713,7 +736,9 @@ async function cleanWithAI() {
       const data = await response.json();
       if (data.cleaned && isValidOutput(data.cleaned, raw)) {
         document.getElementById('inputText').value = data.cleaned;
-        setStatus('✓ Text bereinigt — jetzt Design wählen', 'ok');
+        parsedDoc = parseText(data.cleaned);
+        renderPreview(parsedDoc);
+        setStatus('✓ Bereinigt & Vorschau aktualisiert', 'ok');
         btn.disabled = false;
         btn.textContent = '✦ KI bereinigen';
         return;
@@ -746,6 +771,49 @@ function setStatus(msg, type = '') {
   setTimeout(() => { el.textContent = ''; el.className = 'status-msg'; }, 4000);
 }
 
+// ── GENERATE FROM TOPIC ──────────────────────────────────────
+function toggleGenerateMode() {
+  const box = document.getElementById('generateBox');
+  const btn = document.getElementById('generateBtn');
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('active', !isOpen);
+  if (!isOpen) document.getElementById('topicInput').focus();
+}
+
+async function generateFromTopic() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) { setStatus('Bitte ein Thema eingeben', 'err'); return; }
+
+  const btn = document.getElementById('genSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generiere...';
+
+  try {
+    const response = await fetch('/api/clean', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: `GENERIERE_LERNZETTEL: ${topic}` })
+    });
+    const data = await response.json();
+    if (data.cleaned && isValidOutput(data.cleaned, topic)) {
+      document.getElementById('inputText').value = data.cleaned;
+      parsedDoc = parseText(data.cleaned);
+      renderPreview(parsedDoc);
+      document.getElementById('generateBox').style.display = 'none';
+      document.getElementById('generateBtn').classList.remove('active');
+      setStatus(`✓ Lernzettel zu "${topic}" generiert`, 'ok');
+    } else {
+      setStatus('Generierung fehlgeschlagen — nochmal versuchen', 'err');
+    }
+  } catch(e) {
+    setStatus('Fehler: API nicht erreichbar', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Lernzettel generieren';
+  }
+}
+
 // ── PDF EXPORT ────────────────────────────────────────────────
 function exportPDF() {
   if (!parsedDoc) return;
@@ -765,7 +833,21 @@ function exportPDF() {
     return hexToRgb(hex);
   }
 
-  function checkPage(n=10) { if (y+n>280) { doc.addPage(); y=margin; } }
+  let pageNum = 1;
+  function checkPage(n=10) {
+    if (y+n>278) {
+      // Draw page number before new page
+      doc.setFontSize(7); doc.setFont('helvetica','normal');
+      setRGB(isDark ? [60,60,60] : [200,195,190]);
+      doc.text(`— ${pageNum} —`, pageW/2, 288, { align: 'center' });
+      doc.addPage();
+      pageNum++;
+      // Fill background on new page
+      setFill(bgColor);
+      doc.rect(0, 0, pageW, 297, 'F');
+      y = margin;
+    }
+  }
   function setRGB(col) { doc.setTextColor(col[0],col[1],col[2]); }
   function setFill(col) { doc.setFillColor(col[0],col[1],col[2]); }
 
@@ -906,7 +988,7 @@ function exportPDF() {
 
   doc.setFontSize(7); doc.setFont('helvetica','normal');
   setRGB(isDark ? [60,60,60] : [200,195,190]);
-  doc.text('— 1 —', pageW/2, 288, { align: 'center' });
+  doc.text(`— ${pageNum} —`, pageW/2, 288, { align: 'center' });
   doc.save(`textcraft-${currentDesign.id}.pdf`);
   setStatus('✓ PDF gespeichert!', 'ok');
 }
