@@ -713,47 +713,6 @@ function normalizeAIText(raw) {
     .trim();
 }
 
-function repairAIOutput(raw) {
-  let text = normalizeAIText(raw);
-  if (!text) return '';
-
-  const lines = text.split('\n').map(line => line.replace(/\s+$/g, ''));
-
-  if (!/^#\s.+/m.test(text)) {
-    const firstUseful = lines.find(line => line.trim() && !/^\s*[-*>#]/.test(line.trim()));
-    const title = firstUseful ? firstUseful.trim().slice(0, 60) : 'Lernzettel';
-    lines.unshift('## Lernzettel');
-    lines.unshift(`# ${title}`);
-  } else if (!/^##\s.+/m.test(text)) {
-    const titleIndex = lines.findIndex(line => /^#\s.+/.test(line.trim()));
-    if (titleIndex !== -1) lines.splice(titleIndex + 1, 0, '## Lernzettel');
-  }
-
-  text = lines.join('\n');
-
-  if (!/^\d+\.\s.+/m.test(text)) {
-    const arr = text.split('\n');
-    let inserted = false;
-
-    for (let i = 0; i < arr.length; i++) {
-      if (/^\s*[-•]\s+/.test(arr[i])) {
-        arr.splice(i, 0, '1. Allgemein');
-        inserted = true;
-        break;
-      }
-    }
-
-    if (!inserted) {
-      arr.push('');
-      arr.push('1. Allgemein');
-      arr.push('- Inhalt');
-    }
-
-    text = arr.join('\n');
-  }
-
-  return text.trim();
-}
 
 function looksStructured(raw) {
   return /^#\s.+/m.test(raw) && (/^\d+\.\s.+/m.test(raw) || /^\s*[-•]\s.+/m.test(raw));
@@ -767,13 +726,13 @@ function isValidOutput(cleaned, original) {
   if (/^\s*[{[]/.test(text)) return false;
   if (/^(error|fehler|sorry|entschuldigung)/i.test(text)) return false;
 
-  const hasTitle = /^#\s.+/m.test(text) || /^.{3,80}$/m.test(text);
+  const hasTitle = /^#\s.+/m.test(text);
+  const hasAnyHeading = /^#{1,3}\s.+/m.test(text);
   const hasBullet = /^\s*[-•]\s.+/m.test(text);
-  const hasSection = /^\d+\.\s.+/m.test(text) || /^##\s.+/m.test(text);
+  const hasNumbered = /^\s*\d+\.\s.+/m.test(text);
 
-  const validEnough = (hasTitle && hasBullet) || (hasSection && hasBullet);
+  if (!(hasTitle || hasAnyHeading || hasBullet || hasNumbered)) return false;
 
-  if (!validEnough) return false;
   if (original.length > 200 && text.length < original.length * 0.1) return false;
 
   return true;
@@ -785,20 +744,72 @@ function parseText(raw) {
     .replace(/\t/g, '  ')
     .split('\n');
 
-  const doc = { title: '', subtitle: '', sections: [], merksatz: null };
-  let currentSection = null;
-
-  const ensureSection = (title = '') => {
-    if (!currentSection) {
-      currentSection = { title, items: [], callout: null };
-      doc.sections.push(currentSection);
-    }
-    return currentSection;
+  const doc = {
+    title: '',
+    subtitle: '',
+    sections: [],
+    merksatz: null
   };
 
+  let currentSection = null;
+  let subtitleAlreadyUsed = false;
+  let lastTopItem = null;
+  let lastSubItem = null;
+
+  function newSection(title = '') {
+    currentSection = {
+      title,
+      items: [],
+      callout: null
+    };
+    doc.sections.push(currentSection);
+    lastTopItem = null;
+    lastSubItem = null;
+    return currentSection;
+  }
+
+  function ensureSection(title = '') {
+    if (!currentSection) return newSection(title);
+    return currentSection;
+  }
+
+  function pushTopItem(text, isLabel = false) {
+    const sec = ensureSection('');
+    const item = { text, isLabel, sub: [] };
+    sec.items.push(item);
+    lastTopItem = item;
+    lastSubItem = null;
+    return item;
+  }
+
+  function pushSubItem(text, isLabel = false) {
+    if (!lastTopItem) {
+      return pushTopItem(text, isLabel);
+    }
+    const sub = { text, isLabel, children: [] };
+    lastTopItem.sub.push(sub);
+    lastSubItem = sub;
+    return sub;
+  }
+
+  function pushSubSubItem(text) {
+    if (lastSubItem) {
+      lastSubItem.children.push(text);
+      return;
+    }
+    if (lastTopItem) {
+      const fallbackSub = { text: '', isLabel: false, children: [text] };
+      lastTopItem.sub.push(fallbackSub);
+      lastSubItem = fallbackSub;
+      return;
+    }
+    pushTopItem(text, false);
+  }
+
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
+    const originalLine = lines[i];
+    const trimmed = originalLine.trim();
+
     if (!trimmed) continue;
 
     if (/^#\s+/.test(trimmed)) {
@@ -807,17 +818,20 @@ function parseText(raw) {
     }
 
     if (/^##\s+/.test(trimmed)) {
-      doc.subtitle = trimmed.replace(/^##\s+/, '').trim();
+      const text = trimmed.replace(/^##\s+/, '').trim();
+
+      if (!subtitleAlreadyUsed && doc.sections.length === 0 && !currentSection) {
+        doc.subtitle = text;
+        subtitleAlreadyUsed = true;
+      } else {
+        newSection(text);
+      }
       continue;
     }
 
-    if (/^\d+\.\s+/.test(trimmed)) {
-      currentSection = {
-        title: trimmed.replace(/^\d+\.\s*/, '').trim(),
-        items: [],
-        callout: null
-      };
-      doc.sections.push(currentSection);
+    if (/^###\s+/.test(trimmed)) {
+      const text = trimmed.replace(/^###\s+/, '').trim();
+      pushTopItem(text, true);
       continue;
     }
 
@@ -826,69 +840,50 @@ function parseText(raw) {
       continue;
     }
 
-    if (/^\*\*.*\*\*$/.test(trimmed.replace(/\s+/g, ' '))) {
+    if (/^\*\*.*\*\*$/.test(trimmed)) {
       const text = trimmed.replace(/^\*\*\s*|\s*\*\*$/g, '').trim();
-      const sec = ensureSection('');
-      sec.callout = text;
+      ensureSection('');
+      currentSection.callout = text;
       continue;
     }
 
-    const bulletMatch = line.match(/^(\s*)[-•]\s+(.*)$/);
+    const numberedMatch = originalLine.match(/^(\s*)(\d+)\.\s+(.*)$/);
+    if (numberedMatch) {
+      const indent = numberedMatch[1].length;
+      const text = numberedMatch[3].trim();
+
+      if (indent === 0) {
+        newSection(text);
+      } else if (indent <= 2) {
+        pushTopItem(`${numberedMatch[2]}. ${text}`, true);
+      } else {
+        pushSubItem(`${numberedMatch[2]}. ${text}`, true);
+      }
+      continue;
+    }
+
+    const bulletMatch = originalLine.match(/^(\s*)[-•]\s+(.*)$/);
     if (bulletMatch) {
       const indent = bulletMatch[1].length;
       const text = bulletMatch[2].trim();
-      const sec = ensureSection('');
+      const isLabel = /:$/.test(text);
 
       if (indent >= 4) {
-        const parent = sec.items[sec.items.length - 1];
-        if (!parent) {
-          sec.items.push({ text, isLabel: false, sub: [] });
-          continue;
-        }
-
-        if (!parent.sub) parent.sub = [];
-        let lastSub = parent.sub[parent.sub.length - 1];
-
-        if (!lastSub) {
-          lastSub = { text: '', isLabel: false, children: [] };
-          parent.sub.push(lastSub);
-        }
-
-        if (!lastSub.children) lastSub.children = [];
-        lastSub.children.push(text);
-        continue;
+        pushSubSubItem(text);
+      } else if (indent >= 2) {
+        pushSubItem(text, isLabel);
+      } else {
+        pushTopItem(text, isLabel);
       }
-
-      if (indent >= 2) {
-        const parent = sec.items[sec.items.length - 1];
-        if (!parent) {
-          sec.items.push({ text, isLabel: text.endsWith(':'), sub: [] });
-          continue;
-        }
-
-        if (!parent.sub) parent.sub = [];
-        parent.sub.push({
-          text,
-          isLabel: text.endsWith(':'),
-          children: []
-        });
-        continue;
-      }
-
-      sec.items.push({
-        text,
-        isLabel: text.endsWith(':'),
-        sub: []
-      });
       continue;
     }
 
-    const sec = ensureSection(doc.sections.length ? '' : 'Allgemein');
-    sec.items.push({
-      text: trimmed,
-      isLabel: trimmed.endsWith(':'),
-      sub: []
-    });
+    if (/^[A-ZÄÖÜa-zäöü].*:\s*$/.test(trimmed)) {
+      pushTopItem(trimmed, true);
+      continue;
+    }
+
+    pushTopItem(trimmed, false);
   }
 
   if (!doc.title) doc.title = 'Lernzettel';
@@ -902,7 +897,9 @@ function renderDocHTML(doc, design) {
   let html = `<div class="lz-page ${themeClass}">`;
 
   html += `<div class="lz-doc-title"><h1>${escapeText(doc.title || 'Lernzettel')}</h1>`;
-  if (doc.subtitle) html += `<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
+  if (doc.subtitle) {
+    html += `<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
+  }
   html += `</div><div class="lz-body">`;
 
   doc.sections.forEach((sec, si) => {
@@ -910,7 +907,7 @@ function renderDocHTML(doc, design) {
     html += `<div class="lz-section">`;
 
     if (sec.title) {
-      html += `<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${si + 1}.&nbsp; ${escapeText(sec.title)}</div>`;
+      html += `<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${escapeText(sec.title)}</div>`;
     }
 
     if (sec.callout) {
@@ -924,20 +921,35 @@ function renderDocHTML(doc, design) {
         if (item.isLabel) {
           html += `<div class="lz-label-bullet">${escapeText(item.text)}</div>`;
         } else {
-          html += `<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(item.text)}</span></div>`;
+          html += `
+            <div class="lz-bullet">
+              <div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div>
+              <span>${escapeText(item.text)}</span>
+            </div>
+          `;
         }
 
-        if (item.sub) {
+        if (item.sub && item.sub.length) {
           item.sub.forEach(s => {
             if (s.isLabel) {
               html += `<div class="lz-sub-label">${escapeText(s.text)}</div>`;
             } else {
-              html += `<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(s.text)}</span></div>`;
+              html += `
+                <div class="lz-sub-bullet">
+                  <div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div>
+                  <span>${escapeText(s.text)}</span>
+                </div>
+              `;
             }
 
-            if (s.children) {
+            if (s.children && s.children.length) {
               s.children.forEach(ch => {
-                html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(ch)}</span></div>`;
+                html += `
+                  <div class="lz-sub-sub-bullet">
+                    <div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div>
+                    <span>${escapeText(ch)}</span>
+                  </div>
+                `;
               });
             }
           });
@@ -955,10 +967,20 @@ function renderDocHTML(doc, design) {
   if (doc.merksatz) {
     const ms = doc.merksatz;
     const colon = ms.indexOf(':');
-    const msTitle = colon > -1 ? (ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz') : 'Merksatz';
+    const msTitle = colon > -1
+      ? (ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz')
+      : 'Merksatz';
     const msText = colon > -1 ? ms.slice(colon + 1).trim() : ms;
 
-    html += `<div class="lz-merksatz"><div class="lz-merksatz-icon">✎</div><div><div class="lz-merksatz-title">${escapeText(msTitle)}</div><div class="lz-merksatz-text">${escapeText(msText)}</div></div></div>`;
+    html += `
+      <div class="lz-merksatz">
+        <div class="lz-merksatz-icon">✎</div>
+        <div>
+          <div class="lz-merksatz-title">${escapeText(msTitle)}</div>
+          <div class="lz-merksatz-text">${escapeText(msText)}</div>
+        </div>
+      </div>
+    `;
   }
 
   html += `<div class="lz-page-num">— 1 —</div></div>`;
