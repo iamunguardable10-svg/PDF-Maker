@@ -67,7 +67,7 @@ BEISPIEL OUTPUT:
   });
  
   const data = await response.json();
-  const cleaned = data.choices?.[0]?.message?.content ?? '';
+ const cleaned = data.choices?.[0]?.message?.content ?? JSON.stringify(data);
  
   return new Response(JSON.stringify({ cleaned }), {
     status: 200,
