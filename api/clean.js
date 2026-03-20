@@ -11,19 +11,7 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
   }
  
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'system',
-          content: `Du bist ein Textformatierer für einen Lernzettel-Generator. Deine Aufgabe ist es, beliebigen Input-Text in ein sauberes Markup-Format zu konvertieren UND dabei KI-Floskeln zu entfernen.
+  const prompt = `Du bist ein Textformatierer für einen Lernzettel-Generator. Deine Aufgabe ist es, beliebigen Input-Text in ein sauberes Markup-Format zu konvertieren UND dabei KI-Floskeln zu entfernen.
  
 AUSGABE-FORMAT (strikt einhalten):
 - "# Titel" → Haupttitel des Dokuments (genau eine Zeile)
@@ -59,15 +47,25 @@ BEISPIEL OUTPUT:
 1. Inhalt
 - TV, Streaming
 - Einnahmen durch:
-  - Übertragungsrechte`
-        },
-        { role: 'user', content: text }
-      ],
-    }),
-  });
+  - Übertragungsrechte
+ 
+Hier ist der Text den du formatieren sollst:
+${text}`;
+ 
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 2000, temperature: 0.2 }
+      }),
+    }
+  );
  
   const data = await response.json();
- const cleaned = data.choices?.[0]?.message?.content ?? JSON.stringify(data);
+  const cleaned = data.candidates?.[0]?.content?.parts?.[0]?.text ?? JSON.stringify(data);
  
   return new Response(JSON.stringify({ cleaned }), {
     status: 200,
