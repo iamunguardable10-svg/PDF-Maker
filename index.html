@@ -401,7 +401,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
   border-bottom: 2px solid #c8e6d4;
 }
 .theme-lernzettel .lz-doc-title h1 {
-  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #1c1a18;
+  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--ink);
   display: flex; align-items: center; gap: 12px;
 }
 .theme-lernzettel .lz-doc-title h1::before {
@@ -454,13 +454,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
 
 /* Shared bullet styles */
 .lz-bullets { padding: 0 6px; display: flex; flex-direction: column; gap: 4px; }
-.lz-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; line-height: 1.55; color: #1c1a18; }
+.lz-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; line-height: 1.55; }
 .lz-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-.lz-sub-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.76rem; line-height: 1.5; padding-left: 18px; color: #5a5755; }
+.lz-sub-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.76rem; line-height: 1.5; padding-left: 18px; }
 .lz-subdot { width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; opacity: 0.65; }
-.lz-label-bullet { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; line-height: 1.55; padding-left: 2px; margin-top: 4px; color: #1c1a18; }
-.lz-sub-label { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; line-height: 1.5; padding-left: 18px; margin-top: 3px; color: #1c1a18; }
-.lz-sub-sub-bullet { display: flex; align-items: flex-start; gap: 7px; font-size: 0.73rem; line-height: 1.5; padding-left: 34px; color: #6a6460; }
+.lz-label-bullet { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; line-height: 1.55; padding-left: 2px; margin-top: 4px; }
+.lz-sub-label { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; line-height: 1.5; padding-left: 18px; margin-top: 3px; }
+.lz-sub-sub-bullet { display: flex; align-items: flex-start; gap: 7px; font-size: 0.73rem; line-height: 1.5; padding-left: 34px; }
 .lz-callout { margin: 10px 0; padding: 10px 14px; border-radius: 6px; font-size: 0.77rem; font-weight: 600; font-style: italic; display: flex; align-items: flex-start; gap: 8px; border-left: 3px solid; }
 .lz-callout::before { content: '■'; font-size: 0.5rem; margin-top: 4px; flex-shrink: 0; }
 .lz-page-num { text-align: center; font-size: 0.65rem; color: #ccc; margin-top: 16px; padding: 12px 0 4px; letter-spacing: 0.1em; border-top: 1px solid #f0ede8; }
@@ -473,11 +473,14 @@ textarea::placeholder { color: #383532; font-style: italic; }
   <div class="header-tag">Lernzettel Generator</div>
 </header>
 
+<!-- DESIGN PICKER MODAL -->
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
     <div class="modal-title">Design wählen</div>
     <div class="modal-sub">Wähle einen Stil für dein PDF — klick auf eine Karte um sie auszuwählen.</div>
-    <div class="design-grid" id="designGrid"></div>
+    <div class="design-grid" id="designGrid">
+      <!-- Cards werden per JS generiert -->
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
       <button class="btn-apply" onclick="applyDesign()">Design übernehmen →</button>
@@ -528,88 +531,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
 </div>
 
 <script>
-const previewStyles = `
-.lz-page {
-  background: white;
-  max-width: 680px;
-  margin: 0 auto;
-  border-radius: 14px;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
-  overflow: hidden;
-  animation: fadeUp 0.3s ease;
-}
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.theme-lernzettel .lz-doc-title {
-  background: linear-gradient(135deg, #f0faf4 0%, #e8f5ee 100%);
-  padding: 28px 36px 20px;
-  border-bottom: 2px solid #c8e6d4;
-}
-.theme-lernzettel .lz-doc-title h1 {
-  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #1c1a18;
-  display: flex; align-items: center; gap: 12px;
-}
-.theme-lernzettel .lz-doc-title h1::before {
-  content: ''; display: inline-block; width: 12px; height: 12px;
-  background: #2d6a4f; border-radius: 3px; flex-shrink: 0;
-}
-.theme-lernzettel .lz-doc-subtitle { font-size: 0.78rem; color: #2d6a4f; margin-top: 6px; padding-left: 24px; font-weight: 500; }
-.theme-lernzettel .lz-body { padding: 24px 36px 8px; }
-.theme-lernzettel .lz-section { margin-bottom: 20px; }
-.theme-lernzettel .lz-section-title { padding: 8px 14px; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; border-radius: 6px; margin-bottom: 10px; }
-.theme-lernzettel .lz-merksatz { margin: 16px 36px 12px; background: linear-gradient(135deg, #f0faf4, #e8f5ee); border-radius: 10px; padding: 16px 20px; display: flex; gap: 14px; border: 1px solid #c8e6d4; }
-.theme-lernzettel .lz-merksatz-icon { width: 26px; height: 26px; background: #2d6a4f; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
-.theme-lernzettel .lz-merksatz-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; color: #2d6a4f; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-.theme-lernzettel .lz-merksatz-text { font-size: 0.78rem; color: #2d5a42; line-height: 1.6; font-style: italic; }
-
-.theme-minimal .lz-doc-title { background: white; padding: 32px 40px 20px; border-bottom: 2px solid #1c1a18; }
-.theme-minimal .lz-doc-title h1 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: #1c1a18; }
-.theme-minimal .lz-doc-subtitle { font-size: 0.78rem; color: #8a8580; margin-top: 6px; font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.68rem; }
-.theme-minimal .lz-body { padding: 28px 40px 8px; }
-.theme-minimal .lz-section { margin-bottom: 24px; }
-.theme-minimal .lz-section-title { padding: 0 0 6px; font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid #e2ddd8; margin-bottom: 12px; color: #8a8580 !important; background: transparent !important; border-radius: 0; }
-.theme-minimal .lz-merksatz { margin: 16px 40px 12px; background: #f5f3ef; border-radius: 4px; padding: 16px 20px; display: flex; gap: 14px; border-left: 3px solid #1c1a18; }
-.theme-minimal .lz-merksatz-icon { display: none; }
-.theme-minimal .lz-merksatz-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.68rem; color: #8a8580; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
-.theme-minimal .lz-merksatz-text { font-size: 0.78rem; color: #1c1a18; line-height: 1.6; }
-.theme-minimal .lz-dot { border-radius: 2px !important; }
-.theme-minimal .lz-subdot { border-radius: 1px !important; }
-.theme-minimal .lz-callout { border-left: 2px solid #1c1a18 !important; background: #f5f3ef !important; color: #1c1a18 !important; }
-
-.theme-dark {
-  background: #141414 !important;
-}
-.theme-dark .lz-doc-title { background: #1e1e1e; padding: 28px 36px 20px; border-bottom: 1px solid #333; }
-.theme-dark .lz-doc-title h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #f0ede8; display: flex; align-items: center; gap: 12px; }
-.theme-dark .lz-doc-title h1::before { content: ''; display: inline-block; width: 12px; height: 12px; background: #52b788; border-radius: 3px; flex-shrink: 0; }
-.theme-dark .lz-doc-subtitle { font-size: 0.78rem; color: #52b788; margin-top: 6px; padding-left: 24px; }
-.theme-dark .lz-body { padding: 24px 36px 8px; }
-.theme-dark .lz-section { margin-bottom: 20px; }
-.theme-dark .lz-section-title { padding: 8px 14px; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; border-radius: 6px; margin-bottom: 10px; opacity: 0.9; }
-.theme-dark .lz-bullet { color: #d0cdc8 !important; }
-.theme-dark .lz-sub-bullet { color: #9a9590 !important; }
-.theme-dark .lz-label-bullet { color: #f0ede8 !important; }
-.theme-dark .lz-sub-label { color: #f0ede8 !important; }
-.theme-dark .lz-sub-sub-bullet { color: #7a7570 !important; }
-.theme-dark .lz-merksatz { margin: 16px 36px 12px; background: #1e1e1e; border-radius: 10px; padding: 16px 20px; display: flex; gap: 14px; border: 1px solid #333; }
-.theme-dark .lz-merksatz-icon { width: 26px; height: 26px; background: #52b788; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #1c1a18; font-size: 0.75rem; font-weight: 700; }
-.theme-dark .lz-merksatz-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; color: #52b788; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-.theme-dark .lz-merksatz-text { font-size: 0.78rem; color: #9a9590; line-height: 1.6; font-style: italic; }
-.theme-dark .lz-page-num { color: #444 !important; border-top-color: #2a2a2a !important; }
-
-.lz-bullets { padding: 0 6px; display: flex; flex-direction: column; gap: 4px; }
-.lz-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; line-height: 1.55; color: #1c1a18; }
-.lz-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-.lz-sub-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 0.76rem; line-height: 1.5; padding-left: 18px; color: #5a5755; }
-.lz-subdot { width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; opacity: 0.65; }
-.lz-label-bullet { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; line-height: 1.55; padding-left: 2px; margin-top: 4px; color: #1c1a18; }
-.lz-sub-label { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; line-height: 1.5; padding-left: 18px; margin-top: 3px; color: #1c1a18; }
-.lz-sub-sub-bullet { display: flex; align-items: flex-start; gap: 7px; font-size: 0.73rem; line-height: 1.5; padding-left: 34px; color: #6a6460; }
-.lz-callout { margin: 10px 0; padding: 10px 14px; border-radius: 6px; font-size: 0.77rem; font-weight: 600; font-style: italic; display: flex; align-items: flex-start; gap: 8px; border-left: 3px solid; }
-.lz-callout::before { content: '■'; font-size: 0.5rem; margin-top: 4px; flex-shrink: 0; }
-.lz-page-num { text-align: center; font-size: 0.65rem; color: #ccc; margin-top: 16px; padding: 12px 0 4px; letter-spacing: 0.1em; border-top: 1px solid #f0ede8; }
-`;
-
+// ── DESIGNS ───────────────────────────────────────────────────
 const designs = [
   {
     id: 'lernzettel',
@@ -653,429 +575,18 @@ let currentDesign = designs[0];
 let pendingDesign = designs[0];
 let parsedDoc = null;
 
-function escapeText(str = '') {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeAttr(str = '') {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;');
-}
-
-function setStatus(msg, type = '') {
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = 'status-msg ' + type;
-  setTimeout(() => {
-    el.textContent = '';
-    el.className = 'status-msg';
-  }, 4500);
-}
-
-function getSampleDoc() {
-  return {
-    title: 'Beispiel Lernzettel',
-    subtitle: 'Vorschau',
-    sections: [
-      {
-        title: 'Erster Abschnitt',
-        items: [
-          { text: 'Wichtiger Punkt', isLabel: false, sub: [] },
-          { text: 'Noch ein Punkt', isLabel: false, sub: [{ text: 'Unterpunkt', isLabel: false, children: [] }] }
-        ],
-        callout: null
-      },
-      {
-        title: 'Zweiter Abschnitt',
-        items: [{ text: 'Weiterer Inhalt hier', isLabel: false, sub: [] }],
-        callout: null
-      }
-    ],
-    merksatz: 'Merksatz: Das ist ein wichtiger Hinweis.'
-  };
-}
-
-function normalizeAIText(raw) {
-  return String(raw || '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\t/g, '  ')
-    .replace(/```(?:markdown|md)?/gi, '')
-    .replace(/```/g, '')
-    .replace(/[ \t]+$/gm, '')
-    .replace(/^\*\*\s*(.*?)\s*\*\*$/gm, '**$1**')
-    .replace(/^>\s*Merksatz\s*:\s*/gim, '> Merksatz: ')
-    .trim();
-}
-
-
-function looksStructured(raw) {
-  return /^#\s.+/m.test(raw) && (/^\d+\.\s.+/m.test(raw) || /^\s*[-•]\s.+/m.test(raw));
-}
-
-function isValidOutput(cleaned, original) {
-  if (!cleaned || cleaned.trim().length < 10) return false;
-
-  const text = cleaned.trim();
-
-  if (/^\s*[{[]/.test(text)) return false;
-  if (/^(error|fehler|sorry|entschuldigung)/i.test(text)) return false;
-
-  const hasTitle = /^#\s.+/m.test(text);
-  const hasAnyHeading = /^#{1,3}\s.+/m.test(text);
-  const hasBullet = /^\s*[-•]\s.+/m.test(text);
-  const hasNumbered = /^\s*\d+\.\s.+/m.test(text);
-
-  if (!(hasTitle || hasAnyHeading || hasBullet || hasNumbered)) return false;
-
-  if (original.length > 200 && text.length < original.length * 0.1) return false;
-
-  return true;
-}
-
-function parseText(raw) {
-  const lines = String(raw || '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\t/g, '  ')
-    .split('\n');
-
-  const doc = {
-    title: '',
-    subtitle: '',
-    sections: [],
-    merksatz: null
-  };
-
-  let currentSection = null;
-  let subtitleAlreadyUsed = false;
-  let lastTopItem = null;
-  let lastSubItem = null;
-
-  function newSection(title = '') {
-    currentSection = {
-      title,
-      items: [],
-      callout: null
-    };
-    doc.sections.push(currentSection);
-    lastTopItem = null;
-    lastSubItem = null;
-    return currentSection;
-  }
-
-  function ensureSection(title = '') {
-    if (!currentSection) return newSection(title);
-    return currentSection;
-  }
-
-  function pushTopItem(text, isLabel = false) {
-    const sec = ensureSection('');
-    const item = { text, isLabel, sub: [] };
-    sec.items.push(item);
-    lastTopItem = item;
-    lastSubItem = null;
-    return item;
-  }
-
-  function pushSubItem(text, isLabel = false) {
-    if (!lastTopItem) {
-      return pushTopItem(text, isLabel);
-    }
-    const sub = { text, isLabel, children: [] };
-    lastTopItem.sub.push(sub);
-    lastSubItem = sub;
-    return sub;
-  }
-
-  function pushSubSubItem(text) {
-    if (lastSubItem) {
-      lastSubItem.children.push(text);
-      return;
-    }
-    if (lastTopItem) {
-      const fallbackSub = { text: '', isLabel: false, children: [text] };
-      lastTopItem.sub.push(fallbackSub);
-      lastSubItem = fallbackSub;
-      return;
-    }
-    pushTopItem(text, false);
-  }
-
-  for (let i = 0; i < lines.length; i++) {
-    const originalLine = lines[i];
-    const trimmed = originalLine.trim();
-
-    if (!trimmed) continue;
-
-    if (/^#\s+/.test(trimmed)) {
-      doc.title = trimmed.replace(/^#\s+/, '').trim();
-      continue;
-    }
-
-    if (/^##\s+/.test(trimmed)) {
-      const text = trimmed.replace(/^##\s+/, '').trim();
-
-      if (!subtitleAlreadyUsed && doc.sections.length === 0 && !currentSection) {
-        doc.subtitle = text;
-        subtitleAlreadyUsed = true;
-      } else {
-        newSection(text);
-      }
-      continue;
-    }
-
-    if (/^###\s+/.test(trimmed)) {
-      const text = trimmed.replace(/^###\s+/, '').trim();
-      pushTopItem(text, true);
-      continue;
-    }
-
-    if (/^>\s+/.test(trimmed)) {
-      doc.merksatz = trimmed.replace(/^>\s+/, '').trim();
-      continue;
-    }
-
-    if (/^\*\*.*\*\*$/.test(trimmed)) {
-      const text = trimmed.replace(/^\*\*\s*|\s*\*\*$/g, '').trim();
-      ensureSection('');
-      currentSection.callout = text;
-      continue;
-    }
-
-    const numberedMatch = originalLine.match(/^(\s*)(\d+)\.\s+(.*)$/);
-    if (numberedMatch) {
-      const indent = numberedMatch[1].length;
-      const text = numberedMatch[3].trim();
-
-      if (indent === 0) {
-        newSection(text);
-      } else if (indent <= 2) {
-        pushTopItem(`${numberedMatch[2]}. ${text}`, true);
-      } else {
-        pushSubItem(`${numberedMatch[2]}. ${text}`, true);
-      }
-      continue;
-    }
-
-    const bulletMatch = originalLine.match(/^(\s*)[-•]\s+(.*)$/);
-    if (bulletMatch) {
-      const indent = bulletMatch[1].length;
-      const text = bulletMatch[2].trim();
-      const isLabel = /:$/.test(text);
-
-      if (indent >= 4) {
-        pushSubSubItem(text);
-      } else if (indent >= 2) {
-        pushSubItem(text, isLabel);
-      } else {
-        pushTopItem(text, isLabel);
-      }
-      continue;
-    }
-
-    if (/^[A-ZÄÖÜa-zäöü].*:\s*$/.test(trimmed)) {
-      pushTopItem(trimmed, true);
-      continue;
-    }
-
-    pushTopItem(trimmed, false);
-  }
-
-  if (!doc.title) doc.title = 'Lernzettel';
-  return doc;
-}
-
-function renderDocHTML(doc, design) {
-  const C = design.sectionColors;
-  const themeClass = 'theme-' + design.id;
-
-  let html = `<div class="lz-page ${themeClass}">`;
-
-  html += `<div class="lz-doc-title"><h1>${escapeText(doc.title || 'Lernzettel')}</h1>`;
-  if (doc.subtitle) {
-    html += `<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
-  }
-  html += `</div><div class="lz-body">`;
-
-  doc.sections.forEach((sec, si) => {
-    const c = C[si % C.length];
-    html += `<div class="lz-section">`;
-
-    if (sec.title) {
-      html += `<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${escapeText(sec.title)}</div>`;
-    }
-
-    if (sec.callout) {
-      html += `<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
-    }
-
-    if (sec.items.length) {
-      html += `<div class="lz-bullets">`;
-
-      sec.items.forEach(item => {
-        if (item.isLabel) {
-          html += `<div class="lz-label-bullet">${escapeText(item.text)}</div>`;
-        } else {
-          html += `
-            <div class="lz-bullet">
-              <div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div>
-              <span>${escapeText(item.text)}</span>
-            </div>
-          `;
-        }
-
-        if (item.sub && item.sub.length) {
-          item.sub.forEach(s => {
-            if (s.isLabel) {
-              html += `<div class="lz-sub-label">${escapeText(s.text)}</div>`;
-            } else {
-              html += `
-                <div class="lz-sub-bullet">
-                  <div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div>
-                  <span>${escapeText(s.text)}</span>
-                </div>
-              `;
-            }
-
-            if (s.children && s.children.length) {
-              s.children.forEach(ch => {
-                html += `
-                  <div class="lz-sub-sub-bullet">
-                    <div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div>
-                    <span>${escapeText(ch)}</span>
-                  </div>
-                `;
-              });
-            }
-          });
-        }
-      });
-
-      html += `</div>`;
-    }
-
-    html += `</div>`;
-  });
-
-  html += `</div>`;
-
-  if (doc.merksatz) {
-    const ms = doc.merksatz;
-    const colon = ms.indexOf(':');
-    const msTitle = colon > -1
-      ? (ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz')
-      : 'Merksatz';
-    const msText = colon > -1 ? ms.slice(colon + 1).trim() : ms;
-
-    html += `
-      <div class="lz-merksatz">
-        <div class="lz-merksatz-icon">✎</div>
-        <div>
-          <div class="lz-merksatz-title">${escapeText(msTitle)}</div>
-          <div class="lz-merksatz-text">${escapeText(msText)}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  html += `<div class="lz-page-num">— 1 —</div></div>`;
-  return html;
-}
-
-function getThumbPage(bodyHtml, themeId) {
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:${themeId === 'dark' ? '#141414' : '#f5f3ef'};padding:20px}
-${previewStyles}
-.lz-page{max-width:680px}
-</style>
-</head>
-<body>${bodyHtml}</body>
-</html>`;
-}
-
-function renderDesignGrid() {
-  const grid = document.getElementById('designGrid');
-  grid.innerHTML = '';
-
-  const sampleDoc = parsedDoc || getSampleDoc();
-
-  designs.forEach(d => {
-    const card = document.createElement('div');
-    card.className = 'design-card' + (d.id === pendingDesign.id ? ' selected' : '');
-
-    card.onclick = () => {
-      pendingDesign = d;
-      document.querySelectorAll('.design-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-    };
-
-    const thumbHtml = renderDocHTML(sampleDoc, d);
-    const srcdoc = getThumbPage(thumbHtml, d.id);
-
-    card.innerHTML = `
-      <div class="design-thumbnail">
-        <iframe srcdoc="${escapeAttr(srcdoc)}" scrolling="no"></iframe>
-      </div>
-      <div class="design-info">
-        <div class="design-name">${escapeText(d.name)}</div>
-        <div class="design-desc">${escapeText(d.desc)}</div>
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-}
-
-function renderPreview(doc) {
-  const html = `<style>${previewStyles}</style>${renderDocHTML(doc, currentDesign)}`;
-  document.getElementById('emptyState').style.display = 'none';
-
-  const lzPreview = document.getElementById('lzPreview');
-  lzPreview.style.display = 'block';
-  lzPreview.innerHTML = html;
-
-  document.getElementById('exportBtn').disabled = false;
-}
-
+// ── MODAL ─────────────────────────────────────────────────────
 function openModal() {
-  const raw = document.getElementById('inputText').value.trim();
-
-  if (!raw) {
-    setStatus('Bitte zuerst Text eingeben', 'err');
-    return;
-  }
-
-  if (looksStructured(raw)) {
-    parsedDoc = parseText(raw);
-  } else if (!parsedDoc) {
-    setStatus('Bitte zuerst mit KI bereinigen', 'err');
-    return;
-  }
-
   pendingDesign = currentDesign;
   renderDesignGrid();
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
-
 function closeModal() {
   document.getElementById('modalOverlay').classList.add('hidden');
 }
-
 function applyDesign() {
   currentDesign = pendingDesign;
   closeModal();
-
   if (parsedDoc) {
     renderPreview(parsedDoc);
     setStatus('✓ Design angewendet', 'ok');
@@ -1086,146 +597,285 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
-async function cleanWithAI() {
-  const raw = document.getElementById('inputText').value.trim();
-  if (!raw) {
-    setStatus('Bitte Text eingeben', 'err');
-    return;
+function renderDesignGrid() {
+  const grid = document.getElementById('designGrid');
+  grid.innerHTML = '';
+  designs.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'design-card' + (d.id === pendingDesign.id ? ' selected' : '');
+    card.onclick = () => {
+      pendingDesign = d;
+      document.querySelectorAll('.design-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    };
+
+    // Mini preview thumbnail
+    const sampleDoc = parsedDoc || getSampleDoc();
+    const thumbHtml = renderDocHTML(sampleDoc, d);
+    card.innerHTML = `
+      <div class="design-thumbnail">
+        <iframe srcdoc="${escapeHtml(getThumbPage(thumbHtml, d.id))}" scrolling="no"></iframe>
+      </div>
+      <div class="design-info">
+        <div class="design-name">${d.name}</div>
+        <div class="design-desc">${d.desc}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function getThumbPage(bodyHtml, themeId) {
+  return `<!DOCTYPE html><html><head>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:${themeId==='dark'?'#141414':'#f5f3ef'};padding:0}
+</style>
+</head><body>${bodyHtml}</body></html>`;
+}
+
+function getSampleDoc() {
+  return {
+    title: 'Beispiel Lernzettel',
+    subtitle: 'Vorschau',
+    sections: [
+      { title: 'Erster Abschnitt', items: [
+        { text: 'Wichtiger Punkt', isLabel: false, sub: [] },
+        { text: 'Noch ein Punkt', isLabel: false, sub: [
+          { text: 'Unterpunkt', isLabel: false, children: [] }
+        ]},
+      ], callout: null },
+      { title: 'Zweiter Abschnitt', items: [
+        { text: 'Weiterer Inhalt hier', isLabel: false, sub: [] },
+      ], callout: null },
+    ],
+    merksatz: 'Merksatz: Das ist ein wichtiger Hinweis.'
+  };
+}
+
+// ── PARSER ────────────────────────────────────────────────────
+function parseText(raw) {
+  const lines = raw.split('\n');
+  const doc = { title: '', subtitle: '', sections: [], merksatz: null };
+  let currentSection = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (trimmed.startsWith('# ')) {
+      doc.title = trimmed.slice(2).trim();
+    } else if (trimmed.startsWith('## ')) {
+      doc.subtitle = trimmed.slice(3).trim();
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      currentSection = { title: trimmed.replace(/^\d+\.\s*/, ''), items: [], callout: null };
+      doc.sections.push(currentSection);
+    } else if (trimmed.startsWith('> ')) {
+      doc.merksatz = trimmed.slice(2).trim();
+    } else if (/^\*\*(.+)\*\*$/.test(trimmed)) {
+      const text = trimmed.replace(/^\*\*|\*\*$/g, '');
+      if (currentSection) currentSection.callout = text;
+      else doc.sections.push({ title: null, items: [], callout: text });
+    } else if (trimmed.startsWith('- ') || trimmed.startsWith('\u2022 ')) {
+      const text = trimmed.replace(/^[-\u2022]\s*/, '');
+      const indent = line.search(/\S/);
+      if (!currentSection) { currentSection = { title: '', items: [], callout: null }; doc.sections.push(currentSection); }
+      if (indent >= 4) {
+        const parent = currentSection.items[currentSection.items.length - 1];
+        if (parent && parent.sub) {
+          const lastSub = parent.sub[parent.sub.length - 1];
+          if (lastSub) { if (!lastSub.children) lastSub.children = []; lastSub.children.push(text); }
+        }
+      } else if (indent >= 2) {
+        const parent = currentSection.items[currentSection.items.length - 1];
+        if (parent) {
+          if (!parent.sub) parent.sub = [];
+          parent.sub.push({ text, isLabel: text.trimEnd().endsWith(':'), children: [] });
+        }
+      } else {
+        currentSection.items.push({ text, isLabel: text.trimEnd().endsWith(':'), sub: [] });
+      }
+    }
+  }
+  return doc;
+}
+
+// ── RENDERER ──────────────────────────────────────────────────
+function renderDocHTML(doc, design) {
+  const C = design.sectionColors;
+  const themeClass = 'theme-' + design.id;
+  let html = `<div class="lz-page ${themeClass}">`;
+
+  html += `<div class="lz-doc-title"><h1>${doc.title || 'Lernzettel'}</h1>`;
+  if (doc.subtitle) html += `<div class="lz-doc-subtitle">${doc.subtitle}</div>`;
+  html += `</div><div class="lz-body">`;
+
+  doc.sections.forEach((sec, si) => {
+    const c = C[si % C.length];
+    html += `<div class="lz-section">`;
+    if (sec.title) html += `<div class="lz-section-title" style="background:${c.bg};color:${c.title}">${si+1}.&nbsp; ${sec.title}</div>`;
+    if (sec.callout) html += `<div class="lz-callout" style="background:${c.bg};color:${c.title};border-color:${c.dot}">${sec.callout}</div>`;
+    if (sec.items.length) {
+      html += `<div class="lz-bullets">`;
+      sec.items.forEach(item => {
+        if (item.isLabel) {
+          html += `<div class="lz-label-bullet">${item.text}</div>`;
+        } else {
+          html += `<div class="lz-bullet"><div class="lz-dot" style="background:${c.dot}"></div><span>${item.text}</span></div>`;
+        }
+        if (item.sub) item.sub.forEach(s => {
+          if (s.isLabel) {
+            html += `<div class="lz-sub-label">${s.text}</div>`;
+            if (s.children) s.children.forEach(ch => html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${ch}</span></div>`);
+          } else {
+            html += `<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${s.text}</span></div>`;
+            if (s.children) s.children.forEach(ch => html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${ch}</span></div>`);
+          }
+        });
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  if (doc.merksatz) {
+    const ms = doc.merksatz;
+    const colon = ms.indexOf(':');
+    const msTitle = colon > -1 ? ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz' : 'Merksatz';
+    const msText = colon > -1 ? ms.slice(colon + 1).trim() : ms;
+    html += `<div class="lz-merksatz"><div class="lz-merksatz-icon">✎</div><div><div class="lz-merksatz-title">${msTitle}</div><div class="lz-merksatz-text">${msText}</div></div></div>`;
   }
 
+  html += `<div class="lz-page-num">— 1 —</div></div>`;
+  return html;
+}
+
+function renderPreview(doc) {
+  const html = `<style>${getSharedCSS()}</style>` + renderDocHTML(doc, currentDesign);
+  document.getElementById('emptyState').style.display = 'none';
+  const lzPreview = document.getElementById('lzPreview');
+  lzPreview.style.display = 'block';
+  lzPreview.innerHTML = html;
+  document.getElementById('exportBtn').disabled = false;
+}
+
+function getSharedCSS() {
+  // Inject all lz-* styles into preview so it works standalone
+  return Array.from(document.styleSheets)
+    .flatMap(s => { try { return Array.from(s.cssRules).map(r => r.cssText); } catch(e) { return []; } })
+    .filter(r => r.includes('.lz-') || r.includes('.theme-') || r.includes('@keyframes'))
+    .join('\n');
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────
+function isValidOutput(cleaned, original) {
+  // 1. Must exist and not be empty
+  if (!cleaned || cleaned.trim().length < 10) return false;
+  // 2. Must not be an error message from the API (JSON-like response)
+  if (cleaned.trim().startsWith('{') || cleaned.trim().startsWith('[')) return false;
+  // 3. Must not be way shorter than input ONLY if input was substantial
+  if (original.length > 200 && cleaned.length < original.length * 0.2) return false;
+  return true;
+}
+
+async function cleanWithAI() {
+  const raw = document.getElementById('inputText').value.trim();
+  if (!raw) { setStatus('Bitte Text eingeben', 'err'); return; }
   const btn = document.getElementById('aiBtn');
   btn.disabled = true;
 
   const maxRetries = 3;
-
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     btn.textContent = attempt > 1 ? `⏳ Versuch ${attempt}/${maxRetries}...` : '⏳ Lädt...';
-
     try {
       const response = await fetch('/api/clean', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: raw })
       });
-
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        data = { error: 'Ungültige Server-Antwort' };
-      }
-
-      if (!response.ok) {
-        setStatus(`Fehler: ${data.error || 'Serverfehler'}`, 'err');
-        btn.disabled = false;
-        btn.textContent = '✦ KI bereinigen';
-        return;
-      }
-
+      const data = await response.json();
       if (data.error) {
+        // Echter API-Fehler — sofort anzeigen, kein Retry
         setStatus('Fehler: ' + data.error, 'err');
         btn.disabled = false;
         btn.textContent = '✦ KI bereinigen';
         return;
       }
-
-     const cleaned = normalizeAIText(data.cleaned);
-      if (cleaned && isValidOutput(cleaned, raw)) {
-  document.getElementById('inputText').value = cleaned;
-  parsedDoc = parseText(cleaned);
-  renderPreview(parsedDoc);
-  ...
-}
-      console.log('RAW AI RESPONSE:', data.cleaned);
-      console.log('REPAIRED AI RESPONSE:', cleaned);
-
-      if (cleaned && isValidOutput(cleaned, raw)) {
-        document.getElementById('inputText').value = cleaned;
-        parsedDoc = parseText(cleaned);
+      if (data.cleaned && isValidOutput(data.cleaned, raw)) {
+        document.getElementById('inputText').value = data.cleaned;
+        parsedDoc = parseText(data.cleaned);
         renderPreview(parsedDoc);
         setStatus('✓ Bereinigt & Vorschau aktualisiert', 'ok');
         btn.disabled = false;
         btn.textContent = '✦ KI bereinigen';
         return;
-      }
-
-      if (attempt < maxRetries) {
+      } else if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
     } catch (e) {
-      console.error(e);
-      if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, 1500));
-      }
+      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500));
     }
   }
-
   setStatus('Antwort ungültig — bitte nochmal versuchen', 'err');
   btn.disabled = false;
   btn.textContent = '✦ KI bereinigen';
 }
 
+function openModal() {
+  const raw = document.getElementById('inputText').value.trim();
+  if (raw) parsedDoc = parseText(raw);
+  pendingDesign = currentDesign;
+  renderDesignGrid();
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function setStatus(msg, type = '') {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+  setTimeout(() => { el.textContent = ''; el.className = 'status-msg'; }, 4000);
+}
+
+// ── GENERATE FROM TOPIC ──────────────────────────────────────
 function toggleGenerateMode() {
   const box = document.getElementById('generateBox');
   const btn = document.getElementById('generateBtn');
   const isOpen = box.style.display !== 'none';
-
   box.style.display = isOpen ? 'none' : 'block';
   btn.classList.toggle('active', !isOpen);
-
   if (!isOpen) document.getElementById('topicInput').focus();
 }
 
 async function generateFromTopic() {
   const topic = document.getElementById('topicInput').value.trim();
-  if (!topic) {
-    setStatus('Bitte ein Thema eingeben', 'err');
-    return;
-  }
+  if (!topic) { setStatus('Bitte ein Thema eingeben', 'err'); return; }
 
   const btn = document.getElementById('genSubmitBtn');
   btn.disabled = true;
 
   const maxRetries = 3;
-
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     btn.textContent = attempt > 1 ? `⏳ Versuch ${attempt}/${maxRetries}...` : '⏳ Generiere...';
-
     try {
       const response = await fetch('/api/clean', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: `GENERIERE_LERNZETTEL: ${topic}` })
       });
-
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        data = { error: 'Ungültige Server-Antwort' };
-      }
-
-      if (!response.ok) {
-        setStatus(`Fehler: ${data.error || 'Serverfehler'}`, 'err');
-        btn.disabled = false;
-        btn.textContent = '✦ Lernzettel generieren';
-        return;
-      }
-
+      const data = await response.json();
       if (data.error) {
         setStatus('Fehler: ' + data.error, 'err');
         btn.disabled = false;
         btn.textContent = '✦ Lernzettel generieren';
         return;
       }
-
-      const cleaned = repairAIOutput(data.cleaned);
-      console.log('RAW AI RESPONSE:', data.cleaned);
-      console.log('REPAIRED AI RESPONSE:', cleaned);
-
-      if (cleaned && isValidOutput(cleaned, topic)) {
-        document.getElementById('inputText').value = cleaned;
-        parsedDoc = parseText(cleaned);
+      if (data.cleaned && isValidOutput(data.cleaned, topic)) {
+        document.getElementById('inputText').value = data.cleaned;
+        parsedDoc = parseText(data.cleaned);
         renderPreview(parsedDoc);
         document.getElementById('generateBox').style.display = 'none';
         document.getElementById('generateBtn').classList.remove('active');
@@ -1233,116 +883,84 @@ async function generateFromTopic() {
         btn.disabled = false;
         btn.textContent = '✦ Lernzettel generieren';
         return;
-      }
-
-      if (attempt < maxRetries) {
+      } else if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
-    } catch (e) {
-      console.error(e);
-      if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, 1500));
-      }
+    } catch(e) {
+      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500));
     }
   }
-
   setStatus('Generierung fehlgeschlagen — bitte nochmal versuchen', 'err');
   btn.disabled = false;
   btn.textContent = '✦ Lernzettel generieren';
 }
 
+// ── PDF EXPORT ────────────────────────────────────────────────
 function exportPDF() {
   if (!parsedDoc) return;
-
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-
-  const pageW = 210;
-  const pageH = 297;
-  const margin = 20;
-  const cw = pageW - margin * 2;
-  const bottomLimit = 278;
-
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const pageW = 210, margin = 20, cw = pageW - margin * 2;
   let y = margin;
-  let pageNum = 1;
-
   const C = currentDesign.sectionColors;
-  const isDark = currentDesign.id === 'dark';
 
+  // Convert hex to rgb array
   function hexToRgb(hex) {
-    const cleaned = hex.replace('#', '');
-    return [
-      parseInt(cleaned.slice(0, 2), 16),
-      parseInt(cleaned.slice(2, 4), 16),
-      parseInt(cleaned.slice(4, 6), 16)
-    ];
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return [r,g,b];
   }
-
   function hexToRgbSafe(hex) {
-    if (!hex || hex === 'transparent') return [240, 240, 240];
+    if (!hex || hex === 'transparent') return [240,240,240];
     return hexToRgb(hex);
   }
 
-  function setRGB(col) {
-    pdf.setTextColor(col[0], col[1], col[2]);
-  }
-
-  function setFill(col) {
-    pdf.setFillColor(col[0], col[1], col[2]);
-  }
-
-  function addPageNumber() {
-    pdf.setFontSize(7);
-    pdf.setFont('helvetica', 'normal');
-    setRGB(isDark ? [60, 60, 60] : [200, 195, 190]);
-    pdf.text(`— ${pageNum} —`, pageW / 2, 288, { align: 'center' });
-  }
-
-  const bgColor = isDark ? [20, 20, 20] : [255, 255, 255];
-  const titleBg = isDark ? [30, 30, 30] : (currentDesign.id === 'minimal' ? [255, 255, 255] : [240, 250, 244]);
-  const titleColor = isDark ? [240, 237, 232] : [28, 26, 24];
-  const accentColor = isDark ? [82, 183, 136] : (currentDesign.id === 'minimal' ? [28, 26, 24] : [45, 106, 79]);
-
-  function paintPageBg() {
-    setFill(bgColor);
-    pdf.rect(0, 0, pageW, pageH, 'F');
-  }
-
-  function checkPage(needed = 10) {
-    if (y + needed > bottomLimit) {
-      addPageNumber();
-      pdf.addPage();
+  let pageNum = 1;
+  function checkPage(n=10) {
+    if (y+n>278) {
+      // Draw page number before new page
+      doc.setFontSize(7); doc.setFont('helvetica','normal');
+      setRGB(isDark ? [60,60,60] : [200,195,190]);
+      doc.text(`— ${pageNum} —`, pageW/2, 288, { align: 'center' });
+      doc.addPage();
       pageNum++;
-      paintPageBg();
+      // Fill background on new page
+      setFill(bgColor);
+      doc.rect(0, 0, pageW, 297, 'F');
       y = margin;
     }
   }
+  function setRGB(col) { doc.setTextColor(col[0],col[1],col[2]); }
+  function setFill(col) { doc.setFillColor(col[0],col[1],col[2]); }
 
-  paintPageBg();
+  const isDark = currentDesign.id === 'dark';
+  const bgColor = isDark ? [20,20,20] : [255,255,255];
+  const titleBg = isDark ? [30,30,30] : (currentDesign.id === 'minimal' ? [255,255,255] : [240,250,244]);
+  const titleColor = isDark ? [240,237,232] : [28,26,24];
+  const accentColor = isDark ? [82,183,136] : (currentDesign.id === 'minimal' ? [28,26,24] : [45,106,79]);
 
+  // Page bg
+  setFill(bgColor);
+  doc.rect(0, 0, pageW, 297, 'F');
+
+  // Title
   setFill(titleBg);
-  pdf.rect(0, 0, pageW, isDark ? 28 : 26, 'F');
-
+  doc.rect(0, 0, pageW, isDark ? 28 : 26, 'F');
   if (currentDesign.id !== 'minimal') {
     setFill(accentColor);
-    pdf.rect(margin, y + 3, 4, 4, 'F');
+    doc.rect(margin, y + 3, 4, 4, 'F');
   }
-
-  pdf.setFontSize(13);
-  pdf.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
   setRGB(titleColor);
-  pdf.text(parsedDoc.title || 'Lernzettel', margin + (currentDesign.id === 'minimal' ? 0 : 8), y + 7);
-
+  doc.text(parsedDoc.title || 'Lernzettel', margin + (currentDesign.id === 'minimal' ? 0 : 8), y + 7);
   y += 14;
-
   if (parsedDoc.subtitle) {
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setFont('helvetica', currentDesign.id === 'minimal' ? 'normal' : 'normal');
     setRGB(accentColor);
-    pdf.text(parsedDoc.subtitle, margin + (currentDesign.id === 'minimal' ? 0 : 8), y);
+    doc.text(parsedDoc.subtitle, margin + (currentDesign.id === 'minimal' ? 0 : 8), y);
     y += 7;
   }
-
   y += 4;
 
   parsedDoc.sections.forEach((sec, si) => {
@@ -1352,190 +970,136 @@ function exportPDF() {
     const secBgRgb = hexToRgbSafe(c.bg);
 
     checkPage(16);
-
     if (sec.title) {
       if (currentDesign.id === 'minimal') {
-        setRGB([138, 133, 128]);
-        pdf.setFontSize(7.5);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(sec.title.toUpperCase(), margin, y + 5);
-        pdf.setDrawColor(220, 215, 210);
-        pdf.setLineWidth(0.3);
-        pdf.line(margin, y + 7, margin + cw, y + 7);
+        setRGB([138,133,128]);
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(sec.title.toUpperCase(), margin, y + 5);
+        doc.setDrawColor(220,215,210);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y + 7, margin + cw, y + 7);
         y += 10;
       } else {
         setFill(secBgRgb);
-        pdf.roundedRect(margin, y, cw, 8, 2, 2, 'F');
-        pdf.setFontSize(8.5);
-        pdf.setFont('helvetica', 'bold');
+        doc.roundedRect(margin, y, cw, 8, 2, 2, 'F');
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
         setRGB(titleRgb);
-        pdf.text(`${si + 1}.  ${sec.title}`, margin + 5, y + 5.5);
+        doc.text(`${si+1}.  ${sec.title}`, margin+5, y+5.5);
         y += 11;
       }
     }
 
     if (sec.callout) {
-      const cLines = pdf.splitTextToSize(sec.callout, cw - 10);
-      const boxHeight = Math.max(8, cLines.length * 5 + 3);
-      checkPage(boxHeight + 2);
-
+      checkPage(10);
       setFill(secBgRgb);
-      pdf.rect(margin, y, cw, boxHeight, 'F');
+      doc.rect(margin, y, cw, 8, 'F');
       setFill(dotRgb);
-      pdf.rect(margin, y, 2, boxHeight, 'F');
-
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'bolditalic');
+      doc.rect(margin, y, 2, 8, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica', 'bolditalic');
       setRGB(titleRgb);
-      pdf.text(cLines, margin + 6, y + 5.5);
-
-      y += boxHeight + 2;
+      const cLines = doc.splitTextToSize(sec.callout, cw-10);
+      doc.text(cLines, margin+6, y+5.5);
+      y += cLines.length * 5 + 4;
     }
 
     sec.items.forEach(item => {
-      const textColor = isDark ? [208, 205, 200] : [28, 26, 24];
+      const textColor = isDark ? [208,205,200] : [28,26,24];
 
+      // Pre-calculate full height of this item + all its children
       function itemHeight(it) {
-        pdf.setFontSize(8);
-        let total = pdf.splitTextToSize(it.text, cw - 8).length * 4.5 + 2;
-
-        if (it.sub) {
-          it.sub.forEach(s => {
-            pdf.setFontSize(7.5);
-            total += pdf.splitTextToSize(s.text, cw - 16).length * 4.2 + 1.5;
-
-            if (s.children) {
-              s.children.forEach(ch => {
-                pdf.setFontSize(7);
-                total += pdf.splitTextToSize(ch, cw - 24).length * 4 + 1;
-              });
-            }
+        doc.setFontSize(8);
+        const lh = doc.splitTextToSize(it.text, cw-8).length * 4.5 + 2;
+        let total = lh;
+        if (it.sub) it.sub.forEach(s => {
+          doc.setFontSize(7.5);
+          total += doc.splitTextToSize(s.text, cw-16).length * 4.2 + 1.5;
+          if (s.children) s.children.forEach(ch => {
+            doc.setFontSize(7);
+            total += doc.splitTextToSize(ch, cw-24).length * 4 + 1;
           });
-        }
-
+        });
         return total;
       }
-
       checkPage(itemHeight(item));
 
       if (item.isLabel) {
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'bold');
-        setRGB(isDark ? [240, 237, 232] : [42, 40, 38]);
-        const lines = pdf.splitTextToSize(item.text, cw - 8);
-        pdf.text(lines, margin + 2, y + 3.5);
-        y += lines.length * 4.5 + 1;
+        doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+        setRGB(isDark ? [240,237,232] : [42,40,38]);
+        const lines = doc.splitTextToSize(item.text, cw-8);
+        doc.text(lines, margin+2, y+3.5);
+        y += lines.length*4.5+1;
       } else {
         setFill(dotRgb);
-        if (currentDesign.id === 'minimal') {
-          pdf.rect(margin + 1, y + 1.5, 2.5, 2.5, 'F');
-        } else {
-          pdf.circle(margin + 2, y + 2, 1.5, 'F');
-        }
-
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
+        currentDesign.id === 'minimal' ? doc.rect(margin+1, y+1.5, 2.5, 2.5, 'F') : doc.circle(margin+2, y+2, 1.5, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
         setRGB(textColor);
-        const lines = pdf.splitTextToSize(item.text, cw - 8);
-        pdf.text(lines, margin + 6, y + 3.5);
-        y += lines.length * 4.5 + 2;
+        const lines = doc.splitTextToSize(item.text, cw-8);
+        doc.text(lines, margin+6, y+3.5);
+        y += lines.length*4.5+2;
       }
+      if (item.sub) item.sub.forEach(s => {
+        // Pre-calculate sub height including children
+        function subHeight(sb) {
+          doc.setFontSize(7.5);
+          let h = doc.splitTextToSize(sb.text, cw-16).length * 4.2 + 1.5;
+          if (sb.children) sb.children.forEach(ch => {
+            doc.setFontSize(7);
+            h += doc.splitTextToSize(ch, cw-24).length * 4 + 1;
+          });
+          return h;
+        }
+        checkPage(subHeight(s));
 
-      if (item.sub) {
-        item.sub.forEach(s => {
-          function subHeight(sb) {
-            pdf.setFontSize(7.5);
-            let h = pdf.splitTextToSize(sb.text, cw - 16).length * 4.2 + 1.5;
-            if (sb.children) {
-              sb.children.forEach(ch => {
-                pdf.setFontSize(7);
-                h += pdf.splitTextToSize(ch, cw - 24).length * 4 + 1;
-              });
-            }
-            return h;
-          }
-
-          checkPage(subHeight(s));
-
-          if (s.isLabel) {
-            pdf.setFontSize(7.5);
-            pdf.setFont('helvetica', 'bold');
-            setRGB(isDark ? [240, 237, 232] : [42, 40, 38]);
-            const sl = pdf.splitTextToSize(s.text, cw - 16);
-            pdf.text(sl, margin + 10, y + 3);
-            y += sl.length * 4.2 + 1;
-          } else {
-            setFill(dotRgb);
-            if (currentDesign.id === 'minimal') {
-              pdf.rect(margin + 7, y + 1.2, 2, 2, 'F');
-            } else {
-              pdf.circle(margin + 8, y + 1.8, 1.1, 'F');
-            }
-
-            pdf.setFontSize(7.5);
-            pdf.setFont('helvetica', 'normal');
-            setRGB(isDark ? [154, 149, 144] : [90, 84, 80]);
-            const sl = pdf.splitTextToSize(s.text, cw - 16);
-            pdf.text(sl, margin + 12, y + 3);
-            y += sl.length * 4.2 + 1.5;
-          }
-
-          if (s.children) {
-            s.children.forEach(ch => {
-              pdf.setFontSize(7);
-              const cl = pdf.splitTextToSize(ch, cw - 24);
-              checkPage(cl.length * 4 + 1);
-
-              setFill(dotRgb);
-              pdf.circle(margin + 16, y + 1.6, 0.9, 'F');
-              pdf.setFont('helvetica', 'normal');
-              setRGB(isDark ? [122, 117, 112] : [106, 100, 96]);
-              pdf.text(cl, margin + 20, y + 2.8);
-              y += cl.length * 4 + 1;
-            });
-          }
+        if (s.isLabel) {
+          doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+          setRGB(isDark ? [240,237,232] : [42,40,38]);
+          const sl = doc.splitTextToSize(s.text, cw-16);
+          doc.text(sl, margin+10, y+3); y += sl.length*4.2+1;
+        } else {
+          setFill(dotRgb);
+          currentDesign.id === 'minimal' ? doc.rect(margin+7, y+1.2, 2, 2, 'F') : doc.circle(margin+8, y+1.8, 1.1, 'F');
+          doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+          setRGB(isDark ? [154,149,144] : [90,84,80]);
+          const sl = doc.splitTextToSize(s.text, cw-16);
+          doc.text(sl, margin+12, y+3); y += sl.length*4.2+1.5;
+        }
+        if (s.children) s.children.forEach(ch => {
+          doc.setFontSize(7);
+          const cl = doc.splitTextToSize(ch, cw-24);
+          checkPage(cl.length*4+1);
+          setFill(dotRgb);
+          doc.circle(margin+16, y+1.6, 0.9, 'F');
+          doc.setFont('helvetica', 'normal');
+          setRGB(isDark ? [122,117,112] : [106,100,96]);
+          doc.text(cl, margin+20, y+2.8); y += cl.length*4+1;
         });
-      }
+      });
     });
-
     y += 4;
   });
 
   if (parsedDoc.merksatz) {
-    y += 4;
-
-    const msBg = isDark ? [30, 30, 30] : (currentDesign.id === 'minimal' ? [245, 243, 239] : [240, 250, 244]);
-    const ms = parsedDoc.merksatz.includes(':')
-      ? parsedDoc.merksatz.split(':').slice(1).join(':').trim()
-      : parsedDoc.merksatz;
-
-    const msLines = pdf.splitTextToSize(ms, cw - 20);
-    const msHeight = Math.max(18, 10 + msLines.length * 4.5);
-
-    checkPage(msHeight + 4);
-
+    checkPage(20); y += 4;
+    const msBg = isDark ? [30,30,30] : (currentDesign.id === 'minimal' ? [245,243,239] : [240,250,244]);
     setFill(msBg);
-    pdf.roundedRect(margin, y, cw, msHeight, 3, 3, 'F');
-
-    if (currentDesign.id !== 'minimal') {
-      setFill(accentColor);
-      pdf.rect(margin + 4, y + 4, 7, 7, 'F');
-    }
-
-    pdf.setFontSize(7.5);
-    pdf.setFont('helvetica', 'bold');
+    doc.roundedRect(margin, y, cw, 18, 3, 3, 'F');
+    if (currentDesign.id !== 'minimal') { setFill(accentColor); doc.rect(margin+4, y+4, 7, 7, 'F'); }
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
     setRGB(accentColor);
-    pdf.text('MERKSATZ', margin + (currentDesign.id === 'minimal' ? 4 : 15), y + 8);
-
-    pdf.setFont('helvetica', 'italic');
-    setRGB(isDark ? [154, 149, 144] : [45, 90, 66]);
-    pdf.text(msLines, margin + (currentDesign.id === 'minimal' ? 4 : 15), y + 14);
-
-    y += msHeight + 4;
+    doc.text('MERKSATZ', margin+(currentDesign.id==='minimal'?4:15), y+8);
+    doc.setFont('helvetica', 'italic');
+    setRGB(isDark ? [154,149,144] : [45,90,66]);
+    const ms = parsedDoc.merksatz.includes(':') ? parsedDoc.merksatz.split(':').slice(1).join(':').trim() : parsedDoc.merksatz;
+    doc.text(doc.splitTextToSize(ms, cw-20), margin+(currentDesign.id==='minimal'?4:15), y+14);
+    y += 22;
   }
 
-  addPageNumber();
-  pdf.save(`textcraft-${currentDesign.id}.pdf`);
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  setRGB(isDark ? [60,60,60] : [200,195,190]);
+  doc.text(`— ${pageNum} —`, pageW/2, 288, { align: 'center' });
+  doc.save(`textcraft-${currentDesign.id}.pdf`);
   setStatus('✓ PDF gespeichert!', 'ok');
 }
 </script>
