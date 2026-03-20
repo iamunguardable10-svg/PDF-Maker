@@ -787,31 +787,37 @@ async function generateFromTopic() {
 
   const btn = document.getElementById('genSubmitBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Generiere...';
 
-  try {
-    const response = await fetch('/api/clean', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: `GENERIERE_LERNZETTEL: ${topic}` })
-    });
-    const data = await response.json();
-    if (data.cleaned && isValidOutput(data.cleaned, topic)) {
-      document.getElementById('inputText').value = data.cleaned;
-      parsedDoc = parseText(data.cleaned);
-      renderPreview(parsedDoc);
-      document.getElementById('generateBox').style.display = 'none';
-      document.getElementById('generateBtn').classList.remove('active');
-      setStatus(`✓ Lernzettel zu "${topic}" generiert`, 'ok');
-    } else {
-      setStatus('Generierung fehlgeschlagen — nochmal versuchen', 'err');
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    btn.textContent = attempt > 1 ? `⏳ Versuch ${attempt}/${maxRetries}...` : '⏳ Generiere...';
+    try {
+      const response = await fetch('/api/clean', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: `GENERIERE_LERNZETTEL: ${topic}` })
+      });
+      const data = await response.json();
+      if (data.cleaned && isValidOutput(data.cleaned, topic)) {
+        document.getElementById('inputText').value = data.cleaned;
+        parsedDoc = parseText(data.cleaned);
+        renderPreview(parsedDoc);
+        document.getElementById('generateBox').style.display = 'none';
+        document.getElementById('generateBtn').classList.remove('active');
+        setStatus(`✓ Lernzettel zu "${topic}" generiert`, 'ok');
+        btn.disabled = false;
+        btn.textContent = '✦ Lernzettel generieren';
+        return;
+      } else if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    } catch(e) {
+      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500));
     }
-  } catch(e) {
-    setStatus('Fehler: API nicht erreichbar', 'err');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✦ Lernzettel generieren';
   }
+  setStatus('Generierung fehlgeschlagen — bitte nochmal versuchen', 'err');
+  btn.disabled = false;
+  btn.textContent = '✦ Lernzettel generieren';
 }
 
 // ── PDF EXPORT ────────────────────────────────────────────────
