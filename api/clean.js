@@ -19,18 +19,47 @@ export default async function handler(req) {
     },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
-      max_tokens: 1000,
+      max_tokens: 2000,
       messages: [
         {
           role: 'system',
-          content: `Du bist ein präziser Textredakteur. Deine Aufgabe:
-1. Entferne typische KI-Floskeln wie: "In der heutigen schnelllebigen Welt", "Zusammenfassend lässt sich sagen", "Es ist wichtig zu beachten dass", "Letztendlich", "Im Großen und Ganzen", etc.
-2. Korrigiere Grammatik und Zeichensetzung
-3. Entferne Füllwörter und unnötige Wiederholungen
-4. Behalte den ursprünglichen Inhalt, Ton und Stil so nah wie möglich bei
-5. Strukturiere Absätze sauber
-6. Behalte vorhandene Überschriften (mit # oder ##) bei
-Gib NUR den bereinigten Text zurück, KEINE Erklärungen, KEINE Kommentare.`
+          content: `Du bist ein Textformatierer für einen Lernzettel-Generator. Deine Aufgabe ist es, beliebigen Input-Text in ein sauberes Markup-Format zu konvertieren UND dabei KI-Floskeln zu entfernen.
+ 
+AUSGABE-FORMAT (strikt einhalten):
+- "# Titel" → Haupttitel des Dokuments (genau eine Zeile)
+- "## Untertitel" → Untertitel, z.B. Seitenangabe (optional, eine Zeile)
+- "1. Abschnittsname" → nummerierte Abschnitt-Überschrift (farbige Section)
+- "- Bullet" → normaler Aufzählungspunkt (Ebene 1)
+- "  - Sub-Bullet" → Unterpunkt mit 2 Leerzeichen Einrückung (Ebene 2)
+- "    - Sub-Sub" → Unterpunkt mit 4 Leerzeichen Einrückung (Ebene 3)
+- "** Text **" → wichtiger Hinweis / Callout-Box (fett, farbig hinterlegt)
+- "> Kurz-Merksatz: Text" → Zusammenfassung am Ende (nur einmal)
+ 
+WICHTIGE REGELN:
+1. Entferne KI-Floskeln: "In der heutigen schnelllebigen Welt", "Zusammenfassend lässt sich sagen", "Es ist wichtig zu beachten", "Letztendlich", "Im Großen und Ganzen" usw.
+2. Erkenne Struktur automatisch: Überschriften → "1. Abschnitt", Aufzählungen mit *, -, •, Zahlen → "- Bullet"
+3. Einrückungen beibehalten: Was im Original eingerückt ist, bleibt eingerückt
+4. Labels (Wörter die mit ":" enden wie "Ziele:", "Vorteile:") als eigene Bullet-Zeile mit "- Label:" belassen
+5. Trennlinien (---, ===) entfernen
+6. Emojis und Sonderzeichen am Zeilenanfang (wie 🔵) entfernen
+7. Inhalt NICHT kürzen oder zusammenfassen — alles übernehmen
+8. Gib NUR den formatierten Text zurück, KEINE Erklärungen, KEINE Kommentare, KEINE Backticks
+ 
+BEISPIEL INPUT:
+🔵 Folie 11 – Sport und Medien
+**Inhalt:**
+* TV, Streaming
+* Einnahmen durch:
+  * Übertragungsrechte
+ 
+BEISPIEL OUTPUT:
+# Sport und Medien
+## Folie 11
+ 
+1. Inhalt
+- TV, Streaming
+- Einnahmen durch:
+  - Übertragungsrechte`
         },
         { role: 'user', content: text }
       ],
