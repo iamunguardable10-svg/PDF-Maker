@@ -401,7 +401,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
   border-bottom: 2px solid #c8e6d4;
 }
 .theme-lernzettel .lz-doc-title h1 {
-  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--ink);
+  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #1c1a18;
   display: flex; align-items: center; gap: 12px;
 }
 .theme-lernzettel .lz-doc-title h1::before {
@@ -433,9 +433,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-minimal .lz-callout { border-left: 2px solid #1c1a18 !important; background: #f5f3ef !important; color: #1c1a18 !important; }
 
 /* Dark */
-.theme-dark {
-  background: #141414 !important;
-}
+.theme-dark { background: #141414 !important; }
 .theme-dark .lz-doc-title { background: #1e1e1e; padding: 28px 36px 20px; border-bottom: 1px solid #333; }
 .theme-dark .lz-doc-title h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #f0ede8; display: flex; align-items: center; gap: 12px; }
 .theme-dark .lz-doc-title h1::before { content: ''; display: inline-block; width: 12px; height: 12px; background: #52b788; border-radius: 3px; flex-shrink: 0; }
@@ -677,25 +675,7 @@ function setStatus(msg, type = '') {
   setTimeout(() => {
     el.textContent = '';
     el.className = 'status-msg';
-  }, 4000);
-}
-
-function looksStructured(raw) {
-  return /^#\s.+/m.test(raw) && /^\d+\.\s.+/m.test(raw) && /^\s*[-•]\s.+/m.test(raw);
-}
-
-function isValidOutput(cleaned, original) {
-  if (!cleaned || cleaned.trim().length < 10) return false;
-  if (/^\s*[{[]/.test(cleaned)) return false;
-
-  const hasTitle = /^#\s.+/m.test(cleaned);
-  const hasSection = /^\d+\.\s.+/m.test(cleaned);
-  const hasBullet = /^\s*[-•]\s.+/m.test(cleaned);
-
-  if (!hasTitle || !hasSection || !hasBullet) return false;
-  if (original.length > 200 && cleaned.length < original.length * 0.2) return false;
-
-  return true;
+  }, 4500);
 }
 
 function getSampleDoc() {
@@ -707,11 +687,7 @@ function getSampleDoc() {
         title: 'Erster Abschnitt',
         items: [
           { text: 'Wichtiger Punkt', isLabel: false, sub: [] },
-          {
-            text: 'Noch ein Punkt',
-            isLabel: false,
-            sub: [{ text: 'Unterpunkt', isLabel: false, children: [] }]
-          }
+          { text: 'Noch ein Punkt', isLabel: false, sub: [{ text: 'Unterpunkt', isLabel: false, children: [] }] }
         ],
         callout: null
       },
@@ -729,10 +705,78 @@ function normalizeAIText(raw) {
   return String(raw || '')
     .replace(/\r\n/g, '\n')
     .replace(/\t/g, '  ')
+    .replace(/```(?:markdown|md)?/gi, '')
+    .replace(/```/g, '')
     .replace(/[ \t]+$/gm, '')
     .replace(/^\*\*\s*(.*?)\s*\*\*$/gm, '**$1**')
     .replace(/^>\s*Merksatz\s*:\s*/gim, '> Merksatz: ')
     .trim();
+}
+
+function repairAIOutput(raw) {
+  let text = normalizeAIText(raw);
+  if (!text) return '';
+
+  const lines = text.split('\n').map(line => line.replace(/\s+$/g, ''));
+
+  if (!/^#\s.+/m.test(text)) {
+    const firstUseful = lines.find(line => line.trim() && !/^\s*[-*>#]/.test(line.trim()));
+    const title = firstUseful ? firstUseful.trim().slice(0, 60) : 'Lernzettel';
+    lines.unshift('## Lernzettel');
+    lines.unshift(`# ${title}`);
+  } else if (!/^##\s.+/m.test(text)) {
+    const titleIndex = lines.findIndex(line => /^#\s.+/.test(line.trim()));
+    if (titleIndex !== -1) lines.splice(titleIndex + 1, 0, '## Lernzettel');
+  }
+
+  text = lines.join('\n');
+
+  if (!/^\d+\.\s.+/m.test(text)) {
+    const arr = text.split('\n');
+    let inserted = false;
+
+    for (let i = 0; i < arr.length; i++) {
+      if (/^\s*[-•]\s+/.test(arr[i])) {
+        arr.splice(i, 0, '1. Allgemein');
+        inserted = true;
+        break;
+      }
+    }
+
+    if (!inserted) {
+      arr.push('');
+      arr.push('1. Allgemein');
+      arr.push('- Inhalt');
+    }
+
+    text = arr.join('\n');
+  }
+
+  return text.trim();
+}
+
+function looksStructured(raw) {
+  return /^#\s.+/m.test(raw) && (/^\d+\.\s.+/m.test(raw) || /^\s*[-•]\s.+/m.test(raw));
+}
+
+function isValidOutput(cleaned, original) {
+  if (!cleaned || cleaned.trim().length < 10) return false;
+
+  const text = cleaned.trim();
+
+  if (/^\s*[{[]/.test(text)) return false;
+  if (/^(error|fehler|sorry|entschuldigung)/i.test(text)) return false;
+
+  const hasTitle = /^#\s.+/m.test(text) || /^.{3,80}$/m.test(text);
+  const hasBullet = /^\s*[-•]\s.+/m.test(text);
+  const hasSection = /^\d+\.\s.+/m.test(text) || /^##\s.+/m.test(text);
+
+  const validEnough = (hasTitle && hasBullet) || (hasSection && hasBullet);
+
+  if (!validEnough) return false;
+  if (original.length > 200 && text.length < original.length * 0.1) return false;
+
+  return true;
 }
 
 function parseText(raw) {
@@ -858,9 +902,7 @@ function renderDocHTML(doc, design) {
   let html = `<div class="lz-page ${themeClass}">`;
 
   html += `<div class="lz-doc-title"><h1>${escapeText(doc.title || 'Lernzettel')}</h1>`;
-  if (doc.subtitle) {
-    html += `<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
-  }
+  if (doc.subtitle) html += `<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
   html += `</div><div class="lz-body">`;
 
   doc.sections.forEach((sec, si) => {
@@ -913,9 +955,7 @@ function renderDocHTML(doc, design) {
   if (doc.merksatz) {
     const ms = doc.merksatz;
     const colon = ms.indexOf(':');
-    const msTitle = colon > -1
-      ? (ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz')
-      : 'Merksatz';
+    const msTitle = colon > -1 ? (ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz') : 'Merksatz';
     const msText = colon > -1 ? ms.slice(colon + 1).trim() : ms;
 
     html += `<div class="lz-merksatz"><div class="lz-merksatz-icon">✎</div><div><div class="lz-merksatz-title">${escapeText(msTitle)}</div><div class="lz-merksatz-text">${escapeText(msText)}</div></div></div>`;
@@ -1067,9 +1107,11 @@ async function cleanWithAI() {
         return;
       }
 
-      const cleaned = normalizeAIText(data.cleaned);
+      const cleaned = repairAIOutput(data.cleaned);
+      console.log('RAW AI RESPONSE:', data.cleaned);
+      console.log('REPAIRED AI RESPONSE:', cleaned);
 
-      if (isValidOutput(cleaned, raw)) {
+      if (cleaned && isValidOutput(cleaned, raw)) {
         document.getElementById('inputText').value = cleaned;
         parsedDoc = parseText(cleaned);
         renderPreview(parsedDoc);
@@ -1082,7 +1124,8 @@ async function cleanWithAI() {
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
-    } catch {
+    } catch (e) {
+      console.error(e);
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
@@ -1102,9 +1145,7 @@ function toggleGenerateMode() {
   box.style.display = isOpen ? 'none' : 'block';
   btn.classList.toggle('active', !isOpen);
 
-  if (!isOpen) {
-    document.getElementById('topicInput').focus();
-  }
+  if (!isOpen) document.getElementById('topicInput').focus();
 }
 
 async function generateFromTopic() {
@@ -1150,9 +1191,11 @@ async function generateFromTopic() {
         return;
       }
 
-      const cleaned = normalizeAIText(data.cleaned);
+      const cleaned = repairAIOutput(data.cleaned);
+      console.log('RAW AI RESPONSE:', data.cleaned);
+      console.log('REPAIRED AI RESPONSE:', cleaned);
 
-      if (isValidOutput(cleaned, topic)) {
+      if (cleaned && isValidOutput(cleaned, topic)) {
         document.getElementById('inputText').value = cleaned;
         parsedDoc = parseText(cleaned);
         renderPreview(parsedDoc);
@@ -1167,7 +1210,8 @@ async function generateFromTopic() {
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
-    } catch {
+    } catch (e) {
+      console.error(e);
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, 1500));
       }
