@@ -513,7 +513,7 @@ async function cleanWithAI() {
       document.getElementById('inputText').value = data.cleaned;
       setStatus('✓ KI-Bereinigung abgeschlossen');
     } else {
-      setStatus('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+      setStatus('Fehler: ' + JSON.stringify(data));
     }
   } catch (e) {
     setStatus('Fehler: API nicht erreichbar');
