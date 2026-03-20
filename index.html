@@ -798,6 +798,13 @@ async function cleanWithAI() {
         body: JSON.stringify({ text: raw })
       });
       const data = await response.json();
+      if (data.error) {
+        // Echter API-Fehler — sofort anzeigen, kein Retry
+        setStatus('Fehler: ' + data.error, 'err');
+        btn.disabled = false;
+        btn.textContent = '✦ KI bereinigen';
+        return;
+      }
       if (data.cleaned && isValidOutput(data.cleaned, raw)) {
         document.getElementById('inputText').value = data.cleaned;
         parsedDoc = parseText(data.cleaned);
@@ -807,15 +814,13 @@ async function cleanWithAI() {
         btn.textContent = '✦ KI bereinigen';
         return;
       } else if (attempt < maxRetries) {
-        // Bad output — wait a second and retry
         await new Promise(r => setTimeout(r, 1500));
       }
     } catch (e) {
       if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500));
     }
   }
-  // All retries failed — leave original text untouched
-  setStatus('KI temporär überlastet — bitte nochmal versuchen', 'err');
+  setStatus('Antwort ungültig — bitte nochmal versuchen', 'err');
   btn.disabled = false;
   btn.textContent = '✦ KI bereinigen';
 }
@@ -862,6 +867,12 @@ async function generateFromTopic() {
         body: JSON.stringify({ text: `GENERIERE_LERNZETTEL: ${topic}` })
       });
       const data = await response.json();
+      if (data.error) {
+        setStatus('Fehler: ' + data.error, 'err');
+        btn.disabled = false;
+        btn.textContent = '✦ Lernzettel generieren';
+        return;
+      }
       if (data.cleaned && isValidOutput(data.cleaned, topic)) {
         document.getElementById('inputText').value = data.cleaned;
         parsedDoc = parseText(data.cleaned);
