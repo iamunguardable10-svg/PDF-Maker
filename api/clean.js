@@ -16,7 +16,7 @@ export default async function handler(req) {
 AUSGABE-FORMAT (strikt einhalten):
 - "# Titel" → Haupttitel des Dokuments (genau eine Zeile)
 - "## Untertitel" → Untertitel, z.B. Seitenangabe (optional, eine Zeile)
-- "1. Abschnittsname" → nummerierte Abschnitt-Überschrift (farbige Section)
+- "1. Abschnittsname" → nummerierte Abschnitt-Überschrift (farbige Section) 
 - "- Bullet" → normaler Aufzählungspunkt (Ebene 1)
 - "  - Sub-Bullet" → Unterpunkt mit 2 Leerzeichen Einrückung (Ebene 2)
 - "    - Sub-Sub" → Unterpunkt mit 4 Leerzeichen Einrückung (Ebene 3)
