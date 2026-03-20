@@ -930,8 +930,25 @@ function exportPDF() {
     }
 
     sec.items.forEach(item => {
-      checkPage(8);
       const textColor = isDark ? [208,205,200] : [28,26,24];
+
+      // Pre-calculate full height of this item + all its children
+      function itemHeight(it) {
+        doc.setFontSize(8);
+        const lh = doc.splitTextToSize(it.text, cw-8).length * 4.5 + 2;
+        let total = lh;
+        if (it.sub) it.sub.forEach(s => {
+          doc.setFontSize(7.5);
+          total += doc.splitTextToSize(s.text, cw-16).length * 4.2 + 1.5;
+          if (s.children) s.children.forEach(ch => {
+            doc.setFontSize(7);
+            total += doc.splitTextToSize(ch, cw-24).length * 4 + 1;
+          });
+        });
+        return total;
+      }
+      checkPage(itemHeight(item));
+
       if (item.isLabel) {
         doc.setFontSize(8); doc.setFont('helvetica', 'bold');
         setRGB(isDark ? [240,237,232] : [42,40,38]);
@@ -948,7 +965,18 @@ function exportPDF() {
         y += lines.length*4.5+2;
       }
       if (item.sub) item.sub.forEach(s => {
-        checkPage(7);
+        // Pre-calculate sub height including children
+        function subHeight(sb) {
+          doc.setFontSize(7.5);
+          let h = doc.splitTextToSize(sb.text, cw-16).length * 4.2 + 1.5;
+          if (sb.children) sb.children.forEach(ch => {
+            doc.setFontSize(7);
+            h += doc.splitTextToSize(ch, cw-24).length * 4 + 1;
+          });
+          return h;
+        }
+        checkPage(subHeight(s));
+
         if (s.isLabel) {
           doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
           setRGB(isDark ? [240,237,232] : [42,40,38]);
@@ -963,12 +991,13 @@ function exportPDF() {
           doc.text(sl, margin+12, y+3); y += sl.length*4.2+1.5;
         }
         if (s.children) s.children.forEach(ch => {
-          checkPage(6);
+          doc.setFontSize(7);
+          const cl = doc.splitTextToSize(ch, cw-24);
+          checkPage(cl.length*4+1);
           setFill(dotRgb);
           doc.circle(margin+16, y+1.6, 0.9, 'F');
-          doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+          doc.setFont('helvetica', 'normal');
           setRGB(isDark ? [122,117,112] : [106,100,96]);
-          const cl = doc.splitTextToSize(ch, cw-24);
           doc.text(cl, margin+20, y+2.8); y += cl.length*4+1;
         });
       });
