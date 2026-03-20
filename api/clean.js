@@ -11,45 +11,74 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
   }
  
-  const prompt = `Du bist ein Textformatierer für einen Lernzettel-Generator. Deine Aufgabe ist es, beliebigen Input-Text in ein sauberes Markup-Format zu konvertieren UND dabei KI-Floskeln zu entfernen.
+  const prompt = `Du bist ein Textformatierer für einen Lernzettel-Generator. Konvertiere den Input-Text in das unten beschriebene Markup-Format.
  
-AUSGABE-FORMAT (strikt einhalten):
-- "# Titel" → Haupttitel des Dokuments (genau eine Zeile)
-- "## Untertitel" → Untertitel, z.B. Seitenangabe (optional, eine Zeile)
-- "1. Abschnittsname" → nummerierte Abschnitt-Überschrift (farbige Section) 
-- "- Bullet" → normaler Aufzählungspunkt (Ebene 1)
-- "  - Sub-Bullet" → Unterpunkt mit 2 Leerzeichen Einrückung (Ebene 2)
-- "    - Sub-Sub" → Unterpunkt mit 4 Leerzeichen Einrückung (Ebene 3)
-- "** Text **" → wichtiger Hinweis / Callout-Box (fett, farbig hinterlegt)
-- "> Kurz-Merksatz: Text" → Zusammenfassung am Ende (nur einmal)
+═══ AUSGABE-FORMAT ═══
  
-WICHTIGE REGELN:
-1. Entferne KI-Floskeln: "In der heutigen schnelllebigen Welt", "Zusammenfassend lässt sich sagen", "Es ist wichtig zu beachten", "Letztendlich", "Im Großen und Ganzen" usw.
-2. Erkenne Struktur automatisch: Überschriften → "1. Abschnitt", Aufzählungen mit *, -, •, Zahlen → "- Bullet"
-3. Einrückungen beibehalten: Was im Original eingerückt ist, bleibt eingerückt
-4. Labels (Wörter die mit ":" enden wie "Ziele:", "Vorteile:") als eigene Bullet-Zeile mit "- Label:" belassen
-5. Trennlinien (---, ===) entfernen
-6. Emojis und Sonderzeichen am Zeilenanfang (wie 🔵) entfernen
-7. Inhalt NICHT kürzen oder zusammenfassen — alles übernehmen
-8. Gib NUR den formatierten Text zurück, KEINE Erklärungen, KEINE Kommentare, KEINE Backticks
+# Haupttitel        → Titel des Dokuments (genau eine Zeile, kein Doppelpunkt)
+## Untertitel       → z.B. Thema oder Seitenangabe (optional)
+1. Abschnittsname   → nummerierte Abschnitts-Überschrift
+- Bullet            → Aufzählungspunkt Ebene 1 (0 Leerzeichen)
+  - Sub-Bullet      → Unterpunkt Ebene 2 (GENAU 2 Leerzeichen)
+    - Sub-Sub       → Unterpunkt Ebene 3 (GENAU 4 Leerzeichen)
+** Callout-Text **  → wichtiger Hinweis (muss mit ** beginnen UND enden)
+> Merksatz: Text    → Zusammenfassung ganz am Ende (nur einmal)
  
-BEISPIEL INPUT:
-🔵 Folie 11 – Sport und Medien
-**Inhalt:**
-* TV, Streaming
-* Einnahmen durch:
-  * Übertragungsrechte
+═══ PFLICHTREGELN ═══
  
-BEISPIEL OUTPUT:
-# Sport und Medien
-## Folie 11
+REGEL 1 — KEINE STERNCHEN IN BULLETS:
+Bullet-Text darf NIEMALS **Sternchen** enthalten. Fett-Markierungen im Fließtext weglassen.
+FALSCH: - **Sponsoring** ist wichtig
+RICHTIG: - Sponsoring ist wichtig
  
-1. Inhalt
-- TV, Streaming
-- Einnahmen durch:
-  - Übertragungsrechte
+REGEL 2 — VOLLSTÄNDIGKEIT:
+Jeden einzelnen Punkt aus dem Original übernehmen. NICHTS weglassen, NICHTS kürzen.
+Lieber mehr Bullets als weniger. Im Zweifel alles aufnehmen.
  
-Hier ist der Text den du formatieren sollst:
+REGEL 3 — EINRÜCKUNG:
+Ebene 1: "- Text" (kein Leerzeichen davor)
+Ebene 2: "  - Text" (GENAU 2 Leerzeichen davor)
+Ebene 3: "    - Text" (GENAU 4 Leerzeichen davor)
+Tabs sind VERBOTEN — nur Leerzeichen verwenden.
+ 
+REGEL 4 — LABELS (Wörter mit Doppelpunkt):
+"Ziele:" oder "Vorteile:" → als normaler Bullet: "- Ziele:"
+Die Unterpunkte darunter mit 2 Leerzeichen einrücken.
+ 
+REGEL 5 — BEREINIGUNG:
+- Entferne: KI-Floskeln, Trennlinien (---), Emojis am Zeilenanfang (🔵, ■ usw.)
+- Behalte: alle inhaltlichen Informationen, Zahlen, Beispiele, Zitate
+ 
+REGEL 6 — CALLOUT nur für wirklich wichtige Hinweise:
+"** Text **" nur verwenden wenn im Original explizit etwas als besonders wichtig markiert ist (z.B. fett, unterstrichen, Ausrufezeichen). Nicht für normale Bullets.
+ 
+REGEL 7 — KEIN EXTRA-TEXT:
+Gib NUR den formatierten Text zurück.
+KEINE Erklärungen, KEINE Kommentare, KEINE Markdown-Backticks (kein \`\`\`).
+ 
+═══ BEISPIEL ═══
+ 
+INPUT:
+🔵 Folie 5 – Einnahmequellen
+**Wichtige Geldquellen:**
+* **Sponsoring** – Unternehmen zahlen für Werbung
+* **Medienrechte** – TV-Sender zahlen für Übertragungen
+* Ticketverkauf
+Merke: Sport = Wirtschaftsfaktor!
+ 
+OUTPUT:
+# Einnahmequellen
+## Folie 5
+ 
+1. Wichtige Geldquellen
+- Sponsoring – Unternehmen zahlen für Werbung
+- Medienrechte – TV-Sender zahlen für Übertragungen
+- Ticketverkauf
+ 
+> Merksatz: Sport ist ein bedeutender Wirtschaftsfaktor
+ 
+═══ DEIN INPUT ═══
+ 
 ${text}`;
  
   const response = await fetch(
@@ -59,17 +88,28 @@ ${text}`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 2000, temperature: 0.2 }
+        generationConfig: { maxOutputTokens: 3000, temperature: 0.1 }
       }),
     }
   );
  
   const data = await response.json();
-  const cleaned = data.candidates?.[0]?.content?.parts?.[0]?.text ?? JSON.stringify(data);
+  let cleaned = data.candidates?.[0]?.content?.parts?.[0]?.text ?? JSON.stringify(data);
+ 
+  // Sicherheitsnetz im Backend: Sternchen in Bullet-Zeilen entfernen
+  cleaned = cleaned
+    .split('\n')
+    .map(line => {
+      // Nur in Bullet-Zeilen (- ...) Sternchen entfernen, aber ** Callout ** stehenlassen
+      if (/^\s*-\s/.test(line) && !/^\*\*.*\*\*$/.test(line.trim())) {
+        return line.replace(/\*\*([^*]+)\*\*/g, '$1');
+      }
+      return line;
+    })
+    .join('\n');
  
   return new Response(JSON.stringify({ cleaned }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
 }
- 
