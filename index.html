@@ -227,8 +227,8 @@ textarea::placeholder { color: #c0bab4; font-style: italic; }
 .modal {
   background: white;
   border-radius: 16px;
-  padding: 32px;
-  max-width: 780px;
+  padding: 40px;
+  max-width: 960px;
   width: 100%;
   box-shadow: 0 24px 60px rgba(0,0,0,0.2);
   animation: slideUp 0.25s ease;
@@ -248,8 +248,8 @@ textarea::placeholder { color: #c0bab4; font-style: italic; }
 .design-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 20px;
+  margin-bottom: 28px;
 }
 @media (max-width: 600px) { .design-grid { grid-template-columns: 1fr; } }
  
@@ -279,14 +279,15 @@ textarea::placeholder { color: #c0bab4; font-style: italic; }
 }
  
 .design-thumbnail {
-  height: 180px;
+  height: 240px;
   overflow: hidden;
   pointer-events: none;
+  background: #f5f3ef;
 }
 .design-thumbnail iframe {
-  width: 200%;
-  height: 200%;
-  transform: scale(0.5);
+  width: 300%;
+  height: 300%;
+  transform: scale(0.333);
   transform-origin: top left;
   border: none;
   pointer-events: none;
@@ -684,31 +685,49 @@ function getSharedCSS() {
 }
  
 // ── ACTIONS ───────────────────────────────────────────────────
+function isValidOutput(cleaned, original) {
+  if (!cleaned || cleaned.trim().length < 20) return false;
+  // Must contain at least one bullet or heading
+  if (!/^[#\-1-9>*]/m.test(cleaned)) return false;
+  // Output should be reasonably close in length to input (not drastically shorter)
+  if (cleaned.length < original.length * 0.3) return false;
+  return true;
+}
+ 
 async function cleanWithAI() {
   const raw = document.getElementById('inputText').value.trim();
   if (!raw) { setStatus('Bitte Text eingeben', 'err'); return; }
   const btn = document.getElementById('aiBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Lädt...';
-  try {
-    const response = await fetch('/api/clean', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: raw })
-    });
-    const data = await response.json();
-    if (data.cleaned) {
-      document.getElementById('inputText').value = data.cleaned;
-      setStatus('✓ Text bereinigt — jetzt Vorschau öffnen', 'ok');
-    } else {
-      setStatus('Fehler: ' + JSON.stringify(data), 'err');
+ 
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    btn.textContent = attempt > 1 ? `⏳ Versuch ${attempt}/${maxRetries}...` : '⏳ Lädt...';
+    try {
+      const response = await fetch('/api/clean', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: raw })
+      });
+      const data = await response.json();
+      if (data.cleaned && isValidOutput(data.cleaned, raw)) {
+        document.getElementById('inputText').value = data.cleaned;
+        setStatus('✓ Text bereinigt — jetzt Design wählen', 'ok');
+        btn.disabled = false;
+        btn.textContent = '✦ KI bereinigen';
+        return;
+      } else if (attempt < maxRetries) {
+        // Bad output — wait a second and retry
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    } catch (e) {
+      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1500));
     }
-  } catch (e) {
-    setStatus('Fehler: API nicht erreichbar', 'err');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✦ KI bereinigen';
   }
+  // All retries failed — leave original text untouched
+  setStatus('KI temporär überlastet — bitte nochmal versuchen', 'err');
+  btn.disabled = false;
+  btn.textContent = '✦ KI bereinigen';
 }
  
 function openModal() {
