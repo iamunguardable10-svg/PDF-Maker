@@ -4,148 +4,205 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TextCraft — Lernzettel Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
-  --bg: #fdf9f7;
+  --bg: #f5f3ef;
   --card: #ffffff;
-  --ink: #2d2926;
-  --muted: #9e9690;
-  --border: #e8e2db;
-  --c1: #c8b4e8;
-  --c2: #f4a8b0;
-  --c3: #a8ddb8;
-  --c4: #f9c97a;
-  --c5: #a8cff4;
-  --c6: #f4a8b0;
-  --cbg1: #f3edfb;
-  --cbg2: #fdf0f2;
-  --cbg3: #eef8f2;
-  --cbg4: #fdf6e8;
-  --cbg5: #eaf4fd;
-  --cbg6: #fdf0f2;
-  --accent: #7c5cbf;
+  --ink: #1c1a18;
+  --muted: #8a8580;
+  --border: #e2ddd8;
+  --accent: #2d6a4f;
+  --accent2: #52b788;
+  --warm: #d4a853;
+  --cbg1: #f3edfb; --cbg2: #fdf0f2; --cbg3: #eef8f2;
+  --cbg4: #fdf6e8; --cbg5: #eaf4fd;
+  --c1: #c8b4e8; --c2: #f4a8b0; --c3: #a8ddb8; --c4: #f9c97a; --c5: #a8cff4;
 }
  
 * { box-sizing: border-box; margin: 0; padding: 0; }
  
 body {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
 }
  
+/* ── HEADER ── */
 header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 18px 40px;
+  background: var(--ink);
+  padding: 0 48px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
  
 .logo {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.5rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: var(--accent);
+  color: white;
   letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.logo-sub {
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--accent2);
+  border-radius: 50%;
+  display: inline-block;
+}
+.header-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
+  color: #666;
+  font-weight: 400;
 }
  
-.main-wrap {
+/* ── LAYOUT ── */
+.app {
   display: grid;
-  grid-template-columns: 420px 1fr;
-  min-height: calc(100vh - 66px - 44px);
+  grid-template-columns: 400px 1fr;
+  min-height: calc(100vh - 58px);
 }
  
-@media (max-width: 860px) {
-  .main-wrap {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-  }
-  .left {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  header { padding: 14px 20px; }
-  .right { padding: 20px; }
-  footer { padding: 10px 20px; }
+@media (max-width: 800px) {
+  .app { grid-template-columns: 1fr; }
+  header { padding: 0 20px; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .preview-panel { padding: 24px 16px; }
 }
  
-.left {
+/* ── SIDEBAR ── */
+.sidebar {
   background: var(--card);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
  
-.panel-head {
-  padding: 20px 24px 12px;
-  border-bottom: 1px solid var(--border);
+.sidebar-top {
+  padding: 28px 28px 0;
 }
-.panel-title {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 0.78rem;
+ 
+.sidebar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.sidebar-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+ 
+/* Instructions */
+.instructions {
+  background: #f8f7f4;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.instructions-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--muted);
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.instructions-title::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--accent2);
+  border-radius: 50%;
+}
+.step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: #4a4845;
+  line-height: 1.5;
+}
+.step:last-child { margin-bottom: 0; }
+.step-num {
+  width: 18px; height: 18px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+ 
+.format-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: var(--accent);
 }
  
 textarea {
   flex: 1;
   width: 100%;
-  min-height: 240px;
-  padding: 20px 24px;
+  min-height: 200px;
+  padding: 16px 28px;
   border: none;
+  border-top: 1px solid var(--border);
   outline: none;
   resize: vertical;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.75;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.8;
   color: var(--ink);
-  background: transparent;
+  background: #fefefe;
 }
-textarea::placeholder { color: #c8c0b8; }
+textarea::placeholder { color: #c0bab4; font-style: italic; }
  
-.left-footer {
-  padding: 16px 24px;
+.sidebar-actions {
+  padding: 16px 28px 24px;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: var(--card);
 }
  
-.format-hint {
-  font-size: 0.7rem;
-  color: var(--muted);
-  line-height: 1.6;
-  background: #f7f3ff;
-  border-radius: 6px;
-  padding: 10px 12px;
-  border-left: 3px solid var(--c1);
-}
-.format-hint code {
-  font-size: 0.68rem;
-  background: rgba(124,92,191,0.12);
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-family: monospace;
-}
- 
-.btn-row {
+.btn-group {
   display: flex;
   gap: 8px;
 }
@@ -156,108 +213,155 @@ textarea::placeholder { color: #c8c0b8; }
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
   transition: all 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
+  letter-spacing: 0.01em;
 }
-.btn-parse {
+ 
+.btn-ai {
   background: var(--accent);
   color: white;
+  font-weight: 600;
 }
-.btn-parse:hover { background: #6a4daa; }
-.btn-export {
-  background: #eef8f2;
-  color: #2d7a4f;
-  border: 1px solid #a8ddb8;
-}
-.btn-export:hover { background: #dff2e8; }
-.btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-ai {
-  background: #f3edfb;
-  color: #5a2d9a;
-  border: 1px solid #c8b4e8;
-  flex: 0 0 auto;
-  padding: 11px 14px;
-}
-.btn-ai:hover { background: #e8dff5; }
-.btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ai:hover { background: #245a42; }
+.btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
  
-.right {
+.btn-preview {
+  background: var(--ink);
+  color: white;
+  font-weight: 600;
+}
+.btn-preview:hover { background: #333; }
+ 
+.btn-export {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+.btn-export:hover { background: var(--bg); }
+.btn-export:disabled { opacity: 0.35; cursor: not-allowed; }
+ 
+.status-msg {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: center;
+  min-height: 16px;
+  transition: color 0.2s;
+}
+.status-msg.ok { color: var(--accent); }
+.status-msg.err { color: #c0392b; }
+ 
+/* ── PREVIEW PANEL ── */
+.preview-panel {
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 32px 40px;
+  padding: 36px 48px;
   background: var(--bg);
 }
  
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  text-align: center;
+}
+.empty-visual {
+  width: 80px; height: 80px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.empty-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.empty-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 280px;
+  line-height: 1.6;
+}
+ 
+/* ── LERNZETTEL STYLES ── */
 .lz-page {
   background: white;
-  max-width: 100%;
-  width: 100%;
+  max-width: 680px;
   margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
   overflow: hidden;
-  padding: 0 0 24px;
+  animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
  
 .lz-doc-title {
-  background: #f7f3ff;
-  padding: 22px 32px 16px;
-  border-bottom: 2px solid var(--c1);
+  background: linear-gradient(135deg, #f0faf4 0%, #e8f5ee 100%);
+  padding: 28px 36px 20px;
+  border-bottom: 2px solid #c8e6d4;
 }
 .lz-doc-title h1 {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.15rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--ink);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 .lz-doc-title h1::before {
   content: '';
   display: inline-block;
-  width: 14px; height: 14px;
+  width: 12px; height: 12px;
   background: var(--accent);
   border-radius: 3px;
   flex-shrink: 0;
 }
 .lz-doc-subtitle {
-  font-size: 0.8rem;
-  color: var(--muted);
+  font-size: 0.78rem;
+  color: var(--accent);
   margin-top: 6px;
   padding-left: 24px;
-  font-weight: 600;
+  font-weight: 500;
 }
  
-.lz-body { padding: 20px 32px 0; }
+.lz-body { padding: 24px 36px 8px; }
  
-.lz-section {
-  margin-bottom: 22px;
-  border-radius: 8px;
-  overflow: hidden;
-}
+.lz-section { margin-bottom: 20px; }
  
 .lz-section-title {
-  padding: 9px 16px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 800;
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
   border-radius: 6px;
   margin-bottom: 10px;
 }
  
 .lz-bullets {
-  padding: 0 8px;
+  padding: 0 6px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
  
 .lz-bullet {
@@ -269,7 +373,7 @@ textarea::placeholder { color: #c8c0b8; }
   color: var(--ink);
 }
 .lz-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   margin-top: 5px;
   flex-shrink: 0;
@@ -278,225 +382,189 @@ textarea::placeholder { color: #c8c0b8; }
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 0.77rem;
+  font-size: 0.76rem;
   color: #5a5450;
   line-height: 1.5;
-  padding-left: 20px;
+  padding-left: 18px;
 }
 .lz-subdot {
-  width: 6px; height: 6px;
+  width: 5px; height: 5px;
   border-radius: 50%;
-  margin-top: 5px;
+  margin-top: 6px;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 .lz-label-bullet {
-  display: flex;
-  align-items: flex-start;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #3a3430;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #2a2826;
   line-height: 1.55;
   padding-left: 2px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .lz-sub-label {
-  display: flex;
-  align-items: flex-start;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.77rem;
-  font-weight: 800;
-  color: #3a3430;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2a2826;
   line-height: 1.5;
-  padding-left: 20px;
-  margin-top: 2px;
+  padding-left: 18px;
+  margin-top: 3px;
 }
 .lz-sub-sub-bullet {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 0.74rem;
+  gap: 7px;
+  font-size: 0.73rem;
   color: #6a6460;
   line-height: 1.5;
-  padding-left: 38px;
+  padding-left: 34px;
 }
  
 .lz-callout {
-  margin: 12px 0;
+  margin: 10px 0;
   padding: 10px 14px;
   border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.77rem;
+  font-weight: 600;
   font-style: italic;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  border-left: 3px solid;
 }
 .lz-callout::before {
-  content: '■■';
-  font-size: 0.55rem;
-  letter-spacing: 1px;
+  content: '■';
+  font-size: 0.5rem;
+  margin-top: 4px;
   flex-shrink: 0;
 }
  
 .lz-merksatz {
-  margin: 20px 32px 8px;
-  background: #f7f3ff;
-  border-radius: 8px;
+  margin: 16px 36px 12px;
+  background: linear-gradient(135deg, #f0faf4, #e8f5ee);
+  border-radius: 10px;
   padding: 16px 20px;
   display: flex;
   gap: 14px;
   align-items: flex-start;
+  border: 1px solid #c8e6d4;
 }
 .lz-merksatz-icon {
-  width: 28px; height: 28px;
+  width: 26px; height: 26px;
   background: var(--accent);
   border-radius: 6px;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
 }
 .lz-merksatz-title {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 0.8rem;
-  color: var(--ink);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--accent);
   margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .lz-merksatz-text {
   font-size: 0.78rem;
-  color: #5a4a7a;
-  line-height: 1.55;
+  color: #2d5a42;
+  line-height: 1.6;
   font-style: italic;
 }
  
 .lz-page-num {
   text-align: center;
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 20px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  font-size: 0.65rem;
+  color: #ccc;
+  margin-top: 16px;
+  padding: 12px 0 4px;
+  letter-spacing: 0.1em;
 }
- 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  color: var(--muted);
-  gap: 12px;
-}
-.empty-icon { font-size: 2.5rem; opacity: 0.4; }
-.empty-text { font-size: 0.85rem; text-align: center; max-width: 260px; line-height: 1.6; }
- 
-.status {
-  font-size: 0.72rem;
-  color: var(--muted);
-  text-align: center;
-  padding: 4px 0;
-}
- 
-footer {
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  padding: 10px 40px;
-  font-size: 0.68rem;
-  color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
- 
-.sc0 .lz-section-title { background: var(--cbg2); color: #b03050; }
-.sc0 .lz-dot { background: #f4a8b0; }
-.sc0 .lz-subdot { background: #f4a8b0; }
-.sc1 .lz-section-title { background: var(--cbg3); color: #2d7a4f; }
-.sc1 .lz-dot { background: #a8ddb8; }
-.sc1 .lz-subdot { background: #a8ddb8; }
-.sc2 .lz-section-title { background: var(--cbg4); color: #8a5e12; }
-.sc2 .lz-dot { background: #f9c97a; }
-.sc2 .lz-subdot { background: #f9c97a; }
-.sc3 .lz-section-title { background: var(--cbg5); color: #1a5f8a; }
-.sc3 .lz-dot { background: #a8cff4; }
-.sc3 .lz-subdot { background: #a8cff4; }
-.sc4 .lz-section-title { background: var(--cbg1); color: #5a2d9a; }
-.sc4 .lz-dot { background: #c8b4e8; }
-.sc4 .lz-subdot { background: #c8b4e8; }
 </style>
 </head>
 <body>
  
 <header>
-  <div>
-    <div class="logo">TextCraft</div>
-    <div class="logo-sub">Lernzettel Generator</div>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    TextCraft
   </div>
+  <div class="header-tag">Lernzettel Generator</div>
 </header>
  
-<div class="main-wrap">
-  <div class="left">
-    <div class="panel-head">
-      <div class="panel-title">Text eingeben</div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-title">Text zu Lernzettel</div>
+      <div class="sidebar-sub">Füge beliebigen Text ein — die KI strukturiert ihn automatisch in ein schönes PDF.</div>
+ 
+      <div class="instructions">
+        <div class="instructions-title">So funktioniert's</div>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>Text einfügen — egal ob Stichpunkte, Fließtext, ChatGPT-Output oder Folien-Notizen</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>Auf <strong>KI bereinigen</strong> klicken — die KI strukturiert den Text automatisch ins richtige Format</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>Auf <strong>Vorschau</strong> klicken um das Ergebnis zu sehen, dann als PDF exportieren</div>
+        </div>
+        <div class="format-chips">
+          <span class="chip"># Titel</span>
+          <span class="chip">1. Abschnitt</span>
+          <span class="chip">- Bullet</span>
+          <span class="chip">  - Sub</span>
+          <span class="chip">** Callout **</span>
+          <span class="chip">&gt; Merksatz:</span>
+        </div>
+      </div>
     </div>
-    <textarea id="inputText" placeholder="# Haupttitel
-## Untertitel / Seitenangabe
  
-1. Erster Abschnitt
-- Bullet Punkt
-  - Sub-Bullet
-  - Noch ein Sub-Bullet
-- Weiterer Punkt
-** Wichtiger Hinweis / Callout **
+    <textarea id="inputText" placeholder="Text hier einfügen…
  
-2. Zweiter Abschnitt
-- Punkt A
-- Punkt B
+Beispiel:
+Sport und Medien
+- TV, Streaming, Social Media
+- Einnahmen durch Übertragungsrechte
+- Medien machen Sport weltweit sichtbar"></textarea>
  
-> Kurz-Merksatz: Der wichtigste Satz steht hier."></textarea>
- 
-    <div class="left-footer">
-      <div class="format-hint">
-        <strong>Format-Hilfe:</strong><br>
-        <code># Titel</code> → Dokumenttitel &nbsp;
-        <code>## Untertitel</code> → Untertitel<br>
-        <code>1. Abschnitt</code> → farbige Section<br>
-        <code>- Bullet</code> → Punkt &nbsp;
-        <code>&nbsp;&nbsp;- Sub</code> → Unterpunkt<br>
-        <code>** Text **</code> → Callout-Box<br>
-        <code>&gt; Merksatz: ...</code> → Merksatz unten
+    <div class="sidebar-actions">
+      <div class="btn-group">
+        <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
+        <button class="btn btn-preview" onclick="parseAndRender()">Vorschau →</button>
       </div>
-      <div class="btn-row">
-<button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()" title="KI-Bereinigung via API">✦ KI bereinigen</button>
-        <button class="btn btn-parse" onclick="parseAndRender()">Vorschau →</button>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
-      </div>
-      <div class="status" id="status"></div>
+      <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+      <div class="status-msg" id="status"></div>
     </div>
   </div>
  
-  <div class="right" id="rightPanel">
+  <!-- PREVIEW -->
+  <div class="preview-panel">
     <div class="empty-state" id="emptyState">
-      <div class="empty-icon">📄</div>
-      <div class="empty-text">Text eingeben und auf „Vorschau →" klicken — dein Lernzettel erscheint hier.</div>
+      <div class="empty-visual">📄</div>
+      <div class="empty-title">Noch keine Vorschau</div>
+      <div class="empty-desc">Text eingeben, KI bereinigen lassen und auf „Vorschau →" klicken.</div>
     </div>
     <div id="lzPreview" style="display:none"></div>
   </div>
 </div>
  
-<footer>
-  <span>TextCraft — Schöne Lernzettel aus strukturiertem Text</span>
-  <span>Kein Account, keine Cloud — lokal im Browser</span>
-</footer>
- 
 <script>
-// ── KI BEREINIGUNG (OpenAI via Proxy) ────────────────────────
+// ── KI BEREINIGUNG ────────────────────────────────────────────
 async function cleanWithAI() {
   const raw = document.getElementById('inputText').value.trim();
-  if (!raw) { setStatus('Bitte Text eingeben'); return; }
+  if (!raw) { setStatus('Bitte Text eingeben', 'err'); return; }
  
   const btn = document.getElementById('aiBtn');
   btn.disabled = true;
@@ -511,21 +579,23 @@ async function cleanWithAI() {
     const data = await response.json();
     if (data.cleaned) {
       document.getElementById('inputText').value = data.cleaned;
-      setStatus('✓ KI-Bereinigung abgeschlossen');
+      setStatus('✓ Text wurde bereinigt & formatiert', 'ok');
     } else {
-      setStatus('Fehler: ' + JSON.stringify(data));
+      setStatus('Fehler: ' + JSON.stringify(data), 'err');
     }
   } catch (e) {
-    setStatus('Fehler: API nicht erreichbar');
+    setStatus('Fehler: API nicht erreichbar', 'err');
   } finally {
     btn.disabled = false;
     btn.textContent = '✦ KI bereinigen';
   }
 }
  
-function setStatus(msg) {
-  document.getElementById('status').textContent = msg;
-  setTimeout(() => document.getElementById('status').textContent = '', 4000);
+function setStatus(msg, type = '') {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+  setTimeout(() => { el.textContent = ''; el.className = 'status-msg'; }, 4000);
 }
  
 // ── PARSER ────────────────────────────────────────────────────
@@ -586,7 +656,7 @@ function parseText(raw) {
  
 // ── RENDERER ──────────────────────────────────────────────────
 const sectionColors = [
-  { bg: '#fdf0f2', title: '#d44060', dot: '#f4a8b0' },
+  { bg: '#fdf0f2', title: '#c0364f', dot: '#f4a8b0' },
   { bg: '#eef8f2', title: '#2d7a4f', dot: '#a8ddb8' },
   { bg: '#fdf6e8', title: '#8a5e12', dot: '#f9c97a' },
   { bg: '#eaf4fd', title: '#1a5f8a', dot: '#a8cff4' },
@@ -598,37 +668,35 @@ function renderDoc(doc) {
   html += `<div class="lz-doc-title">`;
   html += `<h1>${doc.title || 'Lernzettel'}</h1>`;
   if (doc.subtitle) html += `<div class="lz-doc-subtitle">${doc.subtitle}</div>`;
-  html += `</div>`;
-  html += `<div class="lz-body">`;
+  html += `</div><div class="lz-body">`;
  
   doc.sections.forEach((sec, si) => {
-    const ci = si % sectionColors.length;
-    const c = sectionColors[ci];
+    const c = sectionColors[si % sectionColors.length];
     html += `<div class="lz-section">`;
     if (sec.title) {
       html += `<div class="lz-section-title" style="background:${c.bg};color:${c.title}">${si + 1}.&nbsp; ${sec.title}</div>`;
     }
     if (sec.callout) {
-      html += `<div class="lz-callout" style="background:${c.bg};color:${c.title};border-left:3px solid ${c.dot}">${sec.callout}</div>`;
+      html += `<div class="lz-callout" style="background:${c.bg};color:${c.title};border-color:${c.dot}">${sec.callout}</div>`;
     }
     if (sec.items.length) {
       html += `<div class="lz-bullets">`;
       sec.items.forEach(item => {
         if (item.isLabel) {
-          html += `<div class="lz-label-bullet"><span>${item.text}</span></div>`;
+          html += `<div class="lz-label-bullet">${item.text}</div>`;
         } else {
           html += `<div class="lz-bullet"><div class="lz-dot" style="background:${c.dot}"></div><span>${item.text}</span></div>`;
         }
         if (item.sub) item.sub.forEach(s => {
           if (s.isLabel) {
-            html += `<div class="lz-sub-label"><span>${s.text}</span></div>`;
+            html += `<div class="lz-sub-label">${s.text}</div>`;
             if (s.children) s.children.forEach(ch => {
-              html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot};opacity:0.6"></div><span>${ch}</span></div>`;
+              html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${ch}</span></div>`;
             });
           } else {
             html += `<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${s.text}</span></div>`;
             if (s.children) s.children.forEach(ch => {
-              html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot};opacity:0.6"></div><span>${ch}</span></div>`;
+              html += `<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${c.dot}"></div><span>${ch}</span></div>`;
             });
           }
         });
@@ -643,28 +711,27 @@ function renderDoc(doc) {
   if (doc.merksatz) {
     const ms = doc.merksatz;
     const colon = ms.indexOf(':');
-    const msTitle = colon > -1 ? ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Kurz-Merksatz' : 'Kurz-Merksatz';
+    const msTitle = colon > -1 ? ms.slice(0, colon).replace(/^Merksatz\s*/i, '').trim() || 'Merksatz' : 'Merksatz';
     const msText = colon > -1 ? ms.slice(colon + 1).trim() : ms;
     html += `<div class="lz-merksatz">
-      <div class="lz-merksatz-icon"></div>
+      <div class="lz-merksatz-icon">✎</div>
       <div>
-        <div class="lz-merksatz-title">${msTitle || 'Kurz-Merksatz'}</div>
+        <div class="lz-merksatz-title">${msTitle}</div>
         <div class="lz-merksatz-text">${msText}</div>
       </div>
     </div>`;
   }
  
-  html += `<div class="lz-page-num">— 1 —</div>`;
-  html += `</div>`;
+  html += `<div class="lz-page-num">— 1 —</div></div>`;
   return html;
 }
  
-// ── MAIN ACTIONS ─────────────────────────────────────────────
+// ── ACTIONS ───────────────────────────────────────────────────
 let parsedDoc = null;
  
 function parseAndRender() {
   const raw = document.getElementById('inputText').value.trim();
-  if (!raw) { setStatus('Bitte Text eingeben'); return; }
+  if (!raw) { setStatus('Bitte Text eingeben', 'err'); return; }
   parsedDoc = parseText(raw);
   const html = renderDoc(parsedDoc);
   document.getElementById('emptyState').style.display = 'none';
@@ -672,7 +739,7 @@ function parseAndRender() {
   lzPreview.style.display = 'block';
   lzPreview.innerHTML = html;
   document.getElementById('exportBtn').disabled = false;
-  setStatus('✓ Vorschau aktualisiert');
+  setStatus('✓ Vorschau aktualisiert', 'ok');
 }
  
 // ── PDF EXPORT ────────────────────────────────────────────────
@@ -684,7 +751,7 @@ function exportPDF() {
   let y = margin;
  
   const colors = [
-    { bg: [253,240,242], title: [212,64,96], dot: [244,168,176] },
+    { bg: [253,240,242], title: [192,54,79], dot: [244,168,176] },
     { bg: [238,248,242], title: [45,122,79], dot: [168,221,184] },
     { bg: [253,246,232], title: [138,94,18], dot: [249,201,122] },
     { bg: [234,244,253], title: [26,95,138], dot: [168,207,244] },
@@ -697,27 +764,27 @@ function exportPDF() {
   function setRGB(col) { doc.setTextColor(col[0], col[1], col[2]); }
   function setFill(col) { doc.setFillColor(col[0], col[1], col[2]); }
  
-  setFill([247, 243, 255]);
-  doc.rect(margin - 4, y - 2, cw + 8, 18, 'F');
+  // Title
+  setFill([240, 250, 244]);
+  doc.rect(margin - 4, y - 2, cw + 8, 20, 'F');
+  setFill([45, 106, 79]);
+  doc.rect(margin, y + 3, 4, 4, 'F');
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  setRGB([45, 41, 38]);
-  setFill([124, 92, 191]);
-  doc.rect(margin, y + 2, 4, 4, 'F');
-  doc.text(parsedDoc.title || 'Lernzettel', margin + 8, y + 6);
-  y += 12;
+  setRGB([28, 26, 24]);
+  doc.text(parsedDoc.title || 'Lernzettel', margin + 8, y + 7);
+  y += 14;
   if (parsedDoc.subtitle) {
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal');
-    setRGB([140, 130, 120]);
+    setRGB([45, 106, 79]);
     doc.text(parsedDoc.subtitle, margin + 8, y);
     y += 6;
   }
-  y += 4;
+  y += 5;
  
   parsedDoc.sections.forEach((sec, si) => {
-    const ci = si % colors.length;
-    const c = colors[ci];
+    const c = colors[si % colors.length];
     checkPage(16);
     if (sec.title) {
       setFill(c.bg);
@@ -746,7 +813,7 @@ function exportPDF() {
       if (item.isLabel) {
         doc.setFontSize(8);
         doc.setFont('helvetica', 'bold');
-        setRGB([74, 68, 64]);
+        setRGB([42, 40, 38]);
         const lines = doc.splitTextToSize(item.text, cw - 8);
         doc.text(lines, margin + 2, y + 3.5);
         y += lines.length * 4.5 + 1;
@@ -755,7 +822,7 @@ function exportPDF() {
         doc.circle(margin + 2, y + 2, 1.5, 'F');
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
-        setRGB([45, 41, 38]);
+        setRGB([28, 26, 24]);
         const lines = doc.splitTextToSize(item.text, cw - 8);
         doc.text(lines, margin + 6, y + 3.5);
         y += lines.length * 4.5 + 2;
@@ -765,7 +832,7 @@ function exportPDF() {
         if (s.isLabel) {
           doc.setFontSize(7.5);
           doc.setFont('helvetica', 'bold');
-          setRGB([74, 68, 64]);
+          setRGB([42, 40, 38]);
           const sLines = doc.splitTextToSize(s.text, cw - 16);
           doc.text(sLines, margin + 10, y + 3);
           y += sLines.length * 4.2 + 1;
@@ -798,62 +865,29 @@ function exportPDF() {
   if (parsedDoc.merksatz) {
     checkPage(20);
     y += 4;
-    setFill([247, 243, 255]);
+    setFill([240, 250, 244]);
     doc.roundedRect(margin, y, cw, 18, 3, 3, 'F');
-    setFill([124, 92, 191]);
+    setFill([45, 106, 79]);
     doc.rect(margin + 4, y + 4, 7, 7, 'F');
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
-    setRGB([45, 41, 38]);
-    doc.text('Kurz-Merksatz', margin + 15, y + 8);
+    setRGB([45, 106, 79]);
+    doc.text('MERKSATZ', margin + 15, y + 8);
     doc.setFont('helvetica', 'italic');
-    setRGB([90, 45, 154]);
+    setRGB([45, 90, 66]);
     const ms = parsedDoc.merksatz.includes(':') ? parsedDoc.merksatz.split(':').slice(1).join(':').trim() : parsedDoc.merksatz;
     const msLines = doc.splitTextToSize(ms, cw - 20);
     doc.text(msLines, margin + 15, y + 14);
     y += 22;
   }
  
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
-  setRGB([160, 155, 145]);
+  setRGB([200, 195, 190]);
   doc.text('— 1 —', pageW / 2, 288, { align: 'center' });
   doc.save('lernzettel.pdf');
-  setStatus('✓ PDF heruntergeladen!');
+  setStatus('✓ PDF gespeichert!', 'ok');
 }
- 
-// Load example on start
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('inputText').value = `# Nationale Feindbilder & Propaganda
-## im Ersten Weltkrieg (S. 187 / 188)
- 
-1. Ausgangslage: »Erbfeindschaft«
-- Langjährige Spannung zwischen Deutschland und Frankreich
-- Nach 1870/71 stark verstärkt (Krieg, Elsass-Lothringen)
-- Entwicklung eines gegenseitigen Feindbilds
-- Nationalismus verschärft diese Gegensätze
- 
-2. Funktion von Feindbildern im Krieg
-- Feind wird stark vereinfacht und negativ dargestellt
-- Ziele:
-  - Eigene Bevölkerung mobilisieren
-  - Zusammenhalt stärken
-  - Krieg rechtfertigen
-- Feind gilt als Bedrohung für:
-  - Kultur, Werte & Existenz der Nation
-** Feindbilder = bewusste Konstruktionen, KEINE objektive Realität! **
- 
-3. Rolle der Propaganda
-- Staat steuert gezielt Informationen
-- Medien:
-  - Zeitungen, Bilder / Karikaturen, Plakate
-- Ziele:
-  - Kriegsunterstützung sichern
-  - Moral stärken («Wir sind überlegen»)
-  - Gegner entmenschlichen
- 
-> Kurz-Merksatz: Propaganda verzerrt die Realität, um Feindbilder zu erzeugen, die den Krieg legitimieren und die Bevölkerung mobilisieren.`;
-});
 </script>
 </body>
 </html>
