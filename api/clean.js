@@ -122,13 +122,33 @@ ${text}`;
   );
 
   const data = await response.json();
-  let cleaned = data.candidates?.[0]?.content?.parts?.[0]?.text ?? JSON.stringify(data);
 
-  // Sicherheitsnetz im Backend: Sternchen in Bullet-Zeilen entfernen
+  // Fehler von Gemini direkt abfangen und als error zurückgeben
+  if (data.error) {
+    const code = data.error.code;
+    let msg = 'KI-Fehler';
+    if (code === 429) msg = 'Gemini Limit erreicht — bitte kurz warten';
+    else if (code === 400) msg = 'Ungültige Anfrage an Gemini';
+    else if (code === 403) msg = 'API Key ungültig';
+    else msg = data.error.message || 'Unbekannter Gemini-Fehler';
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  let cleaned = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!cleaned) {
+    return new Response(JSON.stringify({ error: 'Keine Antwort von Gemini erhalten' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Sicherheitsnetz: Sternchen in Bullet-Zeilen entfernen
   cleaned = cleaned
     .split('\n')
     .map(line => {
-      // Nur in Bullet-Zeilen (- ...) Sternchen entfernen, aber ** Callout ** stehenlassen
       if (/^\s*-\s/.test(line) && !/^\*\*.*\*\*$/.test(line.trim())) {
         return line.replace(/\*\*([^*]+)\*\*/g, '$1');
       }
