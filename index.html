@@ -1129,7 +1129,13 @@ async function cleanWithAI() {
         return;
       }
 
-      const cleaned = repairAIOutput(data.cleaned);
+     const cleaned = normalizeAIText(data.cleaned);
+      if (cleaned && isValidOutput(cleaned, raw)) {
+  document.getElementById('inputText').value = cleaned;
+  parsedDoc = parseText(cleaned);
+  renderPreview(parsedDoc);
+  ...
+}
       console.log('RAW AI RESPONSE:', data.cleaned);
       console.log('REPAIRED AI RESPONSE:', cleaned);
 
