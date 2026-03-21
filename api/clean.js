@@ -40,7 +40,7 @@ Pflichtregeln:
 - Callout ** ... ** nur für wirklich wichtige Aussagen, als eigene Zeile
 - Merksatz > nur einmal ganz am Ende
 - Kein Text vor oder nach dem Lernzettel
-- TABELLEN: Wenn Inhalte vergleichend oder tabellarisch sind (z.B. Vor/Nachteile, Vergleiche, Vokabeln), verwende Markdown-Tabellen:
+- TABELLEN: Wenn Inhalte vergleichend oder tabellarisch sind (z.B. Vor/Nachteile, Vergleiche, Vokabeln), verwende Markdown-Tabellen mit passenden Spalten und Zeilenanzahlen:
   | Spalte 1 | Spalte 2 |
   | Wert A   | Wert B   |`
 
@@ -77,7 +77,7 @@ F) BEREINIGUNG: Emojis, Trennlinien (---), KI-Floskeln, Angebote wie "Sag mir wa
 G) CALLOUT: ** Text ** nur für explizit wichtige Aussagen, als eigene Zeile.
 
 H) MERKSATZ: Echter inhaltlicher Satz am Ende. NICHT den Platzhalter wörtlich übernehmen.
-I) TABELLEN: Wenn der Original-Text Vergleiche, Gegenüberstellungen oder tabellarische Daten enthält, stelle sie als Markdown-Tabelle dar:
+I) TABELLEN: Wenn der Original-Text Vergleiche, Gegenüberstellungen oder tabellarische Daten enthält, stelle sie als Markdown-Tabelle mit den perfekt passenden Spalten und Zeilen dar:
   | Spalte 1 | Spalte 2 |
   | Wert A   | Wert B   |
 
