@@ -211,6 +211,17 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
 .lz-inline-input{background:rgba(255,255,255,0.95);border:2px solid #c9a84c;border-radius:4px;outline:none;padding:1px 6px;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;box-shadow:0 2px 8px rgba(201,168,76,0.2)}
+.lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
+.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;border-bottom:2px solid}
+.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.06);line-height:1.4}
+.lz-table tr:last-child td{border-bottom:none}
+.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.02)}
+.theme-dark .lz-table td{color:#d0cdc8}
+.theme-dark .lz-table th{color:#f0ede8}
+.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.03)}
+.theme-neon .lz-table td{color:#e0e0f0}
+.theme-neon .lz-table th{color:#00ffcc}
+.theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
   body > *:not(#printArea) { display: none !important; }
@@ -369,6 +380,14 @@ const previewStyles = `
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
 .lz-page-num{text-align:center;font-size:0.65rem;color:#ccc;margin-top:16px;padding:12px 0 4px;letter-spacing:0.1em;border-top:1px solid #f0ede8}
+.lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
+.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;border-bottom:2px solid}
+.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.06);line-height:1.4}
+.lz-table tr:last-child td{border-bottom:none}
+.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.02)}
+.theme-dark .lz-table td{color:#d0cdc8}.theme-dark .lz-table th{color:#f0ede8}
+.theme-neon .lz-table td{color:#e0e0f0}.theme-neon .lz-table th{color:#00ffcc}
+.theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
 `;
 
 // ── DESIGNS ──────────────────────────────────────────────────
@@ -446,7 +465,7 @@ function parseText(raw){
   const lines=String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ').split('\n');
   const doc={title:'',subtitle:'',sections:[],merksatz:null};
   let currentSection=null,subtitleAlreadyUsed=false,lastTopItem=null,lastSubItem=null,lastCreatedSectionTitle='';
-  function newSection(title=''){currentSection={title,items:[],callout:null};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
+  function newSection(title=''){currentSection={title,items:[],callout:null,table:null};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
   function ensureSection(){if(!currentSection)return newSection('');return currentSection;}
   function pushTopItem(text,isLabel=false){const sec=ensureSection();const item={text,isLabel,sub:[]};sec.items.push(item);lastTopItem=item;lastSubItem=null;return item;}
   function pushSubItem(text,isLabel=false){if(!lastTopItem)return pushTopItem(text,isLabel);const sub={text,isLabel,children:[]};lastTopItem.sub.push(sub);lastSubItem=sub;return sub;}
@@ -480,6 +499,16 @@ function parseText(raw){
       else pushSubItem(`${nm[2]}. ${text}`,true);
       continue;
     }
+    // Table row detection
+    if(/^\|/.test(trimmed) && trimmed.endsWith('|')){
+      const cells=trimmed.split('|').slice(1,-1).map(c=>c.trim());
+      // Skip separator rows like |---|---|
+      if(cells.every(c=>/^[-:]+$/.test(c)))continue;
+      ensureSection();
+      if(!currentSection.table)currentSection.table=[];
+      currentSection.table.push(cells);
+      continue;
+    }
     const bm=line.match(/^(\s*)[-•]\s+(.*)$/);
     if(bm){
       const indent=bm[1].length,text=bm[2].trim(),isLabel=/:$/.test(text);
@@ -505,6 +534,18 @@ function renderDocHTML(doc,design){
     html+=`<div class="lz-section">`;
     if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span></div>`;
     if(sec.callout)html+=`<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
+    if(sec.table&&sec.table.length){
+      html+=`<div style="padding:0 6px 8px"><table class="lz-table" style="border-color:${escapeAttr(c.dot)}">`;
+      sec.table.forEach((row,ri)=>{
+        html+=`<tr>`;
+        row.forEach(cell=>{
+          if(ri===0) html+=`<th style="border-color:${escapeAttr(c.dot)};color:${escapeAttr(c.title)}">${escapeText(cell)}</th>`;
+          else html+=`<td>${escapeText(cell)}</td>`;
+        });
+        html+=`</tr>`;
+      });
+      html+=`</table></div>`;
+    }
     if(sec.items.length){
       html+=`<div class="lz-bullets">`;
       sec.items.forEach(item=>{
@@ -719,9 +760,18 @@ function exportPDF(){
   function hexToRgbSafe(hex){
     if(!hex||hex==='transparent')return[240,240,240];
     if(hex.startsWith('rgba')){
-      // Parse rgba(r,g,b,a) 
-      const m=hex.match(/rgba\((\d+),(\d+),(\d+)/);
-      if(m)return[parseInt(m[1]),parseInt(m[2]),parseInt(m[3])];
+      const m=hex.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if(m){
+        // Blend the transparent color with the background for visibility
+        const r=parseInt(m[1]),g=parseInt(m[2]),b=parseInt(m[3]);
+        const bg=bgColor;
+        // Mix at 15% opacity for subtle but visible section bg
+        return[
+          Math.round(bg[0]*0.85+r*0.15),
+          Math.round(bg[1]*0.85+g*0.15),
+          Math.round(bg[2]*0.85+b*0.15)
+        ];
+      }
       return[220,220,220];
     }
     return hexToRgb(hex);
@@ -737,15 +787,17 @@ function exportPDF(){
   function paintPageBg(){setFill(bgColor);pdf.rect(0,0,pageW,pageH,'F');}
   function checkPage(needed=10){if(y+needed>bottomLimit){addPageNumber();pdf.addPage();pageNum++;paintPageBg();y=margin;}}
   paintPageBg();
-  // Title block
-  setFill(titleBg);pdf.rect(0,0,pageW,id==='editorial'?32:26,'F');
-  if(id==='editorial'){setFill([201,168,76]);pdf.rect(0,28,pageW,3,'F');}
-  if(id!=='minimal'&&id!=='editorial'){setFill(accentColor);pdf.rect(margin,y+3,4,4,'F');}
+  // Title block — tall enough to fully contain title text
+  const titleBlockH = id==='editorial'?36:30;
+  setFill(titleBg);pdf.rect(0,0,pageW,titleBlockH,'F');
+  if(id==='editorial'){setFill([201,168,76]);pdf.rect(0,titleBlockH-3,pageW,3,'F');}
+  if(id!=='minimal'&&id!=='editorial'){setFill(accentColor);pdf.rect(margin,y+5,4,4,'F');}
   pdf.setFontSize(13);pdf.setFont('helvetica','bold');setRGB(titleColor);
-  pdf.text(parsedDoc.title||'Lernzettel',margin+(id==='minimal'||id==='editorial'?0:8),y+7);
-  y+=id==='editorial'?18:14;
+  pdf.text(parsedDoc.title||'Lernzettel',margin+(id==='minimal'||id==='editorial'?0:8),y+10);
+  y+=id==='editorial'?22:18;
   if(parsedDoc.subtitle){pdf.setFontSize(8);pdf.setFont('helvetica','normal');setRGB(accentColor);pdf.text(parsedDoc.subtitle,margin+(id==='minimal'?0:8),y);y+=7;}
   y+=4;
+  const bodyFont = isRetro ? 'courier' : 'helvetica';
   parsedDoc.sections.forEach((sec,si)=>{
     const c=C[si%C.length];
     const dotRgb=hexToRgbSafe(c.dot),titleRgb=hexToRgbSafe(c.title),secBgRgb=hexToRgbSafe(c.bg);
@@ -753,7 +805,39 @@ function exportPDF(){
     if(sec.title){
       if(id==='minimal'){setRGB([138,133,128]);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');pdf.text(sec.title.toUpperCase(),margin,y+5);pdf.setDrawColor(220,215,210);pdf.setLineWidth(0.3);pdf.line(margin,y+7,margin+cw,y+7);y+=10;}
       else if(id==='editorial'){setRGB([28,26,24]);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');pdf.text(sec.title.toUpperCase(),margin+4,y+5);pdf.setDrawColor(201,168,76);pdf.setLineWidth(0.8);pdf.line(margin,y+7,margin+cw,y+7);y+=11;}
-      else{setFill(secBgRgb);pdf.roundedRect(margin,y,cw,8,id==='pastell'?4:2,id==='pastell'?4:2,'F');pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');setRGB(titleRgb);pdf.text(`${si+1}.  ${sec.title}`,margin+5,y+5.5);y+=11;}
+      else{
+        setFill(secBgRgb);
+        pdf.roundedRect(margin,y,cw,8,id==='pastell'?4:2,id==='pastell'?4:2,'F');
+        pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+        // Use the dot color as title text for better contrast (it's always vivid)
+        const textRgb = hexToRgbSafe(c.dot);
+        setRGB(textRgb);
+        pdf.text(`${si+1}.  ${sec.title}`,margin+5,y+5.5);
+        y+=11;
+      }
+    }
+    if(sec.table&&sec.table.length){
+      const rows=sec.table;
+      const cols=rows[0].length;
+      const colW=cw/cols;
+      const rowH=7;
+      checkPage(rows.length*rowH+4);
+      rows.forEach((row,ri)=>{
+        row.forEach((cell,ci)=>{
+          const cx=margin+ci*colW,cy=y;
+          if(ri===0){
+            setFill(dotRgb);pdf.rect(cx,cy,colW,rowH,'F');
+            pdf.setFontSize(7);pdf.setFont(bodyFont,'bold');setRGB([255,255,255]);
+          } else {
+            if(ri%2===0){setFill([245,245,245]);pdf.rect(cx,cy,colW,rowH,'F');}
+            pdf.setFontSize(7);pdf.setFont(bodyFont,'normal');setRGB(isDark?[208,205,200]:[28,26,24]);
+          }
+          const txt=pdf.splitTextToSize(cell,colW-4);
+          pdf.text(txt[0]||'',cx+2,cy+4.5);
+        });
+        y+=rowH;
+      });
+      y+=4;
     }
     if(sec.callout){
       const cLines=pdf.splitTextToSize(sec.callout,cw-10),boxH=Math.max(8,cLines.length*5+3);
@@ -764,13 +848,13 @@ function exportPDF(){
       const textColor=isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24];
       function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(it.text,cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(s.text,cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}});}return t;}
       checkPage(itemH(item));
-      if(item.isLabel){pdf.setFontSize(8);pdf.setFont('helvetica','bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+2,y+3.5);y+=lines.length*4.5+1;}
-      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont('helvetica','normal');setRGB(textColor);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
+      if(item.isLabel){pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+2,y+3.5);y+=lines.length*4.5+1;}
+      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
       if(item.sub){item.sub.forEach(s=>{
         function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(sb.text,cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}return h;}
         checkPage(subH(s));
-        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
-        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
+        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
+        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
         if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);const cl=pdf.splitTextToSize(ch,cw-24);checkPage(cl.length*4+1);setFill(dotRgb);pdf.circle(margin+16,y+1.6,0.9,'F');pdf.setFont('helvetica','normal');setRGB(isDark?[122,117,112]:[106,100,96]);pdf.text(cl,margin+20,y+2.8);y+=cl.length*4+1;});}
       });}
     });
@@ -779,12 +863,14 @@ function exportPDF(){
   if(parsedDoc.merksatz){
     y+=4;
     const msBg=id==='dark'?[30,30,30]:id==='neon'?[13,13,32]:id==='retro'?[240,232,216]:id==='editorial'?[28,26,24]:id==='pastell'?[254,240,249]:id==='minimal'?[245,243,239]:[240,250,244];
+    const msTextColor=id==='dark'||id==='neon'?[154,149,144]:id==='editorial'?[154,149,144]:id==='retro'?[90,74,42]:id==='pastell'?[106,64,96]:[45,90,66];
+    const msTitleColor=id==='editorial'?[201,168,76]:accentColor;
     const ms=parsedDoc.merksatz.includes(':')?parsedDoc.merksatz.split(':').slice(1).join(':').trim():parsedDoc.merksatz;
     const msLines=pdf.splitTextToSize(ms,cw-20),msH=Math.max(18,10+msLines.length*4.5);
     checkPage(msH+4);setFill(msBg);pdf.roundedRect(margin,y,cw,msH,3,3,'F');
     if(id!=='minimal'){setFill(accentColor);pdf.rect(margin+4,y+4,7,7,'F');}
-    pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');setRGB(accentColor);pdf.text('MERKSATZ',margin+(id==='minimal'?4:15),y+8);
-    pdf.setFont('helvetica','italic');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[45,90,66]);pdf.text(msLines,margin+(id==='minimal'?4:15),y+14);
+    pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(msTitleColor);pdf.text('MERKSATZ',margin+(id==='minimal'?4:15),y+8);
+    pdf.setFont(bodyFont,'italic');setRGB(msTextColor);pdf.text(msLines,margin+(id==='minimal'?4:15),y+14);
     y+=msH+4;
   }
   addPageNumber();
