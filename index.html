@@ -218,10 +218,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.03)}
 .theme-dark .lz-table td{color:#d0cdc8;border-bottom-color:rgba(255,255,255,0.06)}
 .theme-dark .lz-table th{color:#f0ede8}
-.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}
 .theme-neon .lz-table th{color:#0a0a12}
-.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
 .theme-retro .lz-table td{color:#2a1f0a}
 @media print {
@@ -389,9 +389,9 @@ const previewStyles = `
 .lz-table tr:last-child td{border-bottom:none}
 .lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.03)}
 .theme-dark .lz-table td{color:#d0cdc8;border-bottom-color:rgba(255,255,255,0.06)}.theme-dark .lz-table th{color:#f0ede8}
-.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}.theme-neon .lz-table th{color:#0a0a12}
-.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}.theme-retro .lz-table td{color:#2a1f0a}
 `;
 
@@ -543,9 +543,9 @@ function renderDocHTML(doc,design){
       html+=`<div style="padding:0 6px 8px"><table class="lz-table" style="border-color:${escapeAttr(c.dot)}">`;
       sec.table.forEach((row,ri)=>{
         html+=`<tr>`;
-        row.forEach(cell=>{
-          if(ri===0) html+=`<th style="border-color:${escapeAttr(c.dot)};color:${escapeAttr(c.title)}">${escapeText(cell)}</th>`;
-          else html+=`<td>${escapeText(cell)}</td>`;
+        row.forEach((cell,ci)=>{
+          if(ri===0) html+=`<th style="background:${escapeAttr(c.dot)};border-color:${escapeAttr(c.dot)}"><span class="lz-editable" onclick="editTableCell(this,${si},${ri},${ci})">${escapeText(cell)}</span></th>`;
+          else html+=`<td><span class="lz-editable" onclick="editTableCell(this,${si},${ri},${ci})">${escapeText(cell)}</span></td>`;
         });
         html+=`</tr>`;
       });
@@ -728,6 +728,30 @@ function editField(el,type,sectionIdx,itemRef){
   input.addEventListener('blur',save);
 }
 
+function editTableCell(el, secIdx, rowIdx, colIdx) {
+  if (!parsedDoc) return;
+  const current = el.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = current;
+  input.className = 'lz-inline-input';
+  input.style.minWidth = Math.max(60, el.offsetWidth) + 'px';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+  function save() {
+    const newVal = input.value.trim() || current;
+    parsedDoc.sections[secIdx].table[rowIdx][colIdx] = newVal;
+    syncTextarea();
+    renderPreview(parsedDoc);
+  }
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') renderPreview(parsedDoc);
+  });
+  input.addEventListener('blur', save);
+}
+
 function clearInput(){
   document.getElementById('inputText').value='';
   document.getElementById('lzPreview').style.display='none';
@@ -743,6 +767,7 @@ function syncTextarea(){
   parsedDoc.sections.forEach((sec,si)=>{
     text+='\n'+(si+1)+'. '+sec.title+'\n';
     if(sec.callout)text+='** '+sec.callout+' **\n';
+    if(sec.table&&sec.table.length){sec.table.forEach(row=>{text+='| '+row.join(' | ')+'|\n';});}
     sec.items.forEach(item=>{
       text+=(item.isLabel?'':'- ')+item.text+'\n';
       (item.sub||[]).forEach(s=>{text+='  - '+s.text+'\n';(s.children||[]).forEach(ch=>{text+='    - '+ch+'\n';});});
