@@ -790,7 +790,7 @@ function exportPDF(){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
-  let y=margin,pageNum=1;
+  let y=10,pageNum=1;
   const C=currentDesign.sectionColors;
   const id=currentDesign.id;
   const isDark=id==='dark'||id==='neon';
