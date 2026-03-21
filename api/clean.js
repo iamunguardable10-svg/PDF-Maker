@@ -44,9 +44,8 @@ Pflichtregeln:
     : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text EXAKT in dieses Format:
 
 # Haupttitel
-## Optionaler Untertitel (NUR einmal, direkt nach # Titel — danach KEIN ## mehr)
 
-1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
+1. Abschnittsname
 - Bullet
   - Unterpunkt
     - Unter-Unterpunkt
@@ -60,9 +59,9 @@ Pflichtregeln:
 
 KRITISCHE REGELN:
 
-A) ## NUR EINMAL: Nach dem ersten ## darf KEIN weiteres ## vorkommen. Alle weiteren Hauptthemen werden zu "2. Name", "3. Name" usw.
+A) KEIN ##: Verwende NIEMALS "##". Nur "# Titel" einmal ganz oben, dann direkt "1. Abschnitt", "2. Abschnitt" usw.
 
-B) ECHTE ABSCHNITTSNAMEN: NIEMALS "Erster Abschnitt", "Zweiter Abschnitt" usw. Immer den echten Themenname verwenden z.B. "1. Wirtschaftsordnungen", "2. Staatliche Eingriffe".
+B) ECHTE ABSCHNITTSNAMEN: NIEMALS "Erster Abschnitt", "Zweiter Abschnitt" usw. Immer den echten Inhaltsnamen verwenden, z.B. "1. Wirtschaftsordnungen".
 
 C) VOLLSTÄNDIGKEIT: Alle Inhaltspunkte übernehmen, nichts weglassen, nichts kürzen.
 
@@ -74,7 +73,7 @@ F) BEREINIGUNG: Emojis, Trennlinien (---), KI-Floskeln, Angebote wie "Sag mir wa
 
 G) CALLOUT: ** Text ** nur für explizit wichtige Aussagen, als eigene Zeile.
 
-H) MERKSATZ: Echter inhaltlicher Satz. NICHT den Platzhalter wörtlich schreiben.
+H) MERKSATZ: Echter inhaltlicher Satz am Ende. NICHT den Platzhalter wörtlich übernehmen.
 
 Text:
 ${text}`;
