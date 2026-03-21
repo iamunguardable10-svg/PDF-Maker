@@ -212,16 +212,18 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
 .lz-inline-input{background:rgba(255,255,255,0.95);border:2px solid #c9a84c;border-radius:4px;outline:none;padding:1px 6px;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;box-shadow:0 2px 8px rgba(201,168,76,0.2)}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
-.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;border-bottom:2px solid}
-.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.06);line-height:1.4}
+.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
+.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
 .lz-table tr:last-child td{border-bottom:none}
-.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.02)}
-.theme-dark .lz-table td{color:#d0cdc8}
+.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.03)}
+.theme-dark .lz-table td{color:#d0cdc8;border-bottom-color:rgba(255,255,255,0.06)}
 .theme-dark .lz-table th{color:#f0ede8}
-.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.03)}
-.theme-neon .lz-table td{color:#e0e0f0}
-.theme-neon .lz-table th{color:#00ffcc}
+.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}
+.theme-neon .lz-table th{color:#0a0a12}
+.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
+.theme-retro .lz-table td{color:#2a1f0a}
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
   body > *:not(#printArea) { display: none !important; }
@@ -282,6 +284,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()" style="margin-top:8px">✦ Lernzettel generieren</button>
       </div>
       <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+      <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       <div class="status-msg" id="status"></div>
     </div>
   </div>
@@ -381,13 +384,15 @@ const previewStyles = `
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
 .lz-page-num{text-align:center;font-size:0.65rem;color:#ccc;margin-top:16px;padding:12px 0 4px;letter-spacing:0.1em;border-top:1px solid #f0ede8}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
-.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;border-bottom:2px solid}
-.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.06);line-height:1.4}
+.lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
+.lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
 .lz-table tr:last-child td{border-bottom:none}
-.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.02)}
-.theme-dark .lz-table td{color:#d0cdc8}.theme-dark .lz-table th{color:#f0ede8}
-.theme-neon .lz-table td{color:#e0e0f0}.theme-neon .lz-table th{color:#00ffcc}
-.theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
+.lz-table tr:nth-child(even) td{background:rgba(0,0,0,0.03)}
+.theme-dark .lz-table td{color:#d0cdc8;border-bottom-color:rgba(255,255,255,0.06)}.theme-dark .lz-table th{color:#f0ede8}
+.theme-dark .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}.theme-neon .lz-table th{color:#0a0a12}
+.theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.04)}
+.theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}.theme-retro .lz-table td{color:#2a1f0a}
 `;
 
 // ── DESIGNS ──────────────────────────────────────────────────
@@ -723,6 +728,15 @@ function editField(el,type,sectionIdx,itemRef){
   input.addEventListener('blur',save);
 }
 
+function clearInput(){
+  document.getElementById('inputText').value='';
+  document.getElementById('lzPreview').style.display='none';
+  document.getElementById('emptyState').style.display='flex';
+  document.getElementById('exportBtn').disabled=true;
+  parsedDoc=null;
+  setStatus('✓ Eingabe geleert','ok');
+}
+
 function syncTextarea(){
   if(!parsedDoc)return;
   let text='# '+parsedDoc.title+'\n';
@@ -827,10 +841,15 @@ function exportPDF(){
           const cx=margin+ci*colW,cy=y;
           if(ri===0){
             setFill(dotRgb);pdf.rect(cx,cy,colW,rowH,'F');
-            pdf.setFontSize(7);pdf.setFont(bodyFont,'bold');setRGB([255,255,255]);
+            pdf.setFontSize(7);pdf.setFont(bodyFont,'bold');
+            // Header text: white on dark dot colors, dark on light dot colors
+            const dotSum=dotRgb[0]+dotRgb[1]+dotRgb[2];
+            setRGB(dotSum>400?[28,26,24]:[255,255,255]);
           } else {
-            if(ri%2===0){setFill([245,245,245]);pdf.rect(cx,cy,colW,rowH,'F');}
-            pdf.setFontSize(7);pdf.setFont(bodyFont,'normal');setRGB(isDark?[208,205,200]:[28,26,24]);
+            const evenBg=isDark?[30,30,40]:isRetro?[245,240,230]:[245,245,245];
+            if(ri%2===0){setFill(evenBg);pdf.rect(cx,cy,colW,rowH,'F');}
+            else if(isDark){setFill(bgColor);pdf.rect(cx,cy,colW,rowH,'F');}
+            pdf.setFontSize(7);pdf.setFont(bodyFont,'normal');setRGB(isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24]);
           }
           const txt=pdf.splitTextToSize(cell,colW-4);
           pdf.text(txt[0]||'',cx+2,cy+4.5);
