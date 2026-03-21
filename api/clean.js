@@ -69,34 +69,37 @@ Pflichtregeln:
 Text:
 ${text}`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 3000, temperature: 0.1 }
-      }),
-    }
-  );
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 3000,
+      temperature: 0.1,
+      messages: [
+        { role: 'user', content: prompt }
+      ],
+    }),
+  });
 
   const data = await response.json();
 
   if (data.error) {
-    const code = data.error.code;
-    let msg = data.error.message || 'Gemini Fehler';
-    if (code === 429) msg = 'Gemini Limit erreicht — bitte kurz warten';
-    else if (code === 403) msg = 'API Key ungültig';
+    let msg = data.error.message || 'Groq Fehler';
+    if (data.error.code === 'rate_limit_exceeded') msg = 'Groq Limit erreicht — bitte kurz warten';
+    else if (response.status === 401) msg = 'Groq API Key ungültig';
     return new Response(JSON.stringify({ error: msg }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  let cleaned = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  let cleaned = data.choices?.[0]?.message?.content;
   if (!cleaned || typeof cleaned !== 'string') {
-    return new Response(JSON.stringify({ error: 'Keine Antwort von Gemini' }), {
+    return new Response(JSON.stringify({ error: 'Keine Antwort von Groq' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
