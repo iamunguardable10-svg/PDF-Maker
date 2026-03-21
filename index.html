@@ -46,6 +46,8 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-generate { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-generate:hover { background: var(--border2); color: var(--ink); }
 .btn-generate.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(201,168,76,0.3); }
+.btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
+.btn-direct:hover { background: var(--border2); color: var(--ink); }
 #generateBox input { width: 100%; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; outline: none; margin-top: 8px; background: #0e0e0e; color: var(--ink); caret-color: var(--accent); }
 #generateBox input:focus { border-color: rgba(201,168,76,0.5); }
 #generateBox input::placeholder { color: #383532; }
@@ -237,6 +239,9 @@ textarea::placeholder { color: #383532; font-style: italic; }
       <div class="btn-group">
         <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
         <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-direct" onclick="directExport()" title="Text direkt ohne KI als PDF exportieren">⚡ Direkt exportieren</button>
       </div>
       <div class="btn-group">
         <button class="btn btn-generate" id="generateBtn" onclick="toggleGenerateMode()">✎ Aus Thema generieren</button>
@@ -670,6 +675,14 @@ function syncTextarea(){
   });
   if(parsedDoc.merksatz)text+='\n> '+parsedDoc.merksatz+'\n';
   document.getElementById('inputText').value=text.trim();
+}
+
+function directExport(){
+  const raw=document.getElementById('inputText').value.trim();
+  if(!raw){setStatus('Bitte Text eingeben','err');return;}
+  parsedDoc=parseText(raw);
+  renderPreview(parsedDoc);
+  setStatus('✓ Vorschau erstellt — bereit zum Export','ok');
 }
 
 function exportPDF(){
