@@ -78,8 +78,18 @@ H) MERKSATZ: Echter inhaltlicher Satz am Ende. NICHT den Platzhalter wörtlich �
 Text:
 ${text}`;
 
+  // Truncate very long inputs to avoid timeout
+  const maxChars = 6000;
+  const truncatedPrompt = prompt.length > maxChars
+    ? prompt.slice(0, maxChars) + '\n\n[Text wurde gekürzt]'
+    : prompt;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
+    signal: controller.signal,
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -89,17 +99,19 @@ ${text}`;
       max_tokens: 3000,
       temperature: 0.1,
       messages: [
-        { role: 'user', content: prompt }
+        { role: 'user', content: truncatedPrompt }
       ],
     }),
   });
+  clearTimeout(timeout);
 
   const data = await response.json();
 
   if (data.error) {
     let msg = data.error.message || 'Groq Fehler';
-    if (data.error.code === 'rate_limit_exceeded') msg = 'Groq Limit erreicht — bitte kurz warten';
-    else if (response.status === 401) msg = 'Groq API Key ungültig';
+    if (data.error.code === 'rate_limit_exceeded') msg = 'Limit erreicht — bitte 1 Minute warten';
+    else if (response.status === 401) msg = 'API Key ungültig';
+    else if (data.error.code === 'context_length_exceeded') msg = 'Text zu lang — bitte kürzen';
     return new Response(JSON.stringify({ error: msg }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
