@@ -58,13 +58,14 @@ Zielformat:
 > Merksatz: Zusammenfassung in einem Satz.
 
 Pflichtregeln:
-1. VOLLSTÄNDIGKEIT: Jeden einzelnen Inhaltspunkt übernehmen — NICHTS weglassen oder kürzen
+1. VOLLSTÄNDIGKEIT: ALLE inhaltlichen Punkte übernehmen — auch wenn der Text lang ist. NICHTS kürzen oder weglassen.
 2. KEINE STERNCHEN in Bullets: "- **Wort** Text" → "- Wort Text" (Fettdruck entfernen)
 3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Tabs verboten.
-4. BEREINIGUNG: Emojis am Zeilenanfang entfernen, Trennlinien (---) entfernen, KI-Floskeln entfernen
-5. LABELS: Wörter die mit ":" enden (z.B. "Ziele:") als eigener Bullet belassen, Unterpunkte einrücken
-6. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist
-7. TITEL: Falls kein klarer Titel erkennbar → # Lernzettel setzen
+4. BEREINIGUNG: Emojis entfernen, Trennlinien (---) entfernen, KI-Floskeln entfernen
+5. ENTFERNE nicht-inhaltliche Sätze: Angebote wie "Sag mir was du brauchst", "Wenn du willst...", "Ich kann dir helfen..." → komplett weglassen
+6. LABELS: Wörter die mit ":" enden (z.B. "Ziele:") als eigener Bullet belassen, Unterpunkte einrücken
+7. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist (z.B. "Wichtig:", Ausrufezeichen, Fettdruck)
+8. TITEL: Falls kein klarer Titel erkennbar → # Lernzettel setzen
 
 Text:
 ${text}`;
