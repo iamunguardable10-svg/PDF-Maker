@@ -409,8 +409,7 @@ function parseText(raw) {
     if(/^##\s+/.test(trimmed)){
       const text=trimmed.replace(/^##\s+/,'').trim();
       if(!subtitleAlreadyUsed&&doc.sections.length===0&&!currentSection){doc.subtitle=text;subtitleAlreadyUsed=true;}
-      else newSection(text);
-      lastCreatedSectionTitle=text;
+      else { newSection(text); lastCreatedSectionTitle=text; }
       continue;
     }
     if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').trim(),true);continue;}
@@ -425,6 +424,13 @@ function parseText(raw) {
       if(indent===0){
         // Skip if this title was just created by a ## heading right before
         if(text.toLowerCase()===lastCreatedSectionTitle.toLowerCase()){lastCreatedSectionTitle='';continue;}
+        // Skip generic placeholder names like "Erster Abschnitt", "Zweiter Abschnitt" etc.
+        const genericNames = ['erster abschnitt','zweiter abschnitt','dritter abschnitt','vierter abschnitt','fünfter abschnitt','sechster abschnitt','siebter abschnitt','achter abschnitt','neunter abschnitt','zehnter abschnitt','abschnitt'];
+        if(genericNames.includes(text.toLowerCase())){
+          // If we have a pending ## section, keep it; otherwise skip
+          lastCreatedSectionTitle='';
+          continue;
+        }
         lastCreatedSectionTitle='';
         newSection(text);
       }
