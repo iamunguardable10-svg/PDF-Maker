@@ -293,27 +293,61 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <textarea id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg, Pythagoras — oder detaillierter: 'Die Ursachen des Ersten Weltkriegs mit Fokus auf Österreich-Ungarn'…" style="width:100%;min-height:100px;padding:12px 14px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;outline:none;background:#0e0e0e;color:var(--ink);caret-color:var(--accent);resize:vertical;line-height:1.6"></textarea>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:16px">
           <div class="slider-group">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <label style="font-size:0.72rem;color:var(--muted2)">Länge</label>
               <span id="lengthLabel" style="font-size:0.7rem;color:var(--accent)">Mittel</span>
             </div>
-            <input type="range" id="lengthSlider" min="1" max="3" value="2" step="1" class="slider">
+            <input type="range" id="lengthSlider" min="1" max="5" value="3" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Sehr kurz</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Sehr lang</span>
+            </div>
           </div>
           <div class="slider-group">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <label style="font-size:0.72rem;color:var(--muted2)">Ausführlichkeit</label>
               <span id="detailLabel" style="font-size:0.7rem;color:var(--accent)">Ausgewogen</span>
             </div>
-            <input type="range" id="detailSlider" min="1" max="3" value="2" step="1" class="slider">
+            <input type="range" id="detailSlider" min="1" max="5" value="3" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Stichpunkte</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Sehr detailliert</span>
+            </div>
           </div>
           <div class="slider-group">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <label style="font-size:0.72rem;color:var(--muted2)">Niveau</label>
-              <span id="levelLabel" style="font-size:0.7rem;color:var(--accent)">Mittelschule</span>
+              <span id="levelLabel" style="font-size:0.7rem;color:var(--accent)">Gymnasium</span>
             </div>
-            <input type="range" id="levelSlider" min="1" max="3" value="2" step="1" class="slider">
+            <input type="range" id="levelSlider" min="1" max="5" value="2" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Mittelschule</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Uni</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Sprache</label>
+              <span id="langLabel" style="font-size:0.7rem;color:var(--accent)">Normal</span>
+            </div>
+            <input type="range" id="langSlider" min="1" max="5" value="2" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Einfach</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Fachsprache</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Vorwissen</label>
+              <span id="priorLabel" style="font-size:0.7rem;color:var(--accent)">Grundkenntnisse</span>
+            </div>
+            <input type="range" id="priorSlider" min="1" max="5" value="2" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Kein Vorwissen</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Experte</span>
+            </div>
           </div>
         </div>
 
@@ -717,18 +751,24 @@ async function cleanWithAI(){
 
 function toggleGenerateMode() {} // kept for compatibility
 
-const lengthLabels = ['Kurz', 'Mittel', 'Lang'];
-const detailLabels = ['Kompakt', 'Ausgewogen', 'Detailliert'];
-const levelLabels  = ['Grundschule', 'Mittelschule', 'Abitur / Uni'];
+const lengthLabels = ['Sehr kurz', 'Kurz', 'Mittel', 'Lang', 'Sehr lang'];
+const detailLabels = ['Nur Stichpunkte', 'Kompakt', 'Ausgewogen', 'Detailliert', 'Sehr detailliert'];
+const levelLabels  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'];
+const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wissenschaftlich'];
+const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', 'Fortgeschritten', 'Experte'];
 
 function initSliders() {
   const ls = document.getElementById('lengthSlider');
   const ds = document.getElementById('detailSlider');
   const vs = document.getElementById('levelSlider');
+  const gs = document.getElementById('langSlider');
+  const ps = document.getElementById('priorSlider');
   if (!ls) return;
   ls.addEventListener('input', () => { document.getElementById('lengthLabel').textContent = lengthLabels[ls.value-1]; });
   ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent = detailLabels[ds.value-1]; });
   vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent  = levelLabels[vs.value-1]; });
+  gs.addEventListener('input', () => { document.getElementById('langLabel').textContent   = langLabels[gs.value-1]; });
+  ps.addEventListener('input', () => { document.getElementById('priorLabel').textContent  = priorLabels[ps.value-1]; });
 }
 window.addEventListener('DOMContentLoaded', initSliders);
 
@@ -738,15 +778,20 @@ async function generateFromTopic(){
   if(!topic){setStatus('Bitte ein Thema eingeben','err');return;}
 
   // Read sliders if in generate mode
-  const length = document.getElementById('lengthSlider') ? parseInt(document.getElementById('lengthSlider').value) : 2;
-  const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 2;
-  const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 2;
+  const length = document.getElementById('lengthSlider') ? parseInt(document.getElementById('lengthSlider').value) : 3;
+  const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 3;
+  const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 3;
 
-  const lengthHint = ['kurz (3 Abschnitte)', 'mittel (5 Abschnitte)', 'lang (7+ Abschnitte)'][length-1];
-  const detailHint = ['kompakt (2-3 Bullets pro Abschnitt)', 'ausgewogen (4-5 Bullets)', 'sehr detailliert (6+ Bullets mit Unterpunkten)'][detail-1];
-  const levelHint  = ['Grundschule / einfache Sprache', 'Mittelschule / Gymnasium', 'Abitur- / Uni-Niveau mit Fachbegriffen'][level-1];
+  const lang  = document.getElementById('langSlider')  ? parseInt(document.getElementById('langSlider').value)  : 2;
+  const prior = document.getElementById('priorSlider') ? parseInt(document.getElementById('priorSlider').value) : 2;
 
-  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic} | Länge: ${lengthHint} | Ausführlichkeit: ${detailHint} | Niveau: ${levelHint}`;
+  const lengthHint = ['sehr kurz (2-3 Abschnitte, je 2-3 Bullets)', 'kurz (3-4 Abschnitte, je 3 Bullets)', 'mittel (5 Abschnitte, je 4-5 Bullets)', 'lang (6-7 Abschnitte, je 5-6 Bullets)', 'sehr lang (8+ Abschnitte, je 6+ Bullets mit vielen Unterpunkten)'][length-1];
+  const detailHint = ['nur kurze Stichpunkte, keine Unterpunkte', 'kompakt, wenige Unterpunkte', 'ausgewogen, Unterpunkte wo sinnvoll', 'detailliert, viele Unterpunkte und Beispiele', 'sehr detailliert, Sub-Sub-Bullets, Beispiele, Querverweise'][detail-1];
+  const levelHint  = ['Mittelschule, einfache klare Sprache', 'Gymnasium, normale Schulsprache', 'Oberstufe, präzise Formulierungen', 'Abitur-Niveau, anspruchsvolle Sprache und Tiefe', 'Uni-Niveau, akademische Sprache und wissenschaftliche Tiefe'][level-1];
+  const langHint   = ['sehr einfache alltagsnahe Sprache, Fachbegriffe immer erklären', 'normale verständliche Sprache, wichtige Fachbegriffe kurz erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennuung erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung verwenden'][lang-1];
+  const priorHint  = ['kein Vorwissen vorhanden — alle Grundbegriffe und Konzepte erklären', 'Grundkenntnisse vorhanden — Basiskonzepte kurz erwähnen, nicht ausführlich erklären', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschrittenes Wissen — nur sehr spezifische Fachdetails erklären', 'Expertenwissen — keine Erklärungen, nur komprimierte Fakten'][prior-1];
+
+  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic} | Länge: ${lengthHint} | Ausführlichkeit: ${detailHint} | Niveau: ${levelHint} | Sprache: ${langHint} | Vorwissen des Lesers: ${priorHint}`;
 
   const btn=document.getElementById('genSubmitBtn');
   btn.disabled=true;
