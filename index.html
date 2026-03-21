@@ -375,7 +375,7 @@ function getSampleDoc() {
 function parseText(raw) {
   const lines = String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ').split('\n');
   const doc = {title:'',subtitle:'',sections:[],merksatz:null};
-  let currentSection=null, subtitleAlreadyUsed=false, lastTopItem=null, lastSubItem=null;
+  let currentSection=null, subtitleAlreadyUsed=false, lastTopItem=null, lastSubItem=null, lastCreatedSectionTitle='';
 
   function newSection(title='') {
     currentSection={title,items:[],callout:null};
@@ -410,6 +410,7 @@ function parseText(raw) {
       const text=trimmed.replace(/^##\s+/,'').trim();
       if(!subtitleAlreadyUsed&&doc.sections.length===0&&!currentSection){doc.subtitle=text;subtitleAlreadyUsed=true;}
       else newSection(text);
+      lastCreatedSectionTitle=text;
       continue;
     }
     if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').trim(),true);continue;}
@@ -421,7 +422,12 @@ function parseText(raw) {
     const nm=line.match(/^(\s*)(\d+)\.\s+(.*)$/);
     if(nm){
       const indent=nm[1].length, text=nm[3].trim();
-      if(indent===0) newSection(text);
+      if(indent===0){
+        // Skip if this title was just created by a ## heading right before
+        if(text.toLowerCase()===lastCreatedSectionTitle.toLowerCase()){lastCreatedSectionTitle='';continue;}
+        lastCreatedSectionTitle='';
+        newSection(text);
+      }
       else if(indent<=2) pushTopItem(`${nm[2]}. ${text}`,true);
       else pushSubItem(`${nm[2]}. ${text}`,true);
       continue;
