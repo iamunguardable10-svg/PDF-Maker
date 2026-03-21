@@ -41,37 +41,40 @@ Pflichtregeln:
 - Merksatz > nur einmal ganz am Ende
 - Kein Text vor oder nach dem Lernzettel`
 
-    : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text in sauberes Lernzettel-Format.
-Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
+    : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text EXAKT in dieses Format:
 
-Zielformat:
-# Haupttitel (kein Doppelpunkt)
-## Untertitel oder Themenangabe (NUR wenn wirklich ein Untertitel vorhanden — sonst weglassen)
+# Haupttitel
+## Optionaler Untertitel (NUR einmal, direkt nach # Titel — danach KEIN ## mehr)
 
-1. Erster Abschnitt
-- Bullet Ebene 1 (0 Leerzeichen)
-  - Bullet Ebene 2 (GENAU 2 Leerzeichen)
-    - Bullet Ebene 3 (GENAU 4 Leerzeichen)
-
-2. Zweiter Abschnitt
+1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
 - Bullet
+  - Unterpunkt
+    - Unter-Unterpunkt
+
+2. Zweiter Abschnittsname
 - Bullet
 
-** Nur für explizit wichtige Hinweise **
+** Nur für wirklich wichtige Hinweise **
 
-> Merksatz: [Hier ein echter inhaltlicher Satz der das Thema zusammenfasst]
+> Merksatz: Echter inhaltlicher Satz.
 
-Pflichtregeln:
-1. VOLLSTÄNDIGKEIT: ALLE inhaltlichen Punkte übernehmen — auch wenn der Text lang ist. NICHTS kürzen oder weglassen.
-2. KEINE STERNCHEN in Bullets: "- **Wort** Text" → "- Wort Text" (Fettdruck entfernen)
-3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Tabs verboten.
-4. BEREINIGUNG: Emojis entfernen, Trennlinien (---) entfernen, KI-Floskeln entfernen
-5. ENTFERNE nicht-inhaltliche Sätze: Angebote wie "Sag mir was du brauchst", "Wenn du willst...", "Ich kann dir helfen..." → komplett weglassen
-6. LABELS: Wörter die mit ":" enden (z.B. "Ziele:") als eigener Bullet belassen, Unterpunkte einrücken
-7. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist
-8. TITEL: Falls kein klarer Titel erkennbar → # Lernzettel setzen
-9. KEINE DUPLIKATE: Jeder Abschnittsname darf NUR EINMAL vorkommen. Niemals denselben Titel als ## und als 1. verwenden.
-10. MERKSATZ: Schreibe einen echten inhaltlichen Satz der das Kernthema zusammenfasst. NIEMALS "Zusammenfassung in einem Satz." wörtlich schreiben.
+KRITISCHE REGELN:
+
+A) ## NUR EINMAL: Nach dem ersten ## darf KEIN weiteres ## vorkommen. Alle weiteren Hauptthemen werden zu "2. Name", "3. Name" usw.
+
+B) ECHTE ABSCHNITTSNAMEN: NIEMALS "Erster Abschnitt", "Zweiter Abschnitt" usw. Immer den echten Themenname verwenden z.B. "1. Wirtschaftsordnungen", "2. Staatliche Eingriffe".
+
+C) VOLLSTÄNDIGKEIT: Alle Inhaltspunkte übernehmen, nichts weglassen, nichts kürzen.
+
+D) KEINE STERNCHEN in Bullets: "- **Wort**" wird zu "- Wort"
+
+E) EINRÜCKUNG: 0 Leerzeichen für Ebene 1, genau 2 für Ebene 2, genau 4 für Ebene 3. Keine Tabs.
+
+F) BEREINIGUNG: Emojis, Trennlinien (---), KI-Floskeln, Angebote wie "Sag mir was du brauchst" entfernen.
+
+G) CALLOUT: ** Text ** nur für explizit wichtige Aussagen, als eigene Zeile.
+
+H) MERKSATZ: Echter inhaltlicher Satz. NICHT den Platzhalter wörtlich schreiben.
 
 Text:
 ${text}`;
@@ -111,6 +114,17 @@ ${text}`;
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Platzhalter-Callouts entfernen
+  const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile'];
+  cleaned = cleaned.split('\n').filter(line => {
+    const t = line.trim();
+    if (/^\*\*.*\*\*$/.test(t)) {
+      const inner = t.replace(/^\*\*\s*|\s*\*\*$/g,'').trim().toLowerCase();
+      if (placeholders.some(p => inner.includes(p))) return false;
+    }
+    return true;
+  }).join('\n');
 
   // Sicherheitsnetz: Sternchen aus Bullets entfernen + Duplikate bereinigen
   cleaned = cleaned
