@@ -174,6 +174,41 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-callout { margin: 10px 0; padding: 10px 14px; border-radius: 6px; font-size: 0.77rem; font-weight: 600; font-style: italic; display: flex; align-items: flex-start; gap: 8px; border-left: 3px solid; }
 .lz-callout::before { content: '■'; font-size: 0.5rem; margin-top: 4px; flex-shrink: 0; }
 .lz-page-num { text-align: center; font-size: 0.65rem; color: #ccc; margin-top: 16px; padding: 12px 0 4px; letter-spacing: 0.1em; border-top: 1px solid #f0ede8; }
+.lz-doc-title { position: relative; }
+/* Editable elements */
+.lz-editable {
+  cursor: text;
+  border-radius: 4px;
+  transition: background 0.15s;
+  position: relative;
+}
+.lz-editable:hover {
+  background: rgba(201,168,76,0.08);
+  outline: 1px dashed rgba(201,168,76,0.4);
+}
+.lz-editable:hover::after {
+  content: '✎';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: #c9a84c;
+  opacity: 0.7;
+}
+.lz-inline-input {
+  background: rgba(255,255,255,0.95);
+  border: 2px solid #c9a84c;
+  border-radius: 4px;
+  outline: none;
+  padding: 1px 6px;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(201,168,76,0.2);
+}
 </style>
 </head>
 <body>
@@ -461,19 +496,20 @@ function renderDocHTML(doc, design) {
   const C=design.sectionColors;
   const themeClass='theme-'+design.id;
   let html=`<div class="lz-page ${themeClass}">`;
-  html+=`<div class="lz-doc-title"><h1>${escapeText(doc.title||'Lernzettel')}</h1>`;
-  if(doc.subtitle) html+=`<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`;
-  html+=`</div><div class="lz-body">`;
+  html+=`<div class="lz-doc-title">
+    <h1><span class="lz-editable" onclick="editField(this,'title',null,null)" title="Klicken zum Bearbeiten">${escapeText(doc.title||'Lernzettel')}</span></h1>
+  </div>`;
+  html+=`<div class="lz-body">`;
   doc.sections.forEach((sec,si)=>{
     const c=C[si%C.length];
     html+=`<div class="lz-section">`;
-    if(sec.title) html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${escapeText(sec.title)}</div>`;
+    if(sec.title) html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)" title="Klicken zum Bearbeiten">${escapeText(sec.title)}</span></div>`;
     if(sec.callout) html+=`<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
     if(sec.items.length){
       html+=`<div class="lz-bullets">`;
       sec.items.forEach(item=>{
-        if(item.isLabel){html+=`<div class="lz-label-bullet">${escapeText(item.text)}</div>`;}
-        else{html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(item.text)}</span></div>`;}
+        if(item.isLabel){html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},${si}+'_'+${JSON.stringify(item.text).slice(0,20)})" title="Klicken zum Bearbeiten">${escapeText(item.text)}</span></div>`;}
+        else{html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)" title="Klicken zum Bearbeiten">${escapeText(item.text)}</span></div>`;}
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
             if(s.isLabel){html+=`<div class="lz-sub-label">${escapeText(s.text)}</div>`;}
@@ -624,6 +660,66 @@ async function generateFromTopic() {
   }
   setStatus('Generierung fehlgeschlagen — bitte nochmal versuchen','err');
   btn.disabled=false;btn.textContent='✦ Lernzettel generieren';
+}
+
+function editField(el, type, sectionIdx, itemRef) {
+  if (!parsedDoc) return;
+  const current = el.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = current;
+  input.className = 'lz-inline-input';
+  input.style.minWidth = Math.max(80, el.offsetWidth) + 'px';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    const newVal = input.value.trim() || current;
+    // Update parsedDoc
+    if (type === 'title') {
+      parsedDoc.title = newVal;
+    } else if (type === 'section' && sectionIdx !== null) {
+      parsedDoc.sections[sectionIdx].title = newVal;
+    } else if (type === 'bullet') {
+      // Find the bullet by its original text content
+      outer: for (const sec of parsedDoc.sections) {
+        for (const item of sec.items) {
+          if (item.text === current) { item.text = newVal; break outer; }
+          for (const sub of (item.sub||[])) {
+            if (sub.text === current) { sub.text = newVal; break outer; }
+          }
+        }
+      }
+    }
+    // Sync textarea
+    syncTextarea();
+    renderPreview(parsedDoc);
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { renderPreview(parsedDoc); }
+  });
+  input.addEventListener('blur', save);
+}
+
+function syncTextarea() {
+  if (!parsedDoc) return;
+  let text = '# ' + parsedDoc.title + '\n';
+  parsedDoc.sections.forEach((sec, si) => {
+    text += '\n' + (si+1) + '. ' + sec.title + '\n';
+    if (sec.callout) text += '** ' + sec.callout + ' **\n';
+    sec.items.forEach(item => {
+      text += (item.isLabel ? '' : '- ') + item.text + '\n';
+      (item.sub||[]).forEach(s => {
+        text += '  - ' + s.text + '\n';
+        (s.children||[]).forEach(ch => { text += '    - ' + ch + '\n'; });
+      });
+    });
+  });
+  if (parsedDoc.merksatz) text += '\n> ' + parsedDoc.merksatz + '\n';
+  document.getElementById('inputText').value = text.trim();
 }
 
 function exportPDF() {
