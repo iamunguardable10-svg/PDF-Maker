@@ -707,20 +707,6 @@ function directExport(){
 
 function exportPDF(){
   if(!parsedDoc)return;
-  // Use browser print for pixel-perfect output
-  const printArea=document.getElementById('printArea');
-  printArea.innerHTML=`<style>${previewStyles}
-  .lz-page{max-width:100%;border-radius:0;box-shadow:none;animation:none}
-  .lz-editable:hover{background:transparent!important;outline:none!important}
-  .lz-editable:hover::after{display:none!important}
-  </style>${renderDocHTML(parsedDoc,currentDesign)}`;
-  printArea.style.display='block';
-  setTimeout(()=>{
-    window.print();
-    setTimeout(()=>{printArea.style.display='none';},500);
-  },100);
-  setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
-  return; // skip jsPDF below
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
@@ -730,14 +716,24 @@ function exportPDF(){
   const isDark=id==='dark'||id==='neon';
   const isRetro=id==='retro';
   function hexToRgb(hex){const c=hex.replace('#','');return[parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
-  function hexToRgbSafe(hex){if(!hex||hex==='transparent'||hex.startsWith('rgba'))return[220,220,220];return hexToRgb(hex);}
+  function hexToRgbSafe(hex){
+    if(!hex||hex==='transparent')return[240,240,240];
+    if(hex.startsWith('rgba')){
+      // Parse rgba(r,g,b,a) 
+      const m=hex.match(/rgba\((\d+),(\d+),(\d+)/);
+      if(m)return[parseInt(m[1]),parseInt(m[2]),parseInt(m[3])];
+      return[220,220,220];
+    }
+    return hexToRgb(hex);
+  }
   function setRGB(col){pdf.setTextColor(col[0],col[1],col[2]);}
   function setFill(col){pdf.setFillColor(col[0],col[1],col[2]);}
   function addPageNumber(){pdf.setFontSize(7);pdf.setFont('helvetica','normal');setRGB(isDark?[60,60,60]:[200,195,190]);pdf.text(`— ${pageNum} —`,pageW/2,288,{align:'center'});}
+  // Colors matched exactly to CSS theme definitions
   const bgColor=id==='dark'?[20,20,20]:id==='neon'?[10,10,18]:id==='retro'?[250,247,242]:id==='editorial'?[250,249,246]:[255,255,255];
-  const titleBg=id==='dark'?[30,30,30]:id==='neon'?[13,13,32]:id==='retro'?[44,26,14]:id==='editorial'?[28,26,24]:id==='pastell'?[254,240,245]:[240,250,244];
-  const titleColor=id==='dark'||id==='neon'||id==='retro'||id==='editorial'?[240,237,232]:[28,26,24];
-  const accentColor=id==='dark'?[82,183,136]:id==='neon'?[0,255,204]:id==='retro'?[139,94,60]:id==='editorial'?[201,168,76]:id==='pastell'?[192,80,122]:id==='minimal'?[28,26,24]:[45,106,79];
+  const titleBg=id==='dark'?[30,30,30]:id==='neon'?[13,13,32]:id==='retro'?[44,26,14]:id==='editorial'?[28,26,24]:id==='pastell'?[254,240,245]:id==='lernzettel'?[240,250,244]:[255,255,255];
+  const titleColor=(id==='dark'||id==='neon'||id==='retro'||id==='editorial')?[240,237,232]:(id==='pastell'?[58,40,64]:[28,26,24]);
+  const accentColor=id==='dark'?[82,183,136]:id==='neon'?[0,255,204]:id==='retro'?[139,94,60]:id==='editorial'?[201,168,76]:id==='pastell'?[212,112,154]:id==='minimal'?[28,26,24]:[45,106,79];
   function paintPageBg(){setFill(bgColor);pdf.rect(0,0,pageW,pageH,'F');}
   function checkPage(needed=10){if(y+needed>bottomLimit){addPageNumber();pdf.addPage();pageNum++;paintPageBg();y=margin;}}
   paintPageBg();
