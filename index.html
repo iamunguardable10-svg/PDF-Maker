@@ -20,8 +20,8 @@ header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: cente
 .header-tag { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 .app { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); }
 @media (max-width: 800px) { .app { grid-template-columns: 1fr; } header { padding: 0 20px; } .preview-panel { padding: 20px 16px; } }
-.sidebar { background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-.sidebar-top { padding: 28px 28px 0; }
+.sidebar { background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 56px; height: calc(100vh - 56px); overflow: hidden; }
+.sidebar-top { padding: 28px 28px 0; overflow-y: auto; flex-shrink: 0; }
 .sidebar-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
 .sidebar-sub { font-size: 0.75rem; color: var(--muted2); line-height: 1.5; margin-bottom: 20px; }
 .instructions { background: #1a1816; border-radius: 10px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border2); }
@@ -30,7 +30,7 @@ header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: cente
 .step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 9px; font-size: 0.74rem; color: var(--muted2); line-height: 1.55; }
 .step:last-child { margin-bottom: 0; }
 .step-num { width: 17px; height: 17px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(201,168,76,0.3); border-radius: 50%; font-size: 0.58rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-textarea { flex: 1; width: 100%; min-height: 200px; padding: 16px 28px; border: none; border-top: 1px solid var(--border); outline: none; resize: vertical; font-family: 'DM Mono', monospace; font-size: 0.78rem; line-height: 1.8; color: #c8c4be; background: #0e0e0e; caret-color: var(--accent); }
+textarea { flex: 1; width: 100%; min-height: 200px; padding: 16px 28px; border: none; border-top: 1px solid var(--border); outline: none; resize: none; overflow-y: auto; font-family: 'DM Mono', monospace; font-size: 0.78rem; line-height: 1.8; color: #c8c4be; background: #0e0e0e; caret-color: var(--accent); }
 textarea::placeholder { color: #383532; font-style: italic; }
 .sidebar-actions { padding: 16px 28px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 9px; background: var(--sidebar); }
 .btn-group { display: flex; gap: 8px; }
