@@ -15,44 +15,57 @@ export default async function handler(req) {
   const topic = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim() : null;
 
   const prompt = isGenerate
-    ? `Erstelle einen Lernzettel zu: "${topic}".
+    ? `Erstelle einen vollständigen Lernzettel zum Thema: "${topic}".
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
-Exaktes Zielformat:
+
+Format:
 # Titel
 ## Lernzettel
-1. Abschnitt
+
+1. Abschnittsname
 - Punkt
-  - Unterpunkt
-    - Unter-Unterpunkt
-**Wichtiger Hinweis**
-> Merksatz: Ein Satz.
-Regeln:
-- Mindestens 4 Abschnitte
-- Pro Abschnitt mindestens 4 Haupt-Bullets
-- Keine Emojis
-- Kein Fettdruck in normalen Bullets
-- Callouts NUR als eigene Zeile im Format **Wichtiger Hinweis**
-- Merksatz NUR als eigene Zeile im Format > Merksatz: ...
-- Kein zusätzlicher Text vor oder nach dem Lernzettel`
-    : `Konvertiere den folgenden Inhalt in ein sauberes Lernzettel-Format.
+- Punkt
+  - Unterpunkt (GENAU 2 Leerzeichen)
+    - Unter-Unterpunkt (GENAU 4 Leerzeichen)
+
+** Wichtiger Hinweis als eigene Zeile **
+
+> Merksatz: Ein zusammenfassender Satz.
+
+Pflichtregeln:
+- Mindestens 4 Abschnitte mit je mindestens 4 Bullets
+- KEIN Fettdruck (**text**) innerhalb von Bullet-Texten
+- Emojis verboten
+- Nur Leerzeichen für Einrückung, KEINE Tabs
+- Callout ** ... ** nur für wirklich wichtige Aussagen, als eigene Zeile
+- Merksatz > nur einmal ganz am Ende
+- Kein Text vor oder nach dem Lernzettel`
+
+    : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text in sauberes Lernzettel-Format.
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
-Exaktes Format:
-# Titel
-## Untertitel
-1. Abschnitt
-- Bullet
-  - Sub
-    - Sub-Sub
-**Callout nur für sehr Wichtiges**
-> Merksatz: Text
-Regeln:
-- Nichts Inhaltliches weglassen
-- Emojis entfernen
-- Trennlinien entfernen
-- Tabs in Leerzeichen umwandeln
-- Labels mit Doppelpunkt als eigene Bullet lassen
-- Kein Fettdruck in normalen Bullets
-- Falls kein klarer Titel vorhanden ist, setze # Lernzettel
+
+Zielformat:
+# Haupttitel (kein Doppelpunkt)
+## Untertitel oder Themenangabe
+
+1. Abschnittsname
+- Bullet Ebene 1 (0 Leerzeichen)
+  - Bullet Ebene 2 (GENAU 2 Leerzeichen)
+    - Bullet Ebene 3 (GENAU 4 Leerzeichen)
+
+** Nur für explizit wichtige Hinweise **
+
+> Merksatz: Zusammenfassung in einem Satz.
+
+Pflichtregeln:
+1. VOLLSTÄNDIGKEIT: Jeden einzelnen Inhaltspunkt übernehmen — NICHTS weglassen oder kürzen
+2. KEINE STERNCHEN in Bullets: "- **Wort** Text" → "- Wort Text" (Fettdruck entfernen)
+3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Tabs verboten.
+4. BEREINIGUNG: Emojis am Zeilenanfang entfernen, Trennlinien (---) entfernen, KI-Floskeln entfernen
+5. LABELS: Wörter die mit ":" enden (z.B. "Ziele:") als eigener Bullet belassen, Unterpunkte einrücken
+6. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist
+7. TITEL: Falls kein klarer Titel erkennbar → # Lernzettel setzen
+
 Text:
 ${text}`;
 
@@ -89,6 +102,7 @@ ${text}`;
     });
   }
 
+  // Sicherheitsnetz: Sternchen aus Bullet-Zeilen entfernen
   cleaned = cleaned
     .replace(/\r\n/g, '\n')
     .replace(/\t/g, '  ')
