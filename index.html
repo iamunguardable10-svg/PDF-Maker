@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TextCraft — Lernzettel Generator</title>
+<title>Notefly — Lernzettel Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -208,7 +208,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
 </head>
 <body>
 <header>
-  <div class="logo"><span class="logo-dot"></span>TextCraft</div>
+  <div class="logo"><span class="logo-dot"></span>Notefly</div>
   <div class="header-tag">Lernzettel Generator</div>
 </header>
 <div class="modal-overlay hidden" id="modalOverlay">
@@ -762,5 +762,9 @@ function exportPDF(){
   setStatus('✓ PDF gespeichert!','ok');
 }
 </script>
+<footer style="background:#0a0a0a;border-top:1px solid #242220;padding:12px 48px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#5a5755;letter-spacing:0.05em;">
+  <span>© 2026 <span style="color:#7a7775">Ben Hebling</span></span>
+  <span style="color:#3a3836">Notefly — Lernzettel Generator</span>
+</footer>
 </body>
 </html>
