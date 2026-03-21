@@ -212,11 +212,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
 .lz-inline-input{background:rgba(255,255,255,0.95);border:2px solid #c9a84c;border-radius:4px;outline:none;padding:1px 6px;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;box-shadow:0 2px 8px rgba(201,168,76,0.2)}
 @media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
   body > *:not(#printArea) { display: none !important; }
-  #printArea { display: block !important; position: fixed; inset: 0; background: white; z-index: 9999; padding: 0; margin: 0; }
+  #printArea { display: block !important; position: fixed; inset: 0; background: white; z-index: 9999; padding: 20px; margin: 0; }
   #printArea .lz-page { max-width: 100%; border-radius: 0; box-shadow: none; animation: none; }
   .lz-editable:hover { background: transparent !important; outline: none !important; }
   .lz-editable:hover::after { display: none !important; }
+  @page { margin: 0; size: A4; }
 }
 </style>
 </head>
