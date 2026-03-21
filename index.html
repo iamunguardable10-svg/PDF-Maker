@@ -512,10 +512,10 @@ function renderDocHTML(doc, design) {
         else{html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)" title="Klicken zum Bearbeiten">${escapeText(item.text)}</span></div>`;}
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
-            if(s.isLabel){html+=`<div class="lz-sub-label">${escapeText(s.text)}</div>`;}
-            else{html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(s.text)}</span></div>`;}
+            if(s.isLabel){html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'sub',${si},null)" title="Klicken zum Bearbeiten">${escapeText(s.text)}</span></div>`;}
+            else{html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'sub',${si},null)" title="Klicken zum Bearbeiten">${escapeText(s.text)}</span></div>`;}
             if(s.children&&s.children.length){
-              s.children.forEach(ch=>{html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span>${escapeText(ch)}</span></div>`;});
+              s.children.forEach(ch=>{html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'subsub',${si},null)" title="Klicken zum Bearbeiten">${escapeText(ch)}</span></div>`;});
             }
           });
         }
@@ -688,6 +688,8 @@ function editField(el, type, sectionIdx, itemRef) {
           if (item.text === current) { item.text = newVal; break outer; }
           for (const sub of (item.sub||[])) {
             if (sub.text === current) { sub.text = newVal; break outer; }
+            const ci = (sub.children||[]).indexOf(current);
+            if (ci > -1) { sub.children[ci] = newVal; break outer; }
           }
         }
       }
