@@ -55,6 +55,9 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-generate.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(201,168,76,0.3); }
 .btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-direct:hover { background: var(--border2); color: var(--ink); }
+.slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border2); outline: none; cursor: pointer; }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(201,168,76,0.4); }
+.slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
 #generateBox input { width: 100%; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; outline: none; margin-top: 8px; background: #0e0e0e; color: var(--ink); caret-color: var(--accent); }
 #generateBox input:focus { border-color: rgba(201,168,76,0.5); }
 #generateBox input::placeholder { color: #383532; }
@@ -271,22 +274,56 @@ textarea::placeholder { color: #383532; font-style: italic; }
     </div>
     <textarea id="inputText" placeholder="Text hier einfügen…"></textarea>
     <div class="sidebar-actions">
-      <div class="btn-group">
-        <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
-        <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
+
+      <!-- STRUCTURE MODE -->
+      <div id="mode-structure" style="flex-direction:column;gap:9px">
+        <div class="btn-group">
+          <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
+          <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
+        </div>
+        <button class="btn btn-direct" onclick="directExport()">⚡ Direkt exportieren</button>
+        <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+        <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
-      <div class="btn-group">
-        <button class="btn btn-direct" onclick="directExport()" title="Text direkt ohne KI als PDF exportieren">⚡ Direkt exportieren</button>
+
+      <!-- GENERATE MODE -->
+      <div id="mode-generate" style="flex-direction:column;gap:16px">
+        <div>
+          <label style="font-size:0.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:8px">Thema / Prompt</label>
+          <textarea id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg, Pythagoras — oder detaillierter: 'Die Ursachen des Ersten Weltkriegs mit Fokus auf Österreich-Ungarn'…" style="width:100%;min-height:100px;padding:12px 14px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;outline:none;background:#0e0e0e;color:var(--ink);caret-color:var(--accent);resize:vertical;line-height:1.6"></textarea>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Länge</label>
+              <span id="lengthLabel" style="font-size:0.7rem;color:var(--accent)">Mittel</span>
+            </div>
+            <input type="range" id="lengthSlider" min="1" max="3" value="2" step="1" class="slider">
+          </div>
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Ausführlichkeit</label>
+              <span id="detailLabel" style="font-size:0.7rem;color:var(--accent)">Ausgewogen</span>
+            </div>
+            <input type="range" id="detailSlider" min="1" max="3" value="2" step="1" class="slider">
+          </div>
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Niveau</label>
+              <span id="levelLabel" style="font-size:0.7rem;color:var(--accent)">Mittelschule</span>
+            </div>
+            <input type="range" id="levelSlider" min="1" max="3" value="2" step="1" class="slider">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()">✦ Generieren</button>
+          <button class="btn btn-design" onclick="openModal()">◈ Design</button>
+        </div>
+        <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
       </div>
-      <div class="btn-group">
-        <button class="btn btn-generate" id="generateBtn" onclick="toggleGenerateMode()">✎ Aus Thema generieren</button>
-      </div>
-      <div id="generateBox" style="display:none">
-        <input type="text" id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg…" />
-        <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()" style="margin-top:8px">✦ Lernzettel generieren</button>
-      </div>
-      <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
-      <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
+
       <div class="status-msg" id="status"></div>
     </div>
   </div>
@@ -301,11 +338,17 @@ textarea::placeholder { color: #383532; font-style: italic; }
 </div>
 <script>
 // ── PREVIEW STYLES (injected into thumbnails + preview) ──────
-// Check URL params to auto-trigger mode
+const APP_MODE = new URLSearchParams(window.location.search).get('mode') || 'structure';
+
 window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('mode') === 'generate') {
-    toggleGenerateMode();
+  if (APP_MODE === 'generate') {
+    document.getElementById('mode-structure').style.display = 'none';
+    document.getElementById('mode-generate').style.display = 'flex';
+    document.getElementById('sidebar-title').textContent = 'Lernzettel generieren';
+    document.getElementById('sidebar-sub').textContent = 'Gib ein Thema ein und passe die Parameter an — die KI erstellt alles für dich.';
+  } else {
+    document.getElementById('mode-generate').style.display = 'none';
+    document.getElementById('mode-structure').style.display = 'flex';
   }
 });
 
@@ -672,41 +715,64 @@ async function cleanWithAI(){
   btn.disabled=false;btn.textContent='✦ KI bereinigen';
 }
 
-function toggleGenerateMode(){
-  const box=document.getElementById('generateBox'),btn=document.getElementById('generateBtn');
-  const isOpen=box.style.display!=='none';
-  box.style.display=isOpen?'none':'block';
-  btn.classList.toggle('active',!isOpen);
-  if(!isOpen)document.getElementById('topicInput').focus();
+function toggleGenerateMode() {} // kept for compatibility
+
+const lengthLabels = ['Kurz', 'Mittel', 'Lang'];
+const detailLabels = ['Kompakt', 'Ausgewogen', 'Detailliert'];
+const levelLabels  = ['Grundschule', 'Mittelschule', 'Abitur / Uni'];
+
+function initSliders() {
+  const ls = document.getElementById('lengthSlider');
+  const ds = document.getElementById('detailSlider');
+  const vs = document.getElementById('levelSlider');
+  if (!ls) return;
+  ls.addEventListener('input', () => { document.getElementById('lengthLabel').textContent = lengthLabels[ls.value-1]; });
+  ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent = detailLabels[ds.value-1]; });
+  vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent  = levelLabels[vs.value-1]; });
 }
+window.addEventListener('DOMContentLoaded', initSliders);
 
 async function generateFromTopic(){
-  const topic=document.getElementById('topicInput').value.trim();
+  const topicEl = document.getElementById('topicInput');
+  const topic = topicEl.value.trim();
   if(!topic){setStatus('Bitte ein Thema eingeben','err');return;}
+
+  // Read sliders if in generate mode
+  const length = document.getElementById('lengthSlider') ? parseInt(document.getElementById('lengthSlider').value) : 2;
+  const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 2;
+  const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 2;
+
+  const lengthHint = ['kurz (3 Abschnitte)', 'mittel (5 Abschnitte)', 'lang (7+ Abschnitte)'][length-1];
+  const detailHint = ['kompakt (2-3 Bullets pro Abschnitt)', 'ausgewogen (4-5 Bullets)', 'sehr detailliert (6+ Bullets mit Unterpunkten)'][detail-1];
+  const levelHint  = ['Grundschule / einfache Sprache', 'Mittelschule / Gymnasium', 'Abitur- / Uni-Niveau mit Fachbegriffen'][level-1];
+
+  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic} | Länge: ${lengthHint} | Ausführlichkeit: ${detailHint} | Niveau: ${levelHint}`;
+
   const btn=document.getElementById('genSubmitBtn');
   btn.disabled=true;
   const maxRetries=3;
   for(let attempt=1;attempt<=maxRetries;attempt++){
     btn.textContent=attempt>1?`⏳ Versuch ${attempt}/${maxRetries}...`:'⏳ Generiere...';
     try{
-      const response=await fetch('/api/clean',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:`GENERIERE_LERNZETTEL: ${topic}`})});
+      const response=await fetch('/api/clean',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:enrichedTopic})});
       let data;try{data=await response.json();}catch{data={error:'Ungültige Server-Antwort'};}
-      if(!response.ok){setStatus(`Fehler: ${data.error||'Serverfehler'}`,'err');btn.disabled=false;btn.textContent='✦ Lernzettel generieren';return;}
-      if(data.error){setStatus('Fehler: '+data.error,'err');btn.disabled=false;btn.textContent='✦ Lernzettel generieren';return;}
+      if(!response.ok){setStatus(`Fehler: ${data.error||'Serverfehler'}`,'err');btn.disabled=false;btn.textContent='✦ Generieren';return;}
+      if(data.error){setStatus('Fehler: '+data.error,'err');btn.disabled=false;btn.textContent='✦ Generieren';return;}
       const cleaned=normalizeAIText(data.cleaned);
       if(cleaned&&isValidOutput(cleaned,topic)){
         document.getElementById('inputText').value=cleaned;
         parsedDoc=parseText(cleaned);renderPreview(parsedDoc);
-        document.getElementById('generateBox').style.display='none';
-        document.getElementById('generateBtn').classList.remove('active');
+        // Enable both export buttons
+        const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
+        const ebg=document.getElementById('exportBtnGen'); if(ebg) ebg.disabled=false;
         setStatus(`✓ Lernzettel zu "${topic}" generiert`,'ok');
-        btn.disabled=false;btn.textContent='✦ Lernzettel generieren';return;
+        btn.disabled=false;btn.textContent='✦ Generieren';return;
       }
       if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));
     }catch(e){if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));}
   }
   setStatus('Generierung fehlgeschlagen — bitte nochmal versuchen','err');
-  btn.disabled=false;btn.textContent='✦ Lernzettel generieren';
+  btn.disabled=false;btn.textContent='✦ Generieren';
 }
 
 function editField(el,type,sectionIdx,itemRef){
