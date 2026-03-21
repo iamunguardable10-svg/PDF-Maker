@@ -46,16 +46,20 @@ Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein 
 
 Zielformat:
 # Haupttitel (kein Doppelpunkt)
-## Untertitel oder Themenangabe
+## Untertitel oder Themenangabe (NUR wenn wirklich ein Untertitel vorhanden — sonst weglassen)
 
-1. Abschnittsname
+1. Erster Abschnitt
 - Bullet Ebene 1 (0 Leerzeichen)
   - Bullet Ebene 2 (GENAU 2 Leerzeichen)
     - Bullet Ebene 3 (GENAU 4 Leerzeichen)
 
+2. Zweiter Abschnitt
+- Bullet
+- Bullet
+
 ** Nur für explizit wichtige Hinweise **
 
-> Merksatz: Zusammenfassung in einem Satz.
+> Merksatz: [Hier ein echter inhaltlicher Satz der das Thema zusammenfasst]
 
 Pflichtregeln:
 1. VOLLSTÄNDIGKEIT: ALLE inhaltlichen Punkte übernehmen — auch wenn der Text lang ist. NICHTS kürzen oder weglassen.
@@ -64,8 +68,10 @@ Pflichtregeln:
 4. BEREINIGUNG: Emojis entfernen, Trennlinien (---) entfernen, KI-Floskeln entfernen
 5. ENTFERNE nicht-inhaltliche Sätze: Angebote wie "Sag mir was du brauchst", "Wenn du willst...", "Ich kann dir helfen..." → komplett weglassen
 6. LABELS: Wörter die mit ":" enden (z.B. "Ziele:") als eigener Bullet belassen, Unterpunkte einrücken
-7. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist (z.B. "Wichtig:", Ausrufezeichen, Fettdruck)
+7. CALLOUT: ** Text ** nur wenn im Original etwas explizit als sehr wichtig markiert ist
 8. TITEL: Falls kein klarer Titel erkennbar → # Lernzettel setzen
+9. KEINE DUPLIKATE: Jeder Abschnittsname darf NUR EINMAL vorkommen. Niemals denselben Titel als ## und als 1. verwenden.
+10. MERKSATZ: Schreibe einen echten inhaltlichen Satz der das Kernthema zusammenfasst. NIEMALS "Zusammenfassung in einem Satz." wörtlich schreiben.
 
 Text:
 ${text}`;
@@ -106,7 +112,7 @@ ${text}`;
     });
   }
 
-  // Sicherheitsnetz: Sternchen aus Bullet-Zeilen entfernen
+  // Sicherheitsnetz: Sternchen aus Bullets entfernen + Duplikate bereinigen
   cleaned = cleaned
     .replace(/\r\n/g, '\n')
     .replace(/\t/g, '  ')
@@ -125,6 +131,12 @@ ${text}`;
       return line;
     })
     .join('\n')
+    // Duplikate entfernen: ## Titel direkt gefolgt von 1. Titel (gleicher Text)
+    .replace(/^(## .+)\n(\d+\.\s+\1)/gm, '$2')
+    .replace(/^(\d+\.\s+.+)\n(## \1)/gm, '$1')
+    // Leere Merksatz-Platzhalter entfernen
+    .replace(/^> Merksatz: (Zusammenfassung in einem Satz\.?|\[.*?\])$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 
   return new Response(JSON.stringify({ cleaned }), {
