@@ -216,6 +216,25 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable{cursor:text;border-radius:4px;transition:background 0.15s;position:relative}
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
+/* Report styles */
+.lz-report-summary{margin:0 36px 20px;padding:16px 20px;background:#f8f6f2;border-left:4px solid #c9a84c;border-radius:0 6px 6px 0;font-size:0.82rem;line-height:1.75;color:#2a2826;font-style:italic}
+.lz-report-body{padding:8px 36px;font-size:0.83rem;line-height:1.85;color:#1c1a18}
+.lz-report-section-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#1c1a18;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #e8e4de}
+.lz-report-para{margin-bottom:12px;text-align:justify}
+.lz-report-source{margin:16px 36px 8px;font-size:0.72rem;color:#8a8580;font-style:italic;padding-top:12px;border-top:1px solid #e8e4de}
+.theme-dark .lz-report-summary{background:#1e1e1e;color:#d0cdc8;border-color:#52b788}
+.theme-dark .lz-report-body{color:#d0cdc8}
+.theme-dark .lz-report-section-title{color:#f0ede8;border-bottom-color:#333}
+.theme-dark .lz-report-source{color:#5a5755;border-top-color:#333}
+.theme-neon .lz-report-summary{background:#0d0d20;color:#d0d8f0;border-color:#00ffcc}
+.theme-neon .lz-report-body{color:#d0d8f0}
+.theme-neon .lz-report-section-title{color:#fff;border-bottom-color:#1a1a30}
+.theme-retro .lz-report-body,.theme-retro .lz-report-summary{font-family:'DM Mono',monospace}
+/* Template selector */
+.template-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.template-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:0.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:5px}
+.template-btn:hover{border-color:var(--accent);color:var(--ink)}
+.template-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(201,168,76,0.3);font-weight:600}
 .render-toggle{display:none;align-items:center;gap:8px;margin-bottom:16px;font-size:0.72rem;color:var(--muted2)}
 .render-toggle.visible{display:flex}
 .toggle-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:0.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
@@ -231,6 +250,16 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-neon .lz-notebook-text{color:#e0e0f0}
 .theme-neon .lz-notebook-sub{color:#a0a0c0}
 .theme-retro .lz-notebook-text,.theme-retro .lz-notebook-sub{font-family:'DM Mono',monospace}
+.lz-report-summary{margin:0 36px 20px;padding:16px 20px;background:#f8f6f2;border-left:4px solid #c9a84c;border-radius:0 6px 6px 0;font-size:0.82rem;line-height:1.75;color:#2a2826;font-style:italic}
+.lz-report-body{padding:8px 36px;font-size:0.83rem;line-height:1.85;color:#1c1a18}
+.lz-report-section-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #e8e4de}
+.lz-report-para{margin-bottom:12px;text-align:justify}
+.lz-report-source{margin:16px 36px 8px;font-size:0.72rem;color:#8a8580;font-style:italic;padding-top:12px;border-top:1px solid #e8e4de}
+.theme-dark .lz-report-summary{background:#1e1e1e;color:#d0cdc8;border-color:#52b788}
+.theme-dark .lz-report-body{color:#d0cdc8}.theme-dark .lz-report-section-title{color:#f0ede8;border-bottom-color:#333}
+.theme-neon .lz-report-summary{background:#0d0d20;color:#d0d8f0;border-color:#00ffcc}
+.theme-neon .lz-report-body{color:#d0d8f0}.theme-neon .lz-report-section-title{color:#fff;border-bottom-color:#1a1a30}
+.theme-retro .lz-report-body,.theme-retro .lz-report-summary{font-family:'DM Mono',monospace}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
 .lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
 .lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
@@ -294,6 +323,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
 
       <!-- STRUCTURE MODE -->
       <div id="mode-structure" style="flex-direction:column;gap:9px">
+        <div style="margin-bottom:4px">
+          <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Vorlage</div>
+          <div class="template-bar">
+            <button class="template-btn active" id="tpl-lernzettel" onclick="setTemplate('lernzettel')">📚 Lernzettel</button>
+            <button class="template-btn" id="tpl-bericht" onclick="setTemplate('bericht')">📄 Bericht</button>
+          </div>
+        </div>
         <div class="btn-group">
           <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
           <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
@@ -305,6 +341,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
 
       <!-- GENERATE MODE -->
       <div id="mode-generate" style="flex-direction:column;gap:16px">
+        <div style="margin-bottom:4px">
+          <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Vorlage</div>
+          <div class="template-bar">
+            <button class="template-btn active" id="gtpl-lernzettel" onclick="setGenTemplate('lernzettel')">📚 Lernzettel</button>
+            <button class="template-btn" id="gtpl-bericht" onclick="setGenTemplate('bericht')">📄 Bericht</button>
+          </div>
+        </div>
         <div>
           <label style="font-size:0.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:8px">Thema / Prompt</label>
           <textarea id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg, Pythagoras — oder detaillierter: 'Die Ursachen des Ersten Weltkriegs mit Fokus auf Österreich-Ungarn'…" style="width:100%;min-height:100px;padding:12px 14px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;outline:none;background:#0e0e0e;color:var(--ink);caret-color:var(--accent);resize:vertical;line-height:1.6"></textarea>
@@ -395,6 +438,94 @@ textarea::placeholder { color: #383532; font-style: italic; }
 <script>
 // ── PREVIEW STYLES (injected into thumbnails + preview) ──────
 const APP_MODE = new URLSearchParams(window.location.search).get('mode') || 'structure';
+let currentTemplate = 'lernzettel';
+let currentGenTemplate = 'lernzettel';
+
+function setTemplate(tpl) {
+  currentTemplate = tpl;
+  document.querySelectorAll('[id^="tpl-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tpl-' + tpl);
+  if (btn) btn.classList.add('active');
+}
+
+function setGenTemplate(tpl) {
+  currentGenTemplate = tpl;
+  document.querySelectorAll('[id^="gtpl-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('gtpl-' + tpl);
+  if (btn) btn.classList.add('active');
+  // Show/hide sliders for bericht (no need for format slider)
+  const sliderSection = document.querySelector('#mode-generate .slider-group');
+}
+
+function parseReportText(raw) {
+  const lines = String(raw||'').replace(/
+/g,'
+').split('
+');
+  const doc = { title:'', summary:'', sections:[], source:null, _reportMode:true };
+  let currentSection = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i], trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^#\s+/.test(trimmed)) { doc.title = trimmed.replace(/^#\s+/,'').trim(); continue; }
+    if (/^##\s+Zusammenfassung/i.test(trimmed)) {
+      // Read next non-empty lines as summary
+      let sumLines = [];
+      while (i+1 < lines.length) {
+        i++;
+        const next = lines[i].trim();
+        if (!next) continue;
+        if (/^[#\d]/.test(next)) { i--; break; }
+        sumLines.push(next);
+        if (sumLines.length >= 4) break;
+      }
+      doc.summary = sumLines.join(' ');
+      continue;
+    }
+    if (/^>\s*Quellenhinweis/.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    const nm = line.match(/^(\d+)\.\s+(.*)/);
+    if (nm) {
+      currentSection = { num: nm[1], title: nm[2].trim(), paras: [] };
+      doc.sections.push(currentSection);
+      continue;
+    }
+    // Regular text lines go into current section as paragraph text
+    if (currentSection) {
+      const last = currentSection.paras[currentSection.paras.length - 1];
+      if (last && !last.endsWith('.') && !last.endsWith('!') && !last.endsWith('?')) {
+        currentSection.paras[currentSection.paras.length - 1] += ' ' + trimmed;
+      } else {
+        currentSection.paras.push(trimmed);
+      }
+    }
+  }
+  if (!doc.title) doc.title = 'Bericht';
+  return doc;
+}
+
+function renderReportHTML(doc, design) {
+  const themeClass = 'theme-' + design.id;
+  const C = design.sectionColors;
+  let html = `<div class="lz-page ${themeClass}">`;
+  html += `<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title)}</span></h1></div>`;
+  if (doc.summary) {
+    html += `<div class="lz-report-summary">${escapeText(doc.summary)}</div>`;
+  }
+  html += `<div class="lz-report-body">`;
+  doc.sections.forEach((sec, si) => {
+    const c = C[si % C.length];
+    html += `<div class="lz-report-section-title" style="color:${escapeAttr(c.title)}">${escapeText(sec.num)}. ${escapeText(sec.title)}</div>`;
+    sec.paras.forEach(para => {
+      html += `<div class="lz-report-para">${escapeText(para)}</div>`;
+    });
+  });
+  html += `</div>`;
+  if (doc.source) {
+    html += `<div class="lz-report-source">${escapeText(doc.source)}</div>`;
+  }
+  html += `<div class="lz-page-num">— 1 —</div></div>`;
+  return html;
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   if (APP_MODE === 'generate') {
@@ -498,6 +629,16 @@ const previewStyles = `
 .theme-dark .lz-notebook-text{color:#d0cdc8}.theme-dark .lz-notebook-sub{color:#9a9590}.theme-dark .lz-notebook-subsub{color:#7a7570}
 .theme-neon .lz-notebook-text{color:#e0e0f0}.theme-neon .lz-notebook-sub{color:#a0a0c0}
 .theme-retro .lz-notebook-text,.theme-retro .lz-notebook-sub{font-family:'DM Mono',monospace}
+.lz-report-summary{margin:0 36px 20px;padding:16px 20px;background:#f8f6f2;border-left:4px solid #c9a84c;border-radius:0 6px 6px 0;font-size:0.82rem;line-height:1.75;color:#2a2826;font-style:italic}
+.lz-report-body{padding:8px 36px;font-size:0.83rem;line-height:1.85;color:#1c1a18}
+.lz-report-section-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #e8e4de}
+.lz-report-para{margin-bottom:12px;text-align:justify}
+.lz-report-source{margin:16px 36px 8px;font-size:0.72rem;color:#8a8580;font-style:italic;padding-top:12px;border-top:1px solid #e8e4de}
+.theme-dark .lz-report-summary{background:#1e1e1e;color:#d0cdc8;border-color:#52b788}
+.theme-dark .lz-report-body{color:#d0cdc8}.theme-dark .lz-report-section-title{color:#f0ede8;border-bottom-color:#333}
+.theme-neon .lz-report-summary{background:#0d0d20;color:#d0d8f0;border-color:#00ffcc}
+.theme-neon .lz-report-body{color:#d0d8f0}.theme-neon .lz-report-section-title{color:#fff;border-bottom-color:#1a1a30}
+.theme-retro .lz-report-body,.theme-retro .lz-report-summary{font-family:'DM Mono',monospace}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
 .lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
 .lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
@@ -743,6 +884,18 @@ function renderDesignGrid(){
   });
 }
 
+function renderReportPreview(doc){
+  const html=`<style>${previewStyles}</style>${renderReportHTML(doc,currentDesign)}`;
+  document.getElementById('emptyState').style.display='none';
+  const lzPreview=document.getElementById('lzPreview');
+  lzPreview.style.display='block';
+  lzPreview.innerHTML=html;
+  document.getElementById('exportBtn').disabled=false;
+  const eb=document.getElementById('exportBtnGen'); if(eb) eb.disabled=false;
+  const toggle=document.getElementById('renderToggle');
+  if(toggle) toggle.classList.remove('visible'); // no toggle for reports
+}
+
 function renderPreview(doc){
   const html=`<style>${previewStyles}</style>${renderDocHTML(doc,currentDesign)}`;
   document.getElementById('emptyState').style.display='none';
@@ -785,18 +938,25 @@ async function cleanWithAI(){
   if(!raw){setStatus('Bitte Text eingeben','err');return;}
   const btn=document.getElementById('aiBtn');
   btn.disabled=true;
+  const isBericht = currentTemplate === 'bericht';
+  const sendText = isBericht ? `STRUKTUR_BERICHT: ${raw}` : raw;
   const maxRetries=3;
   for(let attempt=1;attempt<=maxRetries;attempt++){
     btn.textContent=attempt>1?`⏳ Versuch ${attempt}/${maxRetries}...`:'⏳ Lädt...';
     try{
-      const response=await fetch('/api/clean',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:raw})});
+      const response=await fetch('/api/clean',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:sendText})});
       let data;try{data=await response.json();}catch{data={error:'Ungültige Server-Antwort'};}
       if(!response.ok){setStatus(`Fehler: ${data.error||'Serverfehler'}`,'err');btn.disabled=false;btn.textContent='✦ KI bereinigen';return;}
       if(data.error){setStatus('Fehler: '+data.error,'err');btn.disabled=false;btn.textContent='✦ KI bereinigen';return;}
       const cleaned=normalizeAIText(data.cleaned);
       if(cleaned&&isValidOutput(cleaned,raw)){
         document.getElementById('inputText').value=cleaned;
-        parsedDoc=parseText(cleaned);renderPreview(parsedDoc);
+        if(currentTemplate==='bericht'){
+          parsedDoc=parseReportText(cleaned);
+          renderReportPreview(parsedDoc);
+        } else {
+          parsedDoc=parseText(cleaned);renderPreview(parsedDoc);
+        }
         setStatus('✓ Bereinigt & Vorschau aktualisiert','ok');
         btn.disabled=false;btn.textContent='✦ KI bereinigen';return;
       }
@@ -874,7 +1034,8 @@ async function generateFromTopic(){
     'FORMAT: FLIESSTEXT. Jeder Bullet ist ein vollständiger erklärender Satz oder 2-3 Sätze die Zusammenhänge erklären. Keine reinen Stichworte — immer vollständige Sätze die das Warum und Wie erklären.'
   ][format-1];
 
-  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic}
+  const prefix = currentGenTemplate === 'bericht' ? 'GENERIERE_BERICHT' : 'GENERIERE_LERNZETTEL';
+  const enrichedTopic = `${prefix}: ${topic}
 
 WICHTIGSTE REGEL — FORMAT:
 ${formatHint}
@@ -900,8 +1061,13 @@ INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie
       const cleaned=normalizeAIText(data.cleaned);
       if(cleaned&&isValidOutput(cleaned,topic)){
         document.getElementById('inputText').value=cleaned;
-        parsedDoc=parseText(cleaned);
-        renderPreview(parsedDoc);
+        if(currentGenTemplate==='bericht'){
+          parsedDoc=parseReportText(cleaned);
+          renderReportPreview(parsedDoc);
+        } else {
+          parsedDoc=parseText(cleaned);
+          renderPreview(parsedDoc);
+        }
         // Enable both export buttons
         const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
         const ebg=document.getElementById('exportBtnGen'); if(ebg) ebg.disabled=false;
