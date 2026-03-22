@@ -40,7 +40,7 @@ Exaktes Format — halte dich GENAU daran:
 
 [Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig für vollständige Abdeckung]
 
-[Letzter Abschnitt]. Fazit
+X. [Letzter Abschnitt]. Fazit
 3-5 Sätze Schlussfolgerungen und Ausblick.
 
 > Quellenhinweis: Nur wenn im Original erkennbar, sonst weglassen.
