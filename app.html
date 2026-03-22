@@ -984,25 +984,24 @@ function renderPreview(doc){
 }
 
 function openModal(){
-  // In generate mode, topicInput is used; in structure mode, inputText
-  const raw = document.getElementById('inputText').value.trim();
-  const topicRaw = document.getElementById('topicInput') ? document.getElementById('topicInput').value.trim() : '';
-  const inGenerateMode = APP_MODE === 'generate';
-  if(!parsedDoc){
-    if(inGenerateMode){
-      if(!topicRaw){setStatus('Bitte zuerst generieren','err');return;}
-      setStatus('Bitte zuerst generieren','err');return;
-    }
-    if(!raw){setStatus('Bitte zuerst Text eingeben','err');return;}
-    if(looksStructured(raw)){
-      parsedDoc=parseText(raw);
-    } else {
-      setStatus('Bitte zuerst mit KI bereinigen','err');return;
-    }
+  // If we already have a parsed doc (lernzettel or bericht), open directly
+  if(parsedDoc){
+    pendingDesign=currentDesign;
+    renderDesignGrid();
+    document.getElementById('modalOverlay').classList.remove('hidden');
+    return;
   }
-  pendingDesign=currentDesign;
-  renderDesignGrid();
-  document.getElementById('modalOverlay').classList.remove('hidden');
+  // Otherwise try to parse from textarea
+  const raw = document.getElementById('inputText').value.trim();
+  if(!raw){setStatus('Bitte zuerst Inhalt generieren oder Text eingeben','err');return;}
+  if(looksStructured(raw)){
+    parsedDoc=parseText(raw);
+    pendingDesign=currentDesign;
+    renderDesignGrid();
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  } else {
+    setStatus('Bitte zuerst mit KI bereinigen','err');
+  }
 }
 
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
