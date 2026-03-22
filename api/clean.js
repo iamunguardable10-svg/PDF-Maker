@@ -48,38 +48,30 @@ STRIKTE REGELN:
 Text:
 ${topic}`
       : `Erstelle einen ausführlichen Bericht zum Thema: "${topic}"
-Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
+Gib NUR den fertigen Bericht zurück — keine Erklärungen, keine Regeln, kein Codeblock.
 
-Exaktes Format — halte dich GENAU daran:
-# [Passender Titel zum Thema]
+# [Passender Titel]
 
 ## Zusammenfassung
-2-4 Sätze Fließtext als Überblick über das Thema.
+2-4 Sätze Fließtext als Überblick.
 
 1. Einleitung
-3-5 Sätze Fließtext über Hintergrund und Bedeutung des Themas.
+3-5 Sätze über Hintergrund und Bedeutung des Themas.
 
-2. [Themenaspekt 1]
+2. [Passender Themenaspekt]
 4-6 Sätze ausführlicher Fließtext.
 
-3. [Themenaspekt 2]
+3. [Weiterer Themenaspekt]
 4-6 Sätze ausführlicher Fließtext.
 
-4. [Themenaspekt 3]
-4-6 Sätze ausführlicher Fließtext.
+[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig für vollständige Abdeckung]
 
-5. Fazit
+[Letzter Abschnitt]. Fazit
 3-5 Sätze Schlussfolgerungen und Ausblick.
 
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
 
-STRIKTE REGELN:
-- KEIN Fettdruck (**text**) — nirgendwo im Text
-- KEINE Bulletpoints (- oder •) — nirgendwo
-- KEINE Markdown-Formatierung außer #, ##, Ziffern und >
-- Nur vollständige Fließtext-Sätze
-- ECHTEN inhaltlichen Text — keine Platzhalter wie [Fließtext] oder [Abschnitt]
-- Zusammenfassung IMMER direkt nach dem Titel`
+Regeln: Kein Fettdruck, keine Bullets, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, ECHTER inhaltlicher Text.`
     : isGenerate
     ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
