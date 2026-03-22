@@ -296,13 +296,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <div style="display:flex;flex-direction:column;gap:16px">
           <div class="slider-group">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Länge</label>
-              <span id="lengthLabel" style="font-size:0.7rem;color:var(--accent)">Mittel</span>
+              <label style="font-size:0.72rem;color:var(--muted2)">Format</label>
+              <span id="formatLabel" style="font-size:0.7rem;color:var(--accent)">Gemischt</span>
             </div>
-            <input type="range" id="lengthSlider" min="1" max="5" value="3" step="1" class="slider">
+            <input type="range" id="formatSlider" min="1" max="3" value="2" step="1" class="slider">
             <div style="display:flex;justify-content:space-between;margin-top:4px">
-              <span style="font-size:0.58rem;color:var(--muted)">Sehr kurz</span>
-              <span style="font-size:0.58rem;color:var(--muted)">Sehr lang</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Bulletpoints</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Fließtext</span>
             </div>
           </div>
           <div class="slider-group">
@@ -312,7 +312,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
             </div>
             <input type="range" id="detailSlider" min="1" max="5" value="3" step="1" class="slider">
             <div style="display:flex;justify-content:space-between;margin-top:4px">
-              <span style="font-size:0.58rem;color:var(--muted)">Stichpunkte</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Kompakt</span>
               <span style="font-size:0.58rem;color:var(--muted)">Sehr detailliert</span>
             </div>
           </div>
@@ -347,17 +347,6 @@ textarea::placeholder { color: #383532; font-style: italic; }
             <div style="display:flex;justify-content:space-between;margin-top:4px">
               <span style="font-size:0.58rem;color:var(--muted)">Kein Vorwissen</span>
               <span style="font-size:0.58rem;color:var(--muted)">Experte</span>
-            </div>
-          </div>
-          <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Format</label>
-              <span id="formatLabel" style="font-size:0.7rem;color:var(--accent)">Gemischt</span>
-            </div>
-            <input type="range" id="formatSlider" min="1" max="3" value="2" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
-              <span style="font-size:0.58rem;color:var(--muted)">Bulletpoints</span>
-              <span style="font-size:0.58rem;color:var(--muted)">Fließtext</span>
             </div>
           </div>
         </div>
@@ -762,7 +751,6 @@ async function cleanWithAI(){
 
 function toggleGenerateMode() {} // kept for compatibility
 
-const lengthLabels = ['Sehr kurz', 'Kurz', 'Mittel', 'Lang', 'Sehr lang'];
 const detailLabels = ['Nur Stichpunkte', 'Kompakt', 'Ausgewogen', 'Detailliert', 'Sehr detailliert'];
 const levelLabels  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'];
 const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wissenschaftlich'];
@@ -770,14 +758,12 @@ const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', '
 const formatLabels = ['Nur Bulletpoints', 'Gemischt', 'Fließtext'];
 
 function initSliders() {
-  const ls = document.getElementById('lengthSlider');
   const ds = document.getElementById('detailSlider');
   const vs = document.getElementById('levelSlider');
   const gs = document.getElementById('langSlider');
   const ps = document.getElementById('priorSlider');
   const fs = document.getElementById('formatSlider');
   if (!ls) return;
-  ls.addEventListener('input', () => { document.getElementById('lengthLabel').textContent  = lengthLabels[ls.value-1]; });
   ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1]; });
   vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1]; });
   gs.addEventListener('input', () => { document.getElementById('langLabel').textContent    = langLabels[gs.value-1]; });
@@ -792,7 +778,6 @@ async function generateFromTopic(){
   if(!topic){setStatus('Bitte ein Thema eingeben','err');return;}
 
   // Read sliders if in generate mode
-  const length = document.getElementById('lengthSlider') ? parseInt(document.getElementById('lengthSlider').value) : 3;
   const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 3;
   const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 3;
 
@@ -800,12 +785,7 @@ async function generateFromTopic(){
   const prior  = document.getElementById('priorSlider')  ? parseInt(document.getElementById('priorSlider').value)  : 2;
   const format = document.getElementById('formatSlider') ? parseInt(document.getElementById('formatSlider').value) : 2;
 
-  // Resolve conflicts: if length=1 and detail=5, detail wins downward
-  const resolvedDetail = Math.min(detail, length + 2);
-
-  // Exact section and bullet counts
-  const sectionCount = [2, 3, 5, 7, 9][length-1];
-  const bulletCount  = [2, 3, 4, 5, 6][resolvedDetail-1];
+  const bulletCount = [2, 3, 4, 5, 6][detail-1];
 
   const levelHint  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'][level-1];
   const langHint   = ['sehr einfache Alltagssprache, jeden Fachbegriff sofort erklären', 'normale verständliche Sprache, wichtige Fachbegriffe in Klammern erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennung kurz erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung'][lang-1];
@@ -821,9 +801,8 @@ async function generateFromTopic(){
 WICHTIGSTE REGEL — FORMAT:
 ${formatHint}
 
-STRUKTUR (exakt einhalten):
-- EXAKT ${sectionCount} Abschnitte
-- EXAKT ${bulletCount} Hauptpunkte pro Abschnitt
+PARAMETER:
+- Ausführlichkeit: ca. ${bulletCount} Hauptpunkte pro Abschnitt, Anzahl Abschnitte je nach Themenumfang
 - Niveau: ${levelHint}
 - Sprache: ${langHint}
 - Vorwissen des Lesers: ${priorHint}
