@@ -800,28 +800,35 @@ async function generateFromTopic(){
   const prior  = document.getElementById('priorSlider')  ? parseInt(document.getElementById('priorSlider').value)  : 2;
   const format = document.getElementById('formatSlider') ? parseInt(document.getElementById('formatSlider').value) : 2;
 
-  const lengthHint = ['sehr kurz (2-3 Abschnitte)', 'kurz (3-4 Abschnitte)', 'mittel (5 Abschnitte)', 'lang (6-7 Abschnitte)', 'sehr lang (8+ Abschnitte)'][length-1];
-  const detailHint = ['nur knappe Stichpunkte', 'kompakt', 'ausgewogen', 'detailliert mit Beispielen', 'sehr detailliert mit Beispielen und Querverweisen'][detail-1];
+  // Resolve conflicts: if length=1 and detail=5, detail wins downward
+  const resolvedDetail = Math.min(detail, length + 2);
+
+  // Exact section and bullet counts
+  const sectionCount = [2, 3, 5, 7, 9][length-1];
+  const bulletCount  = [2, 3, 4, 5, 6][resolvedDetail-1];
+
   const levelHint  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'][level-1];
-  const langHint   = ['sehr einfach, Fachbegriffe immer erklären', 'normal, wichtige Fachbegriffe kurz erklären', 'gehoben, Fachbegriffe gelegentlich erklären', 'Fachsprache, Begriffe nur bei Erstnennung erklären', 'wissenschaftlich, Fachterminologie ohne Erklärung'][lang-1];
-  const priorHint  = ['kein Vorwissen — alle Grundbegriffe erklären', 'Grundkenntnisse — Basiskonzepte nur kurz erwähnen', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschritten — nur sehr spezifische Details erklären', 'Experte — keine Erklärungen, nur komprimierte Fakten'][prior-1];
+  const langHint   = ['sehr einfache Alltagssprache, jeden Fachbegriff sofort erklären', 'normale verständliche Sprache, wichtige Fachbegriffe in Klammern erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennung kurz erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung'][lang-1];
+  const priorHint  = ['kein Vorwissen — jeden Begriff und jedes Konzept von Grund auf erklären', 'Grundkenntnisse — Basiskonzepte nur kurz erwähnen', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschrittenes Wissen — nur sehr spezifische Fachdetails erklären', 'Expertenwissen — keine Erklärungen, nur dichte Fakten'][prior-1];
   const formatHint = [
-    'NUR Bulletpoints. Verwende ausschließlich das Bullet-Format (- Punkt). Kein Fließtext in den Bullets.',
-    'GEMISCHT: Verwende Bulletpoints für Aufzählungen und Fakten. Für Erklärungen, Zusammenhänge und Prozesse schreibe kurze Fließtext-Sätze als eigene Bullet-Zeilen (ohne "-" davor, einfach als normaler Satz eingerückt unter dem Hauptpunkt).',
-    'FLIESSTEXT: Schreibe jeden Bullet-Punkt als vollständigen Satz oder 2-3 Sätze die den Zusammenhang erklären. Keine knappen Stichworte — immer vollständige erklärende Sätze.'
+    'FORMAT: NUR Bulletpoints (- Punkt). Jeder Punkt ist ein knapper präziser Stichpunkt. Keine ganzen Sätze, kein Fließtext.',
+    'FORMAT: GEMISCHT. Kurze Fakten als Bulletpoints. Erklärungen, Kausalzusammenhänge und Prozesse als vollständige Sätze direkt unter dem jeweiligen Bullet (eingerückt, ohne "-").',
+    'FORMAT: NUR FLIESSTEXT. Jeder Bullet ist ein vollständiger erklärender Satz oder 2-3 Sätze. Keine Stichworte — immer vollständige Sätze mit Subjekt, Prädikat, Objekt.'
   ][format-1];
 
   const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic}
 
-Parameter:
-- Länge: ${lengthHint}
-- Ausführlichkeit: ${detailHint}
+WICHTIGSTE REGEL — FORMAT:
+${formatHint}
+
+STRUKTUR (exakt einhalten):
+- EXAKT ${sectionCount} Abschnitte
+- EXAKT ${bulletCount} Hauptpunkte pro Abschnitt
 - Niveau: ${levelHint}
 - Sprache: ${langHint}
 - Vorwissen des Lesers: ${priorHint}
-- Format: ${formatHint}
 
-WICHTIG: Schreibe ECHTEN inhaltlichen Text zum Thema "${topic}". KEINE Platzhalter wie "Definition von X", "Erklärung von Y", "Anwendung auf Z". Jeder Bullet-Punkt muss konkrete Fakten, Definitionen oder Erklärungen enthalten.`;
+INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie "Definition von X", "Erklärung von Y". Jeder Punkt enthält konkrete Fakten, echte Definitionen, reale Beispiele.`;
 
   const btn=document.getElementById('genSubmitBtn');
   btn.disabled=true;
