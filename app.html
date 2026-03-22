@@ -349,6 +349,17 @@ textarea::placeholder { color: #383532; font-style: italic; }
               <span style="font-size:0.58rem;color:var(--muted)">Experte</span>
             </div>
           </div>
+          <div class="slider-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label style="font-size:0.72rem;color:var(--muted2)">Format</label>
+              <span id="formatLabel" style="font-size:0.7rem;color:var(--accent)">Gemischt</span>
+            </div>
+            <input type="range" id="formatSlider" min="1" max="3" value="2" step="1" class="slider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.58rem;color:var(--muted)">Bulletpoints</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Fließtext</span>
+            </div>
+          </div>
         </div>
 
         <div class="btn-group">
@@ -756,6 +767,7 @@ const detailLabels = ['Nur Stichpunkte', 'Kompakt', 'Ausgewogen', 'Detailliert',
 const levelLabels  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'];
 const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wissenschaftlich'];
 const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', 'Fortgeschritten', 'Experte'];
+const formatLabels = ['Nur Bulletpoints', 'Gemischt', 'Fließtext'];
 
 function initSliders() {
   const ls = document.getElementById('lengthSlider');
@@ -763,12 +775,14 @@ function initSliders() {
   const vs = document.getElementById('levelSlider');
   const gs = document.getElementById('langSlider');
   const ps = document.getElementById('priorSlider');
+  const fs = document.getElementById('formatSlider');
   if (!ls) return;
-  ls.addEventListener('input', () => { document.getElementById('lengthLabel').textContent = lengthLabels[ls.value-1]; });
-  ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent = detailLabels[ds.value-1]; });
-  vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent  = levelLabels[vs.value-1]; });
-  gs.addEventListener('input', () => { document.getElementById('langLabel').textContent   = langLabels[gs.value-1]; });
-  ps.addEventListener('input', () => { document.getElementById('priorLabel').textContent  = priorLabels[ps.value-1]; });
+  ls.addEventListener('input', () => { document.getElementById('lengthLabel').textContent  = lengthLabels[ls.value-1]; });
+  ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1]; });
+  vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1]; });
+  gs.addEventListener('input', () => { document.getElementById('langLabel').textContent    = langLabels[gs.value-1]; });
+  ps.addEventListener('input', () => { document.getElementById('priorLabel').textContent   = priorLabels[ps.value-1]; });
+  fs.addEventListener('input', () => { document.getElementById('formatLabel').textContent  = formatLabels[fs.value-1]; });
 }
 window.addEventListener('DOMContentLoaded', initSliders);
 
@@ -782,16 +796,32 @@ async function generateFromTopic(){
   const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 3;
   const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 3;
 
-  const lang  = document.getElementById('langSlider')  ? parseInt(document.getElementById('langSlider').value)  : 2;
-  const prior = document.getElementById('priorSlider') ? parseInt(document.getElementById('priorSlider').value) : 2;
+  const lang   = document.getElementById('langSlider')   ? parseInt(document.getElementById('langSlider').value)   : 2;
+  const prior  = document.getElementById('priorSlider')  ? parseInt(document.getElementById('priorSlider').value)  : 2;
+  const format = document.getElementById('formatSlider') ? parseInt(document.getElementById('formatSlider').value) : 2;
 
-  const lengthHint = ['sehr kurz (2-3 Abschnitte, je 2-3 Bullets)', 'kurz (3-4 Abschnitte, je 3 Bullets)', 'mittel (5 Abschnitte, je 4-5 Bullets)', 'lang (6-7 Abschnitte, je 5-6 Bullets)', 'sehr lang (8+ Abschnitte, je 6+ Bullets mit vielen Unterpunkten)'][length-1];
-  const detailHint = ['nur kurze Stichpunkte, keine Unterpunkte', 'kompakt, wenige Unterpunkte', 'ausgewogen, Unterpunkte wo sinnvoll', 'detailliert, viele Unterpunkte und Beispiele', 'sehr detailliert, Sub-Sub-Bullets, Beispiele, Querverweise'][detail-1];
-  const levelHint  = ['Mittelschule, einfache klare Sprache', 'Gymnasium, normale Schulsprache', 'Oberstufe, präzise Formulierungen', 'Abitur-Niveau, anspruchsvolle Sprache und Tiefe', 'Uni-Niveau, akademische Sprache und wissenschaftliche Tiefe'][level-1];
-  const langHint   = ['sehr einfache alltagsnahe Sprache, Fachbegriffe immer erklären', 'normale verständliche Sprache, wichtige Fachbegriffe kurz erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennuung erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung verwenden'][lang-1];
-  const priorHint  = ['kein Vorwissen vorhanden — alle Grundbegriffe und Konzepte erklären', 'Grundkenntnisse vorhanden — Basiskonzepte kurz erwähnen, nicht ausführlich erklären', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschrittenes Wissen — nur sehr spezifische Fachdetails erklären', 'Expertenwissen — keine Erklärungen, nur komprimierte Fakten'][prior-1];
+  const lengthHint = ['sehr kurz (2-3 Abschnitte)', 'kurz (3-4 Abschnitte)', 'mittel (5 Abschnitte)', 'lang (6-7 Abschnitte)', 'sehr lang (8+ Abschnitte)'][length-1];
+  const detailHint = ['nur knappe Stichpunkte', 'kompakt', 'ausgewogen', 'detailliert mit Beispielen', 'sehr detailliert mit Beispielen und Querverweisen'][detail-1];
+  const levelHint  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'][level-1];
+  const langHint   = ['sehr einfach, Fachbegriffe immer erklären', 'normal, wichtige Fachbegriffe kurz erklären', 'gehoben, Fachbegriffe gelegentlich erklären', 'Fachsprache, Begriffe nur bei Erstnennung erklären', 'wissenschaftlich, Fachterminologie ohne Erklärung'][lang-1];
+  const priorHint  = ['kein Vorwissen — alle Grundbegriffe erklären', 'Grundkenntnisse — Basiskonzepte nur kurz erwähnen', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschritten — nur sehr spezifische Details erklären', 'Experte — keine Erklärungen, nur komprimierte Fakten'][prior-1];
+  const formatHint = [
+    'NUR Bulletpoints. Verwende ausschließlich das Bullet-Format (- Punkt). Kein Fließtext in den Bullets.',
+    'GEMISCHT: Verwende Bulletpoints für Aufzählungen und Fakten. Für Erklärungen, Zusammenhänge und Prozesse schreibe kurze Fließtext-Sätze als eigene Bullet-Zeilen (ohne "-" davor, einfach als normaler Satz eingerückt unter dem Hauptpunkt).',
+    'FLIESSTEXT: Schreibe jeden Bullet-Punkt als vollständigen Satz oder 2-3 Sätze die den Zusammenhang erklären. Keine knappen Stichworte — immer vollständige erklärende Sätze.'
+  ][format-1];
 
-  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic} | Länge: ${lengthHint} | Ausführlichkeit: ${detailHint} | Niveau: ${levelHint} | Sprache: ${langHint} | Vorwissen des Lesers: ${priorHint}`;
+  const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic}
+
+Parameter:
+- Länge: ${lengthHint}
+- Ausführlichkeit: ${detailHint}
+- Niveau: ${levelHint}
+- Sprache: ${langHint}
+- Vorwissen des Lesers: ${priorHint}
+- Format: ${formatHint}
+
+WICHTIG: Schreibe ECHTEN inhaltlichen Text zum Thema "${topic}". KEINE Platzhalter wie "Definition von X", "Erklärung von Y", "Anwendung auf Z". Jeder Bullet-Punkt muss konkrete Fakten, Definitionen oder Erklärungen enthalten.`;
 
   const btn=document.getElementById('genSubmitBtn');
   btn.disabled=true;
