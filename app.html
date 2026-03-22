@@ -927,7 +927,11 @@ function closeModal(){document.getElementById('modalOverlay').classList.add('hid
 function applyDesign(){
   currentDesign=pendingDesign;
   closeModal();
-  if(parsedDoc){renderPreview(parsedDoc);setStatus('✓ Design angewendet','ok');}
+  if(parsedDoc){
+    if(parsedDoc._reportMode) renderReportPreview(parsedDoc);
+    else renderPreview(parsedDoc);
+    setStatus('✓ Design angewendet','ok');
+  }
 }
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
@@ -1169,13 +1173,31 @@ function syncTextarea(){
 function directExport(){
   const raw=document.getElementById('inputText').value.trim();
   if(!raw){setStatus('Bitte Text eingeben','err');return;}
-  parsedDoc=parseText(raw);
-  renderPreview(parsedDoc);
+  if(currentTemplate==='bericht'){
+    parsedDoc=parseReportText(raw);
+    renderReportPreview(parsedDoc);
+  } else {
+    parsedDoc=parseText(raw);
+    renderPreview(parsedDoc);
+  }
   setStatus('✓ Vorschau erstellt — bereit zum Export','ok');
 }
 
 function exportPDF(){
   if(!parsedDoc)return;
+  // If report mode, use print-based export for accurate rendering
+  if(parsedDoc._reportMode){
+    const printArea=document.getElementById('printArea');
+    printArea.innerHTML=`<style>${previewStyles}
+.lz-page{max-width:100%;border-radius:0;box-shadow:none;animation:none}
+.lz-editable:hover{background:transparent!important;outline:none!important}
+.lz-editable:hover::after{display:none!important}
+</style>${renderReportHTML(parsedDoc,currentDesign)}`;
+    printArea.style.display='block';
+    setTimeout(()=>{ window.print(); setTimeout(()=>{printArea.style.display='none';},500); },100);
+    setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
+    return;
+  }
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
