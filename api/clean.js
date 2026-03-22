@@ -24,21 +24,28 @@ export default async function handler(req) {
 Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
 
 Exaktes Format — halte dich GENAU daran:
-# Titel des Berichts
+# [Passender Titel]
 
 ## Zusammenfassung
-Hier 2-4 Sätze Fließtext als zusammenfassender Überblick.
+2-4 Sätze Fließtext als Überblick.
 
-1. Abschnittsname
-Hier 3-5 vollständige Sätze als Fließtext. Kein Bullet. Kein Fettdruck.
+1. Einleitung
+3-5 Sätze über Hintergrund und Bedeutung des Themas.
 
-2. Zweiter Abschnittsname
-Weitere Sätze als Fließtext.
+2. [Passender Themenaspekt]
+4-6 Sätze ausführlicher Fließtext.
+
+3. [Weiterer Themenaspekt]
+4-6 Sätze ausführlicher Fließtext.
+
+[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig für vollständige Abdeckung]
+
+[Letzter Abschnitt]. Fazit
+3-5 Sätze Schlussfolgerungen und Ausblick.
 
 > Quellenhinweis: Nur wenn im Original erkennbar, sonst weglassen.
 
 STRIKTE REGELN:
-- KEIN Fettdruck (**text**) — nirgendwo
 - KEINE Bulletpoints (- oder •) — nirgendwo
 - KEINE Markdown-Formatierung außer #, ##, Ziffern und >
 - Nur vollständige Sätze im Fließtext
@@ -162,6 +169,15 @@ ${text}`;
 
   // Platzhalter-Callouts entfernen
   const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile'];
+  // Remove stray asterisks used as bullet markers (e.g. "* Punkt" -> "- Punkt")
+  cleaned = cleaned.split('\n').map(line => {
+    // Replace "* text" bullet style with "- text"
+    if (/^(\s*)\*\s+(.+)$/.test(line)) {
+      return line.replace(/^(\s*)\*\s+/, '$1- ');
+    }
+    return line;
+  }).join('\n');
+
   cleaned = cleaned.split('\n').filter(line => {
     const t = line.trim();
     if (/^\*\*.*\*\*$/.test(t)) {
