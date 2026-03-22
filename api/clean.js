@@ -83,16 +83,18 @@ Regeln: Kein Fettdruck, keine Bullets, nur #/##/Ziffern/> als Formatierung, voll
     ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
 
-Format:
-# Titel
+Zielformat:
+# Haupttitel
 
-1. Abschnittsname
-- Bullet oder Satz je nach Format-Parameter
-  - Unterpunkt
+1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
+- Bullet Ebene 1
+  - Bullet Ebene 2 (GENAU 2 Leerzeichen Einrückung)
+    - Bullet Ebene 3 (GENAU 4 Leerzeichen Einrückung)
+(baue hier die Struktur und Einrückungen so wie du sie für richtig hälst)
+** Callout nur für wirklich Wichtiges **
 
-** Wichtiger Hinweis als eigene Zeile **
+> Merksatz: Echter inhaltlicher Satz.
 
-> Merksatz: Ein zusammenfassender Satz.
 
 ABSOLUTE PFLICHTREGELN:
 - KEIN Fettdruck in Bullets
@@ -106,14 +108,26 @@ ${topic}`
 
     : `Konvertiere diesen Text in ein sauberes Lernzettel-Format. Gib NUR das Ergebnis zurück — keine Erklärungen, keine Regeln.
 
-# Titel
-1. Abschnittsname
-- Bullet
-  - Unterpunkt
-** Wichtiger Hinweis **
-> Merksatz: Satz.
+Zielformat:
+# Haupttitel
 
-Regeln: Kein ##, echte Abschnittsnamen (nie "Erster Abschnitt"), keine Sternchen in Bullets, Emojis/Trennlinien/KI-Floskeln entfernen, NICHTS kürzen. Tabellen als | Spalte | Spalte | wenn sinnvoll.
+1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
+- Bullet Ebene 1
+  - Bullet Ebene 2 (GENAU 2 Leerzeichen Einrückung)
+    - Bullet Ebene 3 (GENAU 4 Leerzeichen Einrückung)
+
+** Callout nur für wirklich Wichtiges **
+
+> Merksatz: Echter inhaltlicher Satz.
+
+PFLICHTREGELN:
+1. VOLLSTÄNDIGKEIT: Jeden Inhaltspunkt übernehmen, NICHTS weglassen oder kürzen
+2. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs.
+3. KEINE STERNCHEN in Bullets: "- **Wort**" → "- Wort"
+4. KEIN ##: Nur "# Titel" einmal oben, dann direkt nummerierte Abschnitte
+5. ECHTE ABSCHNITTSNAMEN: Nie "Erster Abschnitt" — immer den Themenname
+6. BEREINIGUNG: Emojis, Trennlinien, KI-Floskeln, Angebote wie "Sag mir was du brauchst" entfernen
+7. TABELLEN: Bei Vergleichen oder tabellarischen Daten: | Spalte 1 | Spalte 2 | Spalte X |
 
 ---
 TEXT:
@@ -169,9 +183,9 @@ ${text}`;
 
   // Platzhalter-Callouts entfernen
   const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile'];
+
   // Remove stray asterisks used as bullet markers (e.g. "* Punkt" -> "- Punkt")
   cleaned = cleaned.split('\n').map(line => {
-    // Replace "* text" bullet style with "- text"
     if (/^(\s*)\*\s+(.+)$/.test(line)) {
       return line.replace(/^(\s*)\*\s+/, '$1- ');
     }
@@ -206,10 +220,8 @@ ${text}`;
       return line;
     })
     .join('\n')
-    // Duplikate entfernen: ## Titel direkt gefolgt von 1. Titel (gleicher Text)
     .replace(/^(## .+)\n(\d+\.\s+\1)/gm, '$2')
     .replace(/^(\d+\.\s+.+)\n(## \1)/gm, '$1')
-    // Leere Merksatz-Platzhalter entfernen
     .replace(/^> Merksatz: (Zusammenfassung in einem Satz\.?|\[.*?\])$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
