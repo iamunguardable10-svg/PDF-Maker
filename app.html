@@ -961,7 +961,8 @@ function renderDesignGrid(){
     const card=document.createElement('div');
     card.className='design-card'+(d.id===pendingDesign.id?' selected':'');
     card.onclick=()=>{pendingDesign=d;document.querySelectorAll('.design-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected');};
-    const srcdoc=getThumbPage(renderDocHTML(sampleDoc,d),d.id);
+    const thumbHtml = (sampleDoc._reportMode) ? renderReportHTML(sampleDoc,d) : renderDocHTML(sampleDoc,d);
+    const srcdoc=getThumbPage(thumbHtml,d.id);
     card.innerHTML=`<div class="design-thumbnail"><iframe srcdoc="${escapeAttr(srcdoc)}" scrolling="no"></iframe></div><div class="design-info"><div class="design-name">${escapeText(d.name)}</div><div class="design-desc">${escapeText(d.desc)}</div></div>`;
     grid.appendChild(card);
   });
