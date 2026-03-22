@@ -657,7 +657,11 @@ function renderDocHTML(doc,design){
     if(sec.items.length){
       html+=`<div class="lz-bullets">`;
       const nb=doc._notebookMode;
-      function isSentence(t){return /[.!?]$/.test(t.trim())||t.length>55;}
+      function isSentence(t){
+        const s=t.trim();
+        // Must be genuinely long or end with punctuation AND contain multiple words AND be longer than 45 chars
+        return s.length>70 || (s.length>45 && /[.!?]$/.test(s) && s.split(' ').length>=6);
+      }
       sec.items.forEach(item=>{
         if(item.isLabel){
           html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
@@ -797,7 +801,14 @@ function initSliders() {
   const gs = document.getElementById('langSlider');
   const ps = document.getElementById('priorSlider');
   const fs = document.getElementById('formatSlider');
-  if (!ls) return;
+  if (!ds) return;
+  // Set initial labels
+  document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1];
+  document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1];
+  document.getElementById('langLabel').textContent    = langLabels[gs.value-1];
+  document.getElementById('priorLabel').textContent   = priorLabels[ps.value-1];
+  document.getElementById('formatLabel').textContent  = formatLabels[fs.value-1];
+  // Listen for changes
   ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1]; });
   vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1]; });
   gs.addEventListener('input', () => { document.getElementById('langLabel').textContent    = langLabels[gs.value-1]; });
