@@ -347,6 +347,9 @@ textarea::placeholder { color: #383532; font-style: italic; }
             <button class="template-btn active" id="gtpl-lernzettel" onclick="setGenTemplate('lernzettel')">📚 Lernzettel</button>
             <button class="template-btn" id="gtpl-bericht" onclick="setGenTemplate('bericht')">📄 Bericht</button>
           </div>
+          <div id="gtpl-desc" style="font-size:0.72rem;color:var(--muted2);line-height:1.6;padding:8px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+            📚 <strong style="color:var(--ink)">Lernzettel</strong> — strukturierte Zusammenfassung mit Abschnitten und Stichpunkten, ideal zum schnellen Wiederholen vor Prüfungen.
+          </div>
         </div>
         <div>
           <label style="font-size:0.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:8px">Thema / Prompt</label>
@@ -503,11 +506,19 @@ function setTemplate(tpl) {
   if (btn) btn.classList.add('active');
 }
 
+const gtplDescs = {
+  lernzettel: '📚 <strong style="color:var(--ink)">Lernzettel</strong> — strukturierte Zusammenfassung mit Abschnitten und Stichpunkten, ideal zum schnellen Wiederholen vor Prüfungen.',
+  bericht: '📄 <strong style="color:var(--ink)">Bericht</strong> — ausführlicher Fließtext-Bericht mit Zusammenfassung, nummerierten Abschnitten und Quellenhinweis. Ideal für tiefes Verständnis eines Themas.'
+};
+
 function setGenTemplate(tpl) {
   currentGenTemplate = tpl;
   document.querySelectorAll('[id^="gtpl-"]').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('gtpl-' + tpl);
   if (btn) btn.classList.add('active');
+  // Update description
+  const desc = document.getElementById('gtpl-desc');
+  if (desc) desc.innerHTML = gtplDescs[tpl] || '';
   // Switch slider panels if advanced is open
   if (advancedOpen) {
     const lz = document.getElementById('sliders-lernzettel');
@@ -974,9 +985,15 @@ function renderPreview(doc){
 
 function openModal(){
   const raw=document.getElementById('inputText').value.trim();
-  if(!raw){setStatus('Bitte zuerst Text eingeben','err');return;}
-  if(looksStructured(raw))parsedDoc=parseText(raw);
-  else if(!parsedDoc){setStatus('Bitte zuerst mit KI bereinigen','err');return;}
+  // Allow opening modal if we have a parsedDoc (including reports)
+  if(!parsedDoc){
+    if(!raw){setStatus('Bitte zuerst Text eingeben','err');return;}
+    if(looksStructured(raw)){
+      parsedDoc=parseText(raw);
+    } else {
+      setStatus('Bitte zuerst mit KI bereinigen','err');return;
+    }
+  }
   pendingDesign=currentDesign;
   renderDesignGrid();
   document.getElementById('modalOverlay').classList.remove('hidden');
@@ -991,8 +1008,7 @@ function applyDesign(){
     if(parsedDoc._reportMode){
       renderReportPreview(parsedDoc);
     } else {
-      // Keep current notebook mode when switching design
-      renderPreview(parsedDoc);
+      renderPreview(parsedDoc); // renderPreview already respects _notebookMode
     }
     setStatus('✓ Design angewendet','ok');
   }
@@ -1109,7 +1125,23 @@ function initSliders() {
     });
   });
 }
-window.addEventListener('DOMContentLoaded', initSliders);
+window.addEventListener('DOMContentLoaded', () => {
+  initSliders();
+  // Re-run after layout is complete so offsetWidth is correct
+  setTimeout(() => {
+    document.querySelectorAll('.slider').forEach(s => {
+      const id = s.id;
+      const labelMap = {
+        formatSlider:'formatLabel', detailSlider:'detailLabel', levelSlider:'levelLabel',
+        langSlider:'langLabel', priorSlider:'priorLabel',
+        berichtTiefeSlider:'berichtTiefeLabel', berichtTonSlider:'berichtTonLabel',
+        berichtFokusSlider:'berichtFokusLabel', berichtZielSlider:'berichtZielLabel'
+      };
+      const l = document.getElementById(labelMap[id]);
+      if (l) updateSliderTrack(s, l);
+    });
+  }, 100);
+});
 
 async function generateFromTopic(){
   const topicEl = document.getElementById('topicInput');
