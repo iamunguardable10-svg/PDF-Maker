@@ -213,6 +213,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable{cursor:text;border-radius:4px;transition:background 0.15s;position:relative}
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
+.render-toggle{display:none;align-items:center;gap:8px;margin-bottom:16px;font-size:0.72rem;color:var(--muted2)}
+.render-toggle.visible{display:flex}
+.toggle-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:0.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.toggle-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(201,168,76,0.3)}
 .lz-inline-input{background:rgba(255,255,255,0.95);border:2px solid #c9a84c;border-radius:4px;outline:none;padding:1px 6px;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;box-shadow:0 2px 8px rgba(201,168,76,0.2)}
 /* Notebook render mode */
 .lz-notebook-text{font-size:0.82rem;line-height:1.75;color:#1c1a18;padding:2px 0;margin-left:2px}
@@ -372,6 +376,11 @@ textarea::placeholder { color: #383532; font-style: italic; }
     </div>
   </div>
   <div class="preview-panel">
+    <div class="render-toggle" id="renderToggle">
+      <span style="color:var(--muted);font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase">Ansicht:</span>
+      <button class="toggle-btn active" id="btnLernzettel" onclick="setRenderMode('lernzettel')">⊞ Lernzettel</button>
+      <button class="toggle-btn" id="btnHefteintrag" onclick="setRenderMode('hefteintrag')">≡ Hefteintrag</button>
+    </div>
     <div class="empty-state" id="emptyState">
       <div class="empty-visual">📄</div>
       <div class="empty-title">Noch keine Vorschau</div>
@@ -738,6 +747,14 @@ function renderPreview(doc){
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
   document.getElementById('exportBtn').disabled=false;
+  // Show render toggle
+  const toggle=document.getElementById('renderToggle');
+  if(toggle) toggle.classList.add('visible');
+  // Sync toggle buttons to current mode
+  const nb=doc&&doc._notebookMode;
+  const bl=document.getElementById('btnLernzettel');
+  const bh=document.getElementById('btnHefteintrag');
+  if(bl&&bh){bl.classList.toggle('active',!nb);bh.classList.toggle('active',nb);}
 }
 
 function openModal(){
@@ -881,6 +898,14 @@ INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie
   }
   setStatus('Generierung fehlgeschlagen — bitte nochmal versuchen','err');
   btn.disabled=false;btn.textContent='✦ Generieren';
+}
+
+function setRenderMode(mode) {
+  if (!parsedDoc) return;
+  parsedDoc._notebookMode = (mode === 'hefteintrag');
+  document.getElementById('btnLernzettel').classList.toggle('active', mode === 'lernzettel');
+  document.getElementById('btnHefteintrag').classList.toggle('active', mode === 'hefteintrag');
+  renderPreview(parsedDoc);
 }
 
 function editField(el,type,sectionIdx,itemRef){
