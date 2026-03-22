@@ -55,9 +55,11 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-generate.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(201,168,76,0.3); }
 .btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-direct:hover { background: var(--border2); color: var(--ink); }
+.slider-group { position: relative; }
+.slider-tooltip { position: absolute; top: -22px; transform: translateX(-50%); background: var(--accent); color: #0a0a0a; font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; pointer-events: none; font-family: 'DM Sans', sans-serif; transition: left 0.1s; }
+.slider-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--accent); }
 .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border2); outline: none; cursor: pointer; }
-.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(201,168,76,0.4); transition: transform 0.1s; }
-.slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(201,168,76,0.4); }
 .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
 #generateBox input { width: 100%; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; outline: none; margin-top: 8px; background: #0e0e0e; color: var(--ink); caret-color: var(--accent); }
 #generateBox input:focus { border-color: rgba(201,168,76,0.5); }
@@ -310,56 +312,56 @@ textarea::placeholder { color: #383532; font-style: italic; }
 
         <div style="display:flex;flex-direction:column;gap:16px">
           <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Format</label>
-              <span id="formatLabel" style="font-size:0.7rem;color:var(--accent)">Gemischt</span>
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Format</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="formatLabel" class="slider-tooltip">Gemischt</span>
+              <input type="range" id="formatSlider" min="1" max="3" value="2" step="1" class="slider">
             </div>
-            <input type="range" id="formatSlider" min="1" max="3" value="2" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:0.58rem;color:var(--muted)">Bulletpoints</span>
               <span style="font-size:0.58rem;color:var(--muted)">Fließtext</span>
             </div>
           </div>
           <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Ausführlichkeit</label>
-              <span id="detailLabel" style="font-size:0.7rem;color:var(--accent)">Ausgewogen</span>
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Ausführlichkeit</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="detailLabel" class="slider-tooltip">Ausgewogen</span>
+              <input type="range" id="detailSlider" min="1" max="5" value="3" step="1" class="slider">
             </div>
-            <input type="range" id="detailSlider" min="1" max="5" value="3" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:0.58rem;color:var(--muted)">Kompakt</span>
               <span style="font-size:0.58rem;color:var(--muted)">Sehr detailliert</span>
             </div>
           </div>
           <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Niveau</label>
-              <span id="levelLabel" style="font-size:0.7rem;color:var(--accent)">Gymnasium</span>
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Niveau</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="levelLabel" class="slider-tooltip">Gymnasium</span>
+              <input type="range" id="levelSlider" min="1" max="5" value="2" step="1" class="slider">
             </div>
-            <input type="range" id="levelSlider" min="1" max="5" value="2" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:0.58rem;color:var(--muted)">Mittelschule</span>
               <span style="font-size:0.58rem;color:var(--muted)">Uni</span>
             </div>
           </div>
           <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Sprache</label>
-              <span id="langLabel" style="font-size:0.7rem;color:var(--accent)">Normal</span>
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Sprache</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="langLabel" class="slider-tooltip">Normal</span>
+              <input type="range" id="langSlider" min="1" max="5" value="2" step="1" class="slider">
             </div>
-            <input type="range" id="langSlider" min="1" max="5" value="2" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:0.58rem;color:var(--muted)">Einfach</span>
               <span style="font-size:0.58rem;color:var(--muted)">Fachsprache</span>
             </div>
           </div>
           <div class="slider-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <label style="font-size:0.72rem;color:var(--muted2)">Vorwissen</label>
-              <span id="priorLabel" style="font-size:0.7rem;color:var(--accent)">Grundkenntnisse</span>
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Vorwissen</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="priorLabel" class="slider-tooltip">Grundkenntnisse</span>
+              <input type="range" id="priorSlider" min="1" max="5" value="2" step="1" class="slider">
             </div>
-            <input type="range" id="priorSlider" min="1" max="5" value="2" step="1" class="slider">
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:0.58rem;color:var(--muted)">Kein Vorwissen</span>
               <span style="font-size:0.58rem;color:var(--muted)">Experte</span>
             </div>
@@ -813,10 +815,17 @@ const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wisse
 const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', 'Fortgeschritten', 'Experte'];
 const formatLabels = ['Nur Bulletpoints', 'Gemischt', 'Fließtext'];
 
-function updateSliderTrack(slider) {
+function updateSliderTrack(slider, tooltip) {
   const min = parseInt(slider.min), max = parseInt(slider.max), val = parseInt(slider.value);
   const pct = ((val - min) / (max - min)) * 100;
   slider.style.background = `linear-gradient(to right, var(--accent) ${pct}%, var(--border2) ${pct}%)`;
+  if (tooltip) {
+    // Offset to account for thumb width (8px on each side)
+    const thumbW = 8;
+    const trackW = slider.offsetWidth - thumbW * 2;
+    const pos = thumbW + trackW * pct / 100;
+    tooltip.style.left = pos + 'px';
+  }
 }
 
 function initSliders() {
@@ -832,10 +841,10 @@ function initSliders() {
     const l = document.getElementById(label);
     if (!s || !l) return;
     l.textContent = labels[s.value-1];
-    updateSliderTrack(s);
+    updateSliderTrack(s, l);
     s.addEventListener('input', () => {
       l.textContent = labels[s.value-1];
-      updateSliderTrack(s);
+      updateSliderTrack(s, l);
     });
   });
 }
@@ -1002,8 +1011,6 @@ function directExport(){
 
 function exportPDF(){
   if(!parsedDoc)return;
-  // Note: PDF export always uses standard bullet rendering for now
-  // notebookMode only affects preview
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
