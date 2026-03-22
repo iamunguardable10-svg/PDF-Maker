@@ -214,6 +214,16 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
 .lz-inline-input{background:rgba(255,255,255,0.95);border:2px solid #c9a84c;border-radius:4px;outline:none;padding:1px 6px;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;box-shadow:0 2px 8px rgba(201,168,76,0.2)}
+/* Notebook render mode */
+.lz-notebook-text{font-size:0.82rem;line-height:1.75;color:#1c1a18;padding:2px 0;margin-left:2px}
+.lz-notebook-sub{font-size:0.79rem;line-height:1.7;color:#4a4845;padding:2px 0;margin-left:18px}
+.lz-notebook-subsub{font-size:0.76rem;line-height:1.65;color:#6a6460;padding:1px 0;margin-left:34px}
+.theme-dark .lz-notebook-text{color:#d0cdc8}
+.theme-dark .lz-notebook-sub{color:#9a9590}
+.theme-dark .lz-notebook-subsub{color:#7a7570}
+.theme-neon .lz-notebook-text{color:#e0e0f0}
+.theme-neon .lz-notebook-sub{color:#a0a0c0}
+.theme-retro .lz-notebook-text,.theme-retro .lz-notebook-sub{font-family:'DM Mono',monospace}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
 .lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
 .lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
@@ -470,6 +480,12 @@ const previewStyles = `
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
 .lz-page-num{text-align:center;font-size:0.65rem;color:#ccc;margin-top:16px;padding:12px 0 4px;letter-spacing:0.1em;border-top:1px solid #f0ede8}
+.lz-notebook-text{font-size:0.82rem;line-height:1.75;color:#1c1a18;padding:2px 0;margin-left:2px}
+.lz-notebook-sub{font-size:0.79rem;line-height:1.7;color:#4a4845;padding:2px 0;margin-left:18px}
+.lz-notebook-subsub{font-size:0.76rem;line-height:1.65;color:#6a6460;padding:1px 0;margin-left:34px}
+.theme-dark .lz-notebook-text{color:#d0cdc8}.theme-dark .lz-notebook-sub{color:#9a9590}.theme-dark .lz-notebook-subsub{color:#7a7570}
+.theme-neon .lz-notebook-text{color:#e0e0f0}.theme-neon .lz-notebook-sub{color:#a0a0c0}
+.theme-retro .lz-notebook-text,.theme-retro .lz-notebook-sub{font-family:'DM Mono',monospace}
 .lz-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.76rem}
 .lz-table th{font-family:'Syne',sans-serif;font-weight:700;font-size:0.72rem;padding:6px 10px;text-align:left;color:white}
 .lz-table td{padding:5px 10px;border-bottom:1px solid rgba(0,0,0,0.08);line-height:1.4;color:#1c1a18}
@@ -640,15 +656,33 @@ function renderDocHTML(doc,design){
     }
     if(sec.items.length){
       html+=`<div class="lz-bullets">`;
+      const nb=doc._notebookMode;
+      function isSentence(t){return /[.!?]$/.test(t.trim())||t.length>55;}
       sec.items.forEach(item=>{
-        if(item.isLabel)html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
-        else html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+        if(item.isLabel){
+          html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+        } else if(nb&&isSentence(item.text)){
+          html+=`<div class="lz-notebook-text"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+        } else {
+          html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+        }
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
-            if(s.isLabel)html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
-            else html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+            if(s.isLabel){
+              html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+            } else if(nb&&isSentence(s.text)){
+              html+=`<div class="lz-notebook-sub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+            } else {
+              html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+            }
             if(s.children&&s.children.length){
-              s.children.forEach(ch=>{html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(ch)}</span></div>`;});
+              s.children.forEach(ch=>{
+                if(nb&&isSentence(ch)){
+                  html+=`<div class="lz-notebook-subsub"><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                } else {
+                  html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                }
+              });
             }
           });
         }
@@ -791,9 +825,9 @@ async function generateFromTopic(){
   const langHint   = ['sehr einfache Alltagssprache, jeden Fachbegriff sofort erklären', 'normale verständliche Sprache, wichtige Fachbegriffe in Klammern erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennung kurz erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung'][lang-1];
   const priorHint  = ['kein Vorwissen — jeden Begriff und jedes Konzept von Grund auf erklären', 'Grundkenntnisse — Basiskonzepte nur kurz erwähnen', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschrittenes Wissen — nur sehr spezifische Fachdetails erklären', 'Expertenwissen — keine Erklärungen, nur dichte Fakten'][prior-1];
   const formatHint = [
-    'FORMAT: NUR Bulletpoints (- Punkt). Jeder Punkt ist ein knapper präziser Stichpunkt. Keine ganzen Sätze, kein Fließtext.',
-    'FORMAT: GEMISCHT. Kurze Fakten als Bulletpoints. Erklärungen, Kausalzusammenhänge und Prozesse als vollständige Sätze direkt unter dem jeweiligen Bullet (eingerückt, ohne "-").',
-    'FORMAT: NUR FLIESSTEXT. Jeder Bullet ist ein vollständiger erklärender Satz oder 2-3 Sätze. Keine Stichworte — immer vollständige Sätze mit Subjekt, Prädikat, Objekt.'
+    'FORMAT: NUR Bulletpoints. Jeder Punkt ist ein knapper präziser Stichpunkt. Keine ganzen Sätze, kein Fließtext. Sehr kompakt und direkt.',
+    'FORMAT: NATÜRLICH & GEMISCHT. Schreibe wie strukturierte Notizen — mal ein kurzer Stichpunkt, mal ein erklärender Satz, mal zwei Sätze die einen Zusammenhang erklären. Nicht jeder Punkt muss gleich lang sein. Fakten können kurz sein, Konzepte und Zusammenhänge dürfen ausführlicher erklärt werden. Wirke nicht wie eine Maschine die eine Liste abarbeitet, sondern wie jemand der das Thema versteht und erklärt.',
+    'FORMAT: FLIESSTEXT. Jeder Bullet ist ein vollständiger erklärender Satz oder 2-3 Sätze die Zusammenhänge erklären. Keine reinen Stichworte — immer vollständige Sätze die das Warum und Wie erklären.'
   ][format-1];
 
   const enrichedTopic = `GENERIERE_LERNZETTEL: ${topic}
@@ -822,7 +856,9 @@ INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie
       const cleaned=normalizeAIText(data.cleaned);
       if(cleaned&&isValidOutput(cleaned,topic)){
         document.getElementById('inputText').value=cleaned;
-        parsedDoc=parseText(cleaned);renderPreview(parsedDoc);
+        parsedDoc=parseText(cleaned);
+        parsedDoc._notebookMode = true; // render as notebook
+        renderPreview(parsedDoc);
         // Enable both export buttons
         const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
         const ebg=document.getElementById('exportBtnGen'); if(ebg) ebg.disabled=false;
