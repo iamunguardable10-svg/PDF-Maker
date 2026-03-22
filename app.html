@@ -525,6 +525,19 @@ function setGenTemplate(tpl) {
     const br = document.getElementById('sliders-bericht');
     if (tpl === 'bericht') { if(lz) lz.style.display='none'; if(br) br.style.display='flex'; }
     else { if(br) br.style.display='none'; if(lz) lz.style.display='flex'; }
+    // Recalculate slider positions after switch
+    setTimeout(() => {
+      const labelMap = {
+        formatSlider:'formatLabel', detailSlider:'detailLabel', levelSlider:'levelLabel',
+        langSlider:'langLabel', priorSlider:'priorLabel',
+        berichtTiefeSlider:'berichtTiefeLabel', berichtTonSlider:'berichtTonLabel',
+        berichtFokusSlider:'berichtFokusLabel', berichtZielSlider:'berichtZielLabel'
+      };
+      document.querySelectorAll('.slider').forEach(s => {
+        const l = document.getElementById(labelMap[s.id]);
+        if (l && s.offsetWidth > 0) updateSliderTrack(s, l);
+      });
+    }, 50);
   }
 }
 
@@ -984,23 +997,26 @@ function renderPreview(doc){
 }
 
 function openModal(){
-  // If we already have a parsed doc (lernzettel or bericht), open directly
-  if(parsedDoc){
+  try {
+    if(parsedDoc){
+      pendingDesign=currentDesign;
+      renderDesignGrid();
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      return;
+    }
+    const raw = document.getElementById('inputText').value.trim();
+    if(!raw){setStatus('Bitte zuerst Inhalt eingeben oder generieren','err');return;}
+    if(looksStructured(raw)){
+      parsedDoc=parseText(raw);
+    } else {
+      parsedDoc=parseText(raw); // parse anyway for direct export
+    }
     pendingDesign=currentDesign;
     renderDesignGrid();
     document.getElementById('modalOverlay').classList.remove('hidden');
-    return;
-  }
-  // Otherwise try to parse from textarea
-  const raw = document.getElementById('inputText').value.trim();
-  if(!raw){setStatus('Bitte zuerst Inhalt generieren oder Text eingeben','err');return;}
-  if(looksStructured(raw)){
-    parsedDoc=parseText(raw);
-    pendingDesign=currentDesign;
-    renderDesignGrid();
-    document.getElementById('modalOverlay').classList.remove('hidden');
-  } else {
-    setStatus('Bitte zuerst mit KI bereinigen','err');
+  } catch(e) {
+    console.error('openModal error:', e);
+    setStatus('Fehler beim Öffnen des Designs','err');
   }
 }
 
