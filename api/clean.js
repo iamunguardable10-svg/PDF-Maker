@@ -14,16 +14,28 @@ export default async function handler(req) {
   const isGenerate = text.startsWith('GENERIERE_LERNZETTEL: ');
   const isBericht = text.startsWith('GENERIERE_BERICHT: ') || text.startsWith('STRUKTUR_BERICHT: ');
   const isStrukturBericht = text.startsWith('STRUKTUR_BERICHT: ');
-  const topic = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim()
+
+  // Extract topic/text AND parameters
+  // Format: "PREFIX: topic\n\nPARAMETER:\n- key: value\n..."
+  let rawContent = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim()
     : isBericht ? text.replace(/^(GENERIERE_BERICHT|STRUKTUR_BERICHT): /, '').trim()
     : null;
+
+  // Split topic from parameters if present
+  let topic = rawContent;
+  let paramBlock = '';
+  if (rawContent && rawContent.includes('\n\n')) {
+    const parts = rawContent.split('\n\n');
+    topic = parts[0].trim();
+    paramBlock = parts.slice(1).join('\n\n').trim();
+  }
 
   const prompt = isBericht
     ? isStrukturBericht
       ? `Du bist ein präziser Textformatierer. Wandle den folgenden Text in einen strukturierten Bericht um.
 Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
 
-Exaktes Format — halte dich GENAU daran:
+Exaktes Format:
 # [Passender Titel]
 
 ## Zusammenfassung
@@ -38,25 +50,24 @@ Exaktes Format — halte dich GENAU daran:
 3. [Weiterer Themenaspekt]
 4-6 Sätze ausführlicher Fließtext.
 
-[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig für vollständige Abdeckung]
+[Füge so viele Themenaspekte hinzu wie nötig — mindestens 3]
 
-X. [Letzter Abschnitt]. Fazit
+X. Fazit
 3-5 Sätze Schlussfolgerungen und Ausblick.
 
 > Quellenhinweis: Nur wenn im Original erkennbar, sonst weglassen.
+Allgemein: ** Callout nur für wirklich Wichtiges **
+> Merksatz: Echter inhaltlicher Satz.
 
-STRIKTE REGELN:
-- KEINE Bulletpoints (- oder •) — nirgendwo
-- KEINE Markdown-Formatierung außer #, ##, Ziffern und >
-- Nur vollständige Sätze im Fließtext
-- Alle Informationen aus dem Original behalten
-- Falls kein Titel → # Bericht
+REGELN: Keine Bullets, kein Fettdruck, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, alle Infos behalten.
+ TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |
+---
+TEXT:
+${rawContent}`
 
-Text:
-${topic}`
       : `Erstelle einen ausführlichen Bericht zum Thema: "${topic}"
 Gib NUR den fertigen Bericht zurück — keine Erklärungen, keine Regeln, kein Codeblock.
-
+${paramBlock ? `\n${paramBlock}\n` : ''}
 # [Passender Titel]
 
 ## Zusammenfassung
@@ -71,18 +82,23 @@ Gib NUR den fertigen Bericht zurück — keine Erklärungen, keine Regeln, kein 
 3. [Weiterer Themenaspekt]
 4-6 Sätze ausführlicher Fließtext.
 
-[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig für vollständige Abdeckung]
+[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig]
 
 [Letzter Abschnitt]. Fazit
 3-5 Sätze Schlussfolgerungen und Ausblick.
 
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
 
-Regeln: Kein Fettdruck, keine Bullets, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, ECHTER inhaltlicher Text.`
-    : isGenerate
-    ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
-Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
+Allgemein: ** Callout nur für wirklich Wichtiges **
+> Merksatz: Echter inhaltlicher Satz.
 
+REGELN: Kein Fettdruck, keine Bullets, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, ECHTER inhaltlicher Text.  TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |`
+  
+
+    : isGenerate
+    ? `Erstelle einen Lernzettel zum Thema: "${topic}"
+Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
+${paramBlock ? `\nBeachte diese Parameter:\n${paramBlock}\n` : ''}
 Zielformat:
 # Haupttitel
 
@@ -90,21 +106,18 @@ Zielformat:
 - Bullet Ebene 1
   - Bullet Ebene 2 (GENAU 2 Leerzeichen Einrückung)
     - Bullet Ebene 3 (GENAU 4 Leerzeichen Einrückung)
-(baue hier die Struktur und Einrückungen so wie du sie für richtig hälst)
+(baue Struktur und Einrückungen so wie du sie für richtig hältst)
+
 ** Callout nur für wirklich Wichtiges **
 
 > Merksatz: Echter inhaltlicher Satz.
 
-
-ABSOLUTE PFLICHTREGELN:
+PFLICHTREGELN:
 - KEIN Fettdruck in Bullets
-- Keine Emojis
-- Nur Leerzeichen für Einrückung
+- Keine Emojis, nur Leerzeichen für Einrückung
 - Merksatz nur einmal am Ende
-- TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 |
-- KRITISCH: Schreibe ECHTEN inhaltlichen Text mit konkreten Fakten. NIEMALS Platzhalter wie "Definition von X", "Erklärung von Y", "Beispiel für Z" — immer die echte Definition/Erklärung/das echte Beispiel hinschreiben.
-
-${topic}`
+- TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |
+- ECHTER inhaltlicher Text — NIEMALS Platzhalter wie "Definition von X"`
 
     : `Konvertiere diesen Text in ein sauberes Lernzettel-Format. Gib NUR das Ergebnis zurück — keine Erklärungen, keine Regeln.
 
@@ -127,7 +140,7 @@ PFLICHTREGELN:
 4. KEIN ##: Nur "# Titel" einmal oben, dann direkt nummerierte Abschnitte
 5. ECHTE ABSCHNITTSNAMEN: Nie "Erster Abschnitt" — immer den Themenname
 6. BEREINIGUNG: Emojis, Trennlinien, KI-Floskeln, Angebote wie "Sag mir was du brauchst" entfernen
-7. TABELLEN: Bei Vergleichen oder tabellarischen Daten: | Spalte 1 | Spalte 2 | Spalte X |
+7. TABELLEN: Bei Vergleichen oder tabellarischen Daten: | Spalte 1 | Spalte 2 |
 
 ---
 TEXT:
@@ -201,7 +214,7 @@ ${text}`;
     return true;
   }).join('\n');
 
-  // Sicherheitsnetz: Sternchen aus Bullets entfernen + Duplikate bereinigen
+  // Sicherheitsnetz: Sternchen aus Bullets entfernen + bereinigen
   cleaned = cleaned
     .replace(/\r\n/g, '\n')
     .replace(/\t/g, '  ')
