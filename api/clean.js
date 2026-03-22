@@ -105,44 +105,19 @@ ABSOLUTE PFLICHTREGELN:
 
 ${topic}`
 
-    : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text EXAKT in dieses Format:
+    : `Konvertiere diesen Text in ein sauberes Lernzettel-Format. Gib NUR das Ergebnis zurück — keine Erklärungen, keine Regeln.
 
-# Haupttitel
-
+# Titel
 1. Abschnittsname
 - Bullet
   - Unterpunkt
-    - Unter-Unterpunkt
+** Wichtiger Hinweis **
+> Merksatz: Satz.
 
-2. Zweiter Abschnittsname
-- Bullet
+Regeln: Kein ##, echte Abschnittsnamen (nie "Erster Abschnitt"), keine Sternchen in Bullets, Emojis/Trennlinien/KI-Floskeln entfernen, NICHTS kürzen. Tabellen als | Spalte | Spalte | wenn sinnvoll.
 
-** Nur für wirklich wichtige Hinweise **
-
-> Merksatz: Echter inhaltlicher Satz.
-
-KRITISCHE REGELN:
-
-A) KEIN ##: Verwende NIEMALS "##". Nur "# Titel" einmal ganz oben, dann direkt "1. Abschnitt", "2. Abschnitt" usw.
-
-B) ECHTE ABSCHNITTSNAMEN: NIEMALS "Erster Abschnitt", "Zweiter Abschnitt" usw. Immer den echten Inhaltsnamen verwenden, z.B. "1. Wirtschaftsordnungen".
-
-C) VOLLSTÄNDIGKEIT: Alle Inhaltspunkte übernehmen, nichts weglassen, nichts kürzen.
-
-D) KEINE STERNCHEN in Bullets: "- **Wort**" wird zu "- Wort"
-
-E) EINRÜCKUNG: 0 Leerzeichen für Ebene 1, genau 2 für Ebene 2, genau 4 für Ebene 3. Keine Tabs.
-
-F) BEREINIGUNG: Emojis, Trennlinien (---), KI-Floskeln, Angebote wie "Sag mir was du brauchst" entfernen.
-
-G) CALLOUT: ** Text ** nur für explizit wichtige Aussagen, als eigene Zeile.
-
-H) MERKSATZ: Echter inhaltlicher Satz am Ende. NICHT den Platzhalter wörtlich übernehmen.
-I) TABELLEN: Wenn der Original-Text Vergleiche, Gegenüberstellungen oder tabellarische Daten enthält, stelle sie als Markdown-Tabelle dar:
-  | Spalte 1 | Spalte 2 |
-  | Wert A   | Wert B   |
-
-Text:
+---
+TEXT:
 ${text}`;
 
   // Truncate very long inputs to avoid timeout
