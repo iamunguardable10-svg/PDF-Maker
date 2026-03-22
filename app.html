@@ -458,10 +458,7 @@ function setGenTemplate(tpl) {
 }
 
 function parseReportText(raw) {
-  const lines = String(raw||'').replace(/
-/g,'
-').split('
-');
+  const lines = String(raw||'').replace(/\r\n/g,'\n').split('\n');
   const doc = { title:'', summary:'', sections:[], source:null, _reportMode:true };
   let currentSection = null;
   for (let i = 0; i < lines.length; i++) {
