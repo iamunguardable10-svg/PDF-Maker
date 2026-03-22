@@ -39,18 +39,18 @@ ZIELFORMAT:
 2-4 Sätze Fließtext mit dem wichtigsten Inhalt in kompakter Form.
 
 1. Einleitung
-3-5 Sätze zu Hintergrund, Kontext und Relevanz des Themas.
+Fließtext zu Hintergrund, Kontext und Relevanz des Themas.
 
 2. [Konkreter Themenaspekt]
-4-6 Sätze zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
+Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 
 3. [Weiterer konkreter Themenaspekt]
-4-6 Sätze zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
+Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 
-[Füge so viele inhaltlich sinnvolle Hauptabschnitte hinzu wie nötig, mindestens 3.]
+[Füge so viele nummerierte Hauptabschnitte hinzu wie nötig — mindestens 3. Abschnittsnummern fortlaufend: 1, 2, 3 ...]
 
-X. Fazit
-3-5 Sätze mit Schlussfolgerung, Einordnung und ggf. Ausblick.
+[Höchste Nummer + 1]. Fazit
+Schlussfolgerung, Einordnung und ggf. Ausblick — so viele Sätze wie nötig.
 
 OPTIONAL:
 > Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
@@ -74,26 +74,25 @@ ZIELFORMAT:
 # [Präziser, thematisch passender Titel]
 
 ## Zusammenfassung
-2-4 Sätze Fließtext mit Überblick über das Thema.
+Fließtext mit Überblick über das Thema.
 
 1. Einleitung
-3-5 Sätze zu Hintergrund, Einordnung und Relevanz.
+Fließtext zu Hintergrund, Einordnung und Relevanz.
 
 2. [Konkreter Themenaspekt]
-4-6 Sätze ausführlicher, sachlicher Fließtext.
+Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
 
 3. [Weiterer konkreter Themenaspekt]
-4-6 Sätze ausführlicher, sachlicher Fließtext.
+Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
 
-[Füge so viele Hauptabschnitte hinzu wie das Thema sinnvoll erfordert — mindestens 3.]
+[Füge so viele nummerierte Hauptabschnitte hinzu wie das Thema erfordert — mindestens 3. Die Abschnittsnummern müssen fortlaufend sein: 1, 2, 3, 4 ... KEINE Buchstaben oder X.]
 
-[Letzter Abschnitt]. Fazit
-3-5 Sätze mit Schlussfolgerungen und ggf. Ausblick.
+[Höchste Nummer + 1]. Fazit
+Schlussfolgerungen und ggf. Ausblick.
 
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
 
-OPTIONAL:
-> Merksatz: Genau ein fachlich sinnvoller Kernsatz mit echtem Informationswert.
+> Merksatz: [Nur einfügen wenn er echten Mehrwert hat — ein prägnanter Kernsatz der das Wichtigste zusammenfasst]
 
 REGELN:
 - Kein Fettdruck, keine Bullets
@@ -101,6 +100,7 @@ REGELN:
 - Vollständige, präzise Sätze, keine leeren Phrasen
 - Keine Platzhalter im fertigen Text
 - Echter inhaltlicher Text mit klarer Gliederung
+- Abschnittsnummern IMMER als arabische Ziffern: 1, 2, 3, 4, 5 — NIEMALS X oder Buchstaben
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |`
 
     : isGenerate
