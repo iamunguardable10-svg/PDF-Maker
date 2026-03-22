@@ -12,9 +12,71 @@ export default async function handler(req) {
   }
 
   const isGenerate = text.startsWith('GENERIERE_LERNZETTEL: ');
-  const topic = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim() : null;
+  const isBericht = text.startsWith('GENERIERE_BERICHT: ') || text.startsWith('STRUKTUR_BERICHT: ');
+  const isStrukturBericht = text.startsWith('STRUKTUR_BERICHT: ');
+  const topic = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim()
+    : isBericht ? text.replace(/^(GENERIERE_BERICHT|STRUKTUR_BERICHT): /, '').trim()
+    : null;
 
-  const prompt = isGenerate
+  const prompt = isBericht
+    ? isStrukturBericht
+      ? `Du bist ein präziser Textformatierer. Wandle den folgenden Text in einen strukturierten Bericht um.
+Gib NUR den formatierten Text zurück. Keine Einleitung, kein Markdown-Codeblock.
+
+Zielformat:
+# Titel des Berichts
+
+## Zusammenfassung
+[2-4 Sätze die das Wesentliche zusammenfassen]
+
+1. Erster Abschnitt
+[Fließtext, 3-5 vollständige Sätze die den Inhalt ausführlich erklären]
+
+2. Zweiter Abschnitt
+[Fließtext]
+
+> Quellenhinweis: [Falls erkennbar, sonst weglassen]
+
+REGELN:
+- Schreibe jeden Abschnitt als zusammenhängenden Fließtext, KEINE Bulletpoints
+- Vollständige Sätze, akademischer Stil
+- Behalte ALLE Informationen aus dem Original
+- Entferne Emojis, Trennlinien, KI-Floskeln
+- Falls kein Titel erkennbar → # Bericht setzen
+
+Text:
+${topic}`
+      : `Erstelle einen ausführlichen Bericht zum Thema: "${topic}"
+Gib NUR den formatierten Text zurück. Keine Einleitung, kein Markdown-Codeblock.
+
+Format:
+# Titel des Berichts
+
+## Zusammenfassung
+[2-4 Sätze Überblick]
+
+1. Einleitung
+[Fließtext, Hintergrund und Bedeutung des Themas]
+
+2. Hauptteil: [Themenaspekt]
+[Ausführlicher Fließtext]
+
+3. Weiterer Abschnitt
+[Fließtext]
+
+4. Fazit
+[Schlussfolgerungen und Ausblick]
+
+> Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen.
+
+REGELN:
+- Schreibe AUSSCHLIESSLICH Fließtext, KEINE Bulletpoints
+- Mindestens 5 nummerierte Abschnitte
+- Jeden Abschnitt mit 4-6 vollständigen Sätzen füllen
+- Akademischer, sachlicher Stil
+- ECHTEN inhaltlichen Text, keine Platzhalter
+- Zusammenfassung IMMER direkt nach dem Titel`
+    : isGenerate
     ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
 
