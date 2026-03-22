@@ -322,7 +322,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
     <div class="sidebar-actions">
 
       <!-- STRUCTURE MODE -->
-      <div id="mode-structure" style="flex-direction:column;gap:9px">
+      <div id="mode-structure" style="display:none;flex-direction:column;gap:9px">
         <div style="margin-bottom:4px">
           <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Vorlage</div>
           <div class="template-bar">
@@ -340,7 +340,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
       </div>
 
       <!-- GENERATE MODE -->
-      <div id="mode-generate" style="flex-direction:column;gap:16px">
+      <div id="mode-generate" style="display:none;flex-direction:column;gap:16px">
         <div style="margin-bottom:4px">
           <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Vorlage</div>
           <div class="template-bar">
@@ -531,8 +531,10 @@ window.addEventListener('DOMContentLoaded', () => {
   if (APP_MODE === 'generate') {
     document.getElementById('mode-structure').style.display = 'none';
     document.getElementById('mode-generate').style.display = 'flex';
-    document.getElementById('sidebar-title').textContent = 'Lernzettel generieren';
-    document.getElementById('sidebar-sub').textContent = 'Gib ein Thema ein und passe die Parameter an — die KI erstellt alles für dich.';
+    document.querySelector('.sidebar-title').textContent = 'Lernzettel generieren';
+    document.querySelector('.sidebar-sub').textContent = 'Wähle eine Vorlage, gib dein Thema ein und passe die Parameter an.';
+    document.querySelector('.instructions').style.display = 'none';
+    document.getElementById('inputText').style.display = 'none';
   } else {
     document.getElementById('mode-generate').style.display = 'none';
     document.getElementById('mode-structure').style.display = 'flex';
