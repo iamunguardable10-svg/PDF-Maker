@@ -56,7 +56,8 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-direct:hover { background: var(--border2); color: var(--ink); }
 .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border2); outline: none; cursor: pointer; }
-.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(201,168,76,0.4); }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(201,168,76,0.4); transition: transform 0.1s; }
+.slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
 .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
 #generateBox input { width: 100%; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; outline: none; margin-top: 8px; background: #0e0e0e; color: var(--ink); caret-color: var(--accent); }
 #generateBox input:focus { border-color: rgba(201,168,76,0.5); }
@@ -812,25 +813,31 @@ const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wisse
 const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', 'Fortgeschritten', 'Experte'];
 const formatLabels = ['Nur Bulletpoints', 'Gemischt', 'Fließtext'];
 
+function updateSliderTrack(slider) {
+  const min = parseInt(slider.min), max = parseInt(slider.max), val = parseInt(slider.value);
+  const pct = ((val - min) / (max - min)) * 100;
+  slider.style.background = `linear-gradient(to right, var(--accent) ${pct}%, var(--border2) ${pct}%)`;
+}
+
 function initSliders() {
-  const ds = document.getElementById('detailSlider');
-  const vs = document.getElementById('levelSlider');
-  const gs = document.getElementById('langSlider');
-  const ps = document.getElementById('priorSlider');
-  const fs = document.getElementById('formatSlider');
-  if (!ds) return;
-  // Set initial labels
-  document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1];
-  document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1];
-  document.getElementById('langLabel').textContent    = langLabels[gs.value-1];
-  document.getElementById('priorLabel').textContent   = priorLabels[ps.value-1];
-  document.getElementById('formatLabel').textContent  = formatLabels[fs.value-1];
-  // Listen for changes
-  ds.addEventListener('input', () => { document.getElementById('detailLabel').textContent  = detailLabels[ds.value-1]; });
-  vs.addEventListener('input', () => { document.getElementById('levelLabel').textContent   = levelLabels[vs.value-1]; });
-  gs.addEventListener('input', () => { document.getElementById('langLabel').textContent    = langLabels[gs.value-1]; });
-  ps.addEventListener('input', () => { document.getElementById('priorLabel').textContent   = priorLabels[ps.value-1]; });
-  fs.addEventListener('input', () => { document.getElementById('formatLabel').textContent  = formatLabels[fs.value-1]; });
+  const sliders = [
+    {el:'detailSlider', label:'detailLabel', labels:detailLabels},
+    {el:'levelSlider',  label:'levelLabel',  labels:levelLabels},
+    {el:'langSlider',   label:'langLabel',   labels:langLabels},
+    {el:'priorSlider',  label:'priorLabel',  labels:priorLabels},
+    {el:'formatSlider', label:'formatLabel', labels:formatLabels},
+  ];
+  sliders.forEach(({el, label, labels}) => {
+    const s = document.getElementById(el);
+    const l = document.getElementById(label);
+    if (!s || !l) return;
+    l.textContent = labels[s.value-1];
+    updateSliderTrack(s);
+    s.addEventListener('input', () => {
+      l.textContent = labels[s.value-1];
+      updateSliderTrack(s);
+    });
+  });
 }
 window.addEventListener('DOMContentLoaded', initSliders);
 
@@ -885,7 +892,6 @@ INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie
       if(cleaned&&isValidOutput(cleaned,topic)){
         document.getElementById('inputText').value=cleaned;
         parsedDoc=parseText(cleaned);
-        parsedDoc._notebookMode = true; // render as notebook
         renderPreview(parsedDoc);
         // Enable both export buttons
         const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
@@ -996,6 +1002,8 @@ function directExport(){
 
 function exportPDF(){
   if(!parsedDoc)return;
+  // Note: PDF export always uses standard bullet rendering for now
+  // notebookMode only affects preview
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
