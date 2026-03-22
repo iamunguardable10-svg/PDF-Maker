@@ -15,13 +15,10 @@ export default async function handler(req) {
   const isBericht = text.startsWith('GENERIERE_BERICHT: ') || text.startsWith('STRUKTUR_BERICHT: ');
   const isStrukturBericht = text.startsWith('STRUKTUR_BERICHT: ');
 
-  // Extract topic/text AND parameters
-  // Format: "PREFIX: topic\n\nPARAMETER:\n- key: value\n..."
   let rawContent = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim()
     : isBericht ? text.replace(/^(GENERIERE_BERICHT|STRUKTUR_BERICHT): /, '').trim()
     : null;
 
-  // Split topic from parameters if present
   let topic = rawContent;
   let paramBlock = '';
   if (rawContent && rawContent.includes('\n\n')) {
@@ -32,121 +29,140 @@ export default async function handler(req) {
 
   const prompt = isBericht
     ? isStrukturBericht
-      ? `Du bist ein präziser Textformatierer. Wandle den folgenden Text in einen strukturierten Bericht um.
-Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
+      ? `Du bist ein präziser Texteditor für sachliche Fachtexte. Formatiere den folgenden Inhalt in einen klar gegliederten Bericht um.
+Gib ausschließlich den fertigen Bericht zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
 
-Exaktes Format:
-# [Passender Titel]
+ZIELFORMAT:
+# [Präziser, thematisch passender Titel]
 
 ## Zusammenfassung
-2-4 Sätze Fließtext als Überblick.
+2-4 Sätze Fließtext mit dem wichtigsten Inhalt in kompakter Form.
 
 1. Einleitung
-3-5 Sätze über Hintergrund und Bedeutung des Themas.
+3-5 Sätze zu Hintergrund, Kontext und Relevanz des Themas.
 
-2. [Passender Themenaspekt]
-4-6 Sätze ausführlicher Fließtext.
+2. [Konkreter Themenaspekt]
+4-6 Sätze zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 
-3. [Weiterer Themenaspekt]
-4-6 Sätze ausführlicher Fließtext.
+3. [Weiterer konkreter Themenaspekt]
+4-6 Sätze zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 
-[Füge so viele Themenaspekte hinzu wie nötig — mindestens 3]
+[Füge so viele inhaltlich sinnvolle Hauptabschnitte hinzu wie nötig, mindestens 3.]
 
 X. Fazit
-3-5 Sätze Schlussfolgerungen und Ausblick.
+3-5 Sätze mit Schlussfolgerung, Einordnung und ggf. Ausblick.
 
-> Quellenhinweis: Nur wenn im Original erkennbar, sonst weglassen.
-Allgemein: ** Callout nur für wirklich Wichtiges **
-> Merksatz: Echter inhaltlicher Satz.
+OPTIONAL:
+> Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet.
 
-REGELN: Keine Bullets, kein Fettdruck, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, alle Infos behalten.
- TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |
----
+REGELN:
+- Keine Bullets, kein Fettdruck im Fließtext
+- Nur #, ##, nummerierte Hauptabschnitte, > für optionale Hinweise
+- Vollständige Sätze statt Stichworte
+- Keine Informationen erfinden, keine Platzhalter im Ergebnis
+- Inhalt vollständig und logisch geordnet übernehmen
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+
 TEXT:
 ${rawContent}`
 
-      : `Erstelle einen ausführlichen Bericht zum Thema: "${topic}"
-Gib NUR den fertigen Bericht zurück — keine Erklärungen, keine Regeln, kein Codeblock.
-${paramBlock ? `\n${paramBlock}\n` : ''}
-# [Passender Titel]
+      : `Erstelle einen sachlich formulierten, klar gegliederten Bericht zum Thema: "${topic}"
+Gib ausschließlich den fertigen Bericht zurück. Keine Erklärungen, keine Regeln, kein Codeblock.
+${paramBlock ? `\nZusätzliche Vorgaben:\n${paramBlock}\n` : ''}
+ZIELFORMAT:
+# [Präziser, thematisch passender Titel]
 
 ## Zusammenfassung
-2-4 Sätze Fließtext als Überblick.
+2-4 Sätze Fließtext mit Überblick über das Thema.
 
 1. Einleitung
-3-5 Sätze über Hintergrund und Bedeutung des Themas.
+3-5 Sätze zu Hintergrund, Einordnung und Relevanz.
 
-2. [Passender Themenaspekt]
-4-6 Sätze ausführlicher Fließtext.
+2. [Konkreter Themenaspekt]
+4-6 Sätze ausführlicher, sachlicher Fließtext.
 
-3. [Weiterer Themenaspekt]
-4-6 Sätze ausführlicher Fließtext.
+3. [Weiterer konkreter Themenaspekt]
+4-6 Sätze ausführlicher, sachlicher Fließtext.
 
-[Füge so viele Themenaspekte hinzu wie das Thema erfordert — mindestens 3, so viele wie nötig]
+[Füge so viele Hauptabschnitte hinzu wie das Thema sinnvoll erfordert — mindestens 3.]
 
 [Letzter Abschnitt]. Fazit
-3-5 Sätze Schlussfolgerungen und Ausblick.
+3-5 Sätze mit Schlussfolgerungen und ggf. Ausblick.
 
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
 
-Allgemein: ** Callout nur für wirklich Wichtiges **
-> Merksatz: Echter inhaltlicher Satz.
+OPTIONAL:
+> Merksatz: Genau ein fachlich sinnvoller Kernsatz mit echtem Informationswert.
 
-REGELN: Kein Fettdruck, keine Bullets, nur #/##/Ziffern/> als Formatierung, vollständige Sätze, ECHTER inhaltlicher Text.  TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |`
-  
+REGELN:
+- Kein Fettdruck, keine Bullets
+- Nur #, ##, nummerierte Hauptabschnitte und > als Formatierung
+- Vollständige, präzise Sätze, keine leeren Phrasen
+- Keine Platzhalter im fertigen Text
+- Echter inhaltlicher Text mit klarer Gliederung
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |`
 
     : isGenerate
-    ? `Erstelle einen Lernzettel zum Thema: "${topic}"
-Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
-${paramBlock ? `\nBeachte diese Parameter:\n${paramBlock}\n` : ''}
-Zielformat:
+    ? `Erstelle einen klar strukturierten, inhaltlich dichten Lernzettel zum Thema: "${topic}"
+Gib ausschließlich den formatierten Lernzettel zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
+${paramBlock ? `\nBeachte diese zusätzlichen Vorgaben:\n${paramBlock}\n` : ''}
+ZIELFORMAT:
 # Haupttitel
 
-1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
-- Bullet Ebene 1
-  - Bullet Ebene 2 (GENAU 2 Leerzeichen Einrückung)
-    - Bullet Ebene 3 (GENAU 4 Leerzeichen Einrückung)
-(baue Struktur und Einrückungen so wie du sie für richtig hältst)
+1. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+  - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
+    - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
 
-** Callout nur für wirklich Wichtiges **
+[Baue die Struktur fachlich sinnvoll auf. Nutze echte Abschnittsnamen, keine Platzhalter.]
 
-> Merksatz: Echter inhaltlicher Satz.
+**Wichtiger Hinweis**
+
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
 PFLICHTREGELN:
-- KEIN Fettdruck in Bullets
-- Keine Emojis, nur Leerzeichen für Einrückung
-- Merksatz nur einmal am Ende
-- TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 | Spalte X |
-- ECHTER inhaltlicher Text — NIEMALS Platzhalter wie "Definition von X"`
+- Nur echter Inhalt, keine Platzhalter wie "Definition von X" oder "Erster Abschnitt"
+- Klar, kompakt, lernorientiert und fachlich korrekt formulieren
+- KEIN Fettdruck innerhalb von Bullets
+- Keine Emojis, nur Leerzeichen für Einrückungen
+- Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4
+- Merksatz genau einmal am Ende
+- Callout nur bei wirklich zentralem Hinweis
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Keine Meta-Sätze wie "hier ist dein Lernzettel"`
 
-    : `Konvertiere diesen Text in ein sauberes Lernzettel-Format. Gib NUR das Ergebnis zurück — keine Erklärungen, keine Regeln.
+    : `Konvertiere den folgenden Text in ein sauberes, vollständiges und gut lernbares Lernzettel-Format.
+Gib ausschließlich das Ergebnis zurück. Keine Erklärungen, keine Regeln, kein Codeblock.
 
-Zielformat:
+ZIELFORMAT:
 # Haupttitel
 
-1. Abschnittsname (echter Name, NICHT "Erster Abschnitt")
-- Bullet Ebene 1
-  - Bullet Ebene 2 (GENAU 2 Leerzeichen Einrückung)
-    - Bullet Ebene 3 (GENAU 4 Leerzeichen Einrückung)
+1. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+  - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
+    - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
 
-** Callout nur für wirklich Wichtiges **
+**Wichtiger Hinweis**
 
-> Merksatz: Echter inhaltlicher Satz.
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
 PFLICHTREGELN:
-1. VOLLSTÄNDIGKEIT: Jeden Inhaltspunkt übernehmen, NICHTS weglassen oder kürzen
-2. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs.
-3. KEINE STERNCHEN in Bullets: "- **Wort**" → "- Wort"
-4. KEIN ##: Nur "# Titel" einmal oben, dann direkt nummerierte Abschnitte
-5. ECHTE ABSCHNITTSNAMEN: Nie "Erster Abschnitt" — immer den Themenname
-6. BEREINIGUNG: Emojis, Trennlinien, KI-Floskeln, Angebote wie "Sag mir was du brauchst" entfernen
-7. TABELLEN: Bei Vergleichen oder tabellarischen Daten: | Spalte 1 | Spalte 2 |
+1. VOLLSTÄNDIGKEIT: Jeden inhaltlich relevanten Punkt übernehmen. Nichts Wesentliches weglassen.
+2. STRUKTUR: Inhalte logisch ordnen, zusammenfassen und hierarchisch gliedern.
+3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs.
+4. KEIN FETTDRUCK IN BULLETS: Keine "- **Begriff**" Formulierungen.
+5. NUR EIN HAUPTTITEL: Genau einmal "# Titel" oben. Danach direkt nummerierte Abschnitte, kein "##".
+6. ECHTE ABSCHNITTSNAMEN: Keine Platzhalter, sondern fachlich passende Überschriften.
+7. BEREINIGUNG: Emojis, Trennlinien, KI-Floskeln, Meta-Kommentare entfernen.
+8. TABELLEN: Bei Vergleichen eine Tabelle verwenden: | Spalte 1 | Spalte 2 |
+9. MERKSATZ: Genau einmal am Ende, nur mit echtem fachlichem Mehrwert.
+10. KEINE ERFINDUNGEN: Nur Inhalte aus dem gegebenen Text übernehmen.
 
 ---
 TEXT:
 ${text}`;
 
-  // Truncate very long inputs to avoid timeout
   const maxChars = 6000;
   const truncatedPrompt = prompt.length > maxChars
     ? prompt.slice(0, maxChars) + '\n\n[Text wurde gekürzt]'
@@ -166,9 +182,7 @@ ${text}`;
       model: 'llama-3.3-70b-versatile',
       max_tokens: 3000,
       temperature: 0.1,
-      messages: [
-        { role: 'user', content: truncatedPrompt }
-      ],
+      messages: [{ role: 'user', content: truncatedPrompt }],
     }),
   });
   clearTimeout(timeout);
@@ -194,14 +208,10 @@ ${text}`;
     });
   }
 
-  // Platzhalter-Callouts entfernen
   const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile'];
 
-  // Remove stray asterisks used as bullet markers (e.g. "* Punkt" -> "- Punkt")
   cleaned = cleaned.split('\n').map(line => {
-    if (/^(\s*)\*\s+(.+)$/.test(line)) {
-      return line.replace(/^(\s*)\*\s+/, '$1- ');
-    }
+    if (/^(\s*)\*\s+(.+)$/.test(line)) return line.replace(/^(\s*)\*\s+/, '$1- ');
     return line;
   }).join('\n');
 
@@ -214,7 +224,6 @@ ${text}`;
     return true;
   }).join('\n');
 
-  // Sicherheitsnetz: Sternchen aus Bullets entfernen + bereinigen
   cleaned = cleaned
     .replace(/\r\n/g, '\n')
     .replace(/\t/g, '  ')
