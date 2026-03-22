@@ -21,60 +21,64 @@ export default async function handler(req) {
   const prompt = isBericht
     ? isStrukturBericht
       ? `Du bist ein präziser Textformatierer. Wandle den folgenden Text in einen strukturierten Bericht um.
-Gib NUR den formatierten Text zurück. Keine Einleitung, kein Markdown-Codeblock.
+Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
 
-Zielformat:
+Exaktes Format — halte dich GENAU daran:
 # Titel des Berichts
 
 ## Zusammenfassung
-[2-4 Sätze die das Wesentliche zusammenfassen]
+Hier 2-4 Sätze Fließtext als zusammenfassender Überblick.
 
-1. Erster Abschnitt
-[Fließtext, 3-5 vollständige Sätze die den Inhalt ausführlich erklären]
+1. Abschnittsname
+Hier 3-5 vollständige Sätze als Fließtext. Kein Bullet. Kein Fettdruck.
 
-2. Zweiter Abschnitt
-[Fließtext]
+2. Zweiter Abschnittsname
+Weitere Sätze als Fließtext.
 
-> Quellenhinweis: [Falls erkennbar, sonst weglassen]
+> Quellenhinweis: Nur wenn im Original erkennbar, sonst weglassen.
 
-REGELN:
-- Schreibe jeden Abschnitt als zusammenhängenden Fließtext, KEINE Bulletpoints
-- Vollständige Sätze, akademischer Stil
-- Behalte ALLE Informationen aus dem Original
-- Entferne Emojis, Trennlinien, KI-Floskeln
-- Falls kein Titel erkennbar → # Bericht setzen
+STRIKTE REGELN:
+- KEIN Fettdruck (**text**) — nirgendwo
+- KEINE Bulletpoints (- oder •) — nirgendwo
+- KEINE Markdown-Formatierung außer #, ##, Ziffern und >
+- Nur vollständige Sätze im Fließtext
+- Alle Informationen aus dem Original behalten
+- Falls kein Titel → # Bericht
 
 Text:
 ${topic}`
       : `Erstelle einen ausführlichen Bericht zum Thema: "${topic}"
-Gib NUR den formatierten Text zurück. Keine Einleitung, kein Markdown-Codeblock.
+Gib NUR den formatierten Text zurück. Kein Markdown-Codeblock, keine Einleitung.
 
-Format:
-# Titel des Berichts
+Exaktes Format — halte dich GENAU daran:
+# [Passender Titel zum Thema]
 
 ## Zusammenfassung
-[2-4 Sätze Überblick]
+2-4 Sätze Fließtext als Überblick über das Thema.
 
 1. Einleitung
-[Fließtext, Hintergrund und Bedeutung des Themas]
+3-5 Sätze Fließtext über Hintergrund und Bedeutung des Themas.
 
-2. Hauptteil: [Themenaspekt]
-[Ausführlicher Fließtext]
+2. [Themenaspekt 1]
+4-6 Sätze ausführlicher Fließtext.
 
-3. Weiterer Abschnitt
-[Fließtext]
+3. [Themenaspekt 2]
+4-6 Sätze ausführlicher Fließtext.
 
-4. Fazit
-[Schlussfolgerungen und Ausblick]
+4. [Themenaspekt 3]
+4-6 Sätze ausführlicher Fließtext.
 
-> Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen.
+5. Fazit
+3-5 Sätze Schlussfolgerungen und Ausblick.
 
-REGELN:
-- Schreibe AUSSCHLIESSLICH Fließtext, KEINE Bulletpoints
-- Mindestens 5 nummerierte Abschnitte
-- Jeden Abschnitt mit 4-6 vollständigen Sätzen füllen
-- Akademischer, sachlicher Stil
-- ECHTEN inhaltlichen Text, keine Platzhalter
+> Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
+
+STRIKTE REGELN:
+- KEIN Fettdruck (**text**) — nirgendwo im Text
+- KEINE Bulletpoints (- oder •) — nirgendwo
+- KEINE Markdown-Formatierung außer #, ##, Ziffern und >
+- Nur vollständige Fließtext-Sätze
+- ECHTEN inhaltlichen Text — keine Platzhalter wie [Fließtext] oder [Abschnitt]
 - Zusammenfassung IMMER direkt nach dem Titel`
     : isGenerate
     ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
