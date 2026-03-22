@@ -353,7 +353,14 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <textarea id="topicInput" placeholder="z.B. Photosynthese, Zweiter Weltkrieg, Pythagoras — oder detaillierter: 'Die Ursachen des Ersten Weltkriegs mit Fokus auf Österreich-Ungarn'…" style="width:100%;min-height:100px;padding:12px 14px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;outline:none;background:#0e0e0e;color:var(--ink);caret-color:var(--accent);resize:vertical;line-height:1.6"></textarea>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:16px">
+        <!-- Advanced settings toggle -->
+        <button onclick="toggleAdvanced()" id="advancedToggle" style="background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.72rem;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between">
+          <span>⚙ Erweiterte Einstellungen</span>
+          <span id="advancedArrow" style="transition:transform 0.2s">▾</span>
+        </button>
+
+        <!-- Lernzettel sliders -->
+        <div id="sliders-lernzettel" style="display:none;flex-direction:column;gap:16px">
           <div class="slider-group">
             <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Format</label>
             <div style="position:relative;margin-bottom:4px">
@@ -411,6 +418,54 @@ textarea::placeholder { color: #383532; font-style: italic; }
           </div>
         </div>
 
+        <!-- Bericht sliders -->
+        <div id="sliders-bericht" style="display:none;flex-direction:column;gap:16px">
+          <div class="slider-group">
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Tiefe</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="berichtTiefeLabel" class="slider-tooltip">Überblick</span>
+              <input type="range" id="berichtTiefeSlider" min="1" max="4" value="2" step="1" class="slider">
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:0.58rem;color:var(--muted)">Zusammenfassung</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Wissenschaftlich</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Ton</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="berichtTonLabel" class="slider-tooltip">Neutral</span>
+              <input type="range" id="berichtTonSlider" min="1" max="3" value="2" step="1" class="slider">
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:0.58rem;color:var(--muted)">Informell</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Akademisch</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Schwerpunkt</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="berichtFokusLabel" class="slider-tooltip">Ausgewogen</span>
+              <input type="range" id="berichtFokusSlider" min="1" max="3" value="2" step="1" class="slider">
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:0.58rem;color:var(--muted)">Theorie</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Praxis & Beispiele</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:10px">Zielgruppe</label>
+            <div style="position:relative;margin-bottom:4px">
+              <span id="berichtZielLabel" class="slider-tooltip">Allgemein</span>
+              <input type="range" id="berichtZielSlider" min="1" max="4" value="2" step="1" class="slider">
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:0.58rem;color:var(--muted)">Laien</span>
+              <span style="font-size:0.58rem;color:var(--muted)">Experten</span>
+            </div>
+          </div>
+        </div>
+
         <div class="btn-group">
           <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()">✦ Generieren</button>
           <button class="btn btn-design" onclick="openModal()">◈ Design</button>
@@ -453,8 +508,13 @@ function setGenTemplate(tpl) {
   document.querySelectorAll('[id^="gtpl-"]').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('gtpl-' + tpl);
   if (btn) btn.classList.add('active');
-  // Show/hide sliders for bericht (no need for format slider)
-  const sliderSection = document.querySelector('#mode-generate .slider-group');
+  // Switch slider panels if advanced is open
+  if (advancedOpen) {
+    const lz = document.getElementById('sliders-lernzettel');
+    const br = document.getElementById('sliders-bericht');
+    if (tpl === 'bericht') { if(lz) lz.style.display='none'; if(br) br.style.display='flex'; }
+    else { if(br) br.style.display='none'; if(lz) lz.style.display='flex'; }
+  }
 }
 
 function parseReportText(raw) {
@@ -928,8 +988,12 @@ function applyDesign(){
   currentDesign=pendingDesign;
   closeModal();
   if(parsedDoc){
-    if(parsedDoc._reportMode) renderReportPreview(parsedDoc);
-    else renderPreview(parsedDoc);
+    if(parsedDoc._reportMode){
+      renderReportPreview(parsedDoc);
+    } else {
+      // Keep current notebook mode when switching design
+      renderPreview(parsedDoc);
+    }
     setStatus('✓ Design angewendet','ok');
   }
 }
@@ -953,15 +1017,18 @@ async function cleanWithAI(){
       if(data.error){setStatus('Fehler: '+data.error,'err');btn.disabled=false;btn.textContent='✦ KI bereinigen';return;}
       const cleaned=normalizeAIText(data.cleaned);
       if(cleaned&&isValidOutput(cleaned,raw)){
-        document.getElementById('inputText').value=cleaned;
+        // Store cleaned version but keep original in textarea
         if(currentTemplate==='bericht'){
           parsedDoc=parseReportText(cleaned);
+          parsedDoc._notebookMode=true;
           renderReportPreview(parsedDoc);
         } else {
-          parsedDoc=parseText(cleaned);renderPreview(parsedDoc);
+          parsedDoc=parseText(cleaned);
+          parsedDoc._notebookMode=false;
+          renderPreview(parsedDoc);
         }
-        setStatus('✓ Bereinigt & Vorschau aktualisiert','ok');
-        btn.disabled=false;btn.textContent='✦ KI bereinigen';return;
+        setStatus('✓ Vorschau aktualisiert','ok');
+        btn.disabled=false;btn.textContent='↺ Erneut versuchen';return;
       }
       if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));
     }catch(e){if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));}
@@ -973,6 +1040,30 @@ async function cleanWithAI(){
 function toggleGenerateMode() {} // kept for compatibility
 
 const detailLabels = ['Nur Stichpunkte', 'Kompakt', 'Ausgewogen', 'Detailliert', 'Sehr detailliert'];
+const berichtTiefeLabels = ['Kurzzusammenfassung', 'Überblick', 'Ausführlich', 'Wissenschaftlich'];
+const berichtTonLabels   = ['Informell', 'Neutral', 'Akademisch'];
+const berichtFokusLabels = ['Theorielastig', 'Ausgewogen', 'Praxis & Beispiele'];
+const berichtZielLabels  = ['Laien', 'Allgemein', 'Fortgeschritten', 'Experten'];
+
+let advancedOpen = false;
+function toggleAdvanced() {
+  advancedOpen = !advancedOpen;
+  const lz = document.getElementById('sliders-lernzettel');
+  const br = document.getElementById('sliders-bericht');
+  const arrow = document.getElementById('advancedArrow');
+  const btn = document.getElementById('advancedToggle');
+  if (advancedOpen) {
+    if (currentGenTemplate === 'bericht') { if(br) br.style.display='flex'; }
+    else { if(lz) lz.style.display='flex'; }
+    if(arrow) arrow.style.transform='rotate(180deg)';
+    if(btn) btn.style.color='var(--accent)';
+  } else {
+    if(lz) lz.style.display='none';
+    if(br) br.style.display='none';
+    if(arrow) arrow.style.transform='';
+    if(btn) btn.style.color='var(--muted2)';
+  }
+}
 const levelLabels  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'];
 const langLabels   = ['Sehr einfach', 'Normal', 'Gehoben', 'Fachsprache', 'Wissenschaftlich'];
 const priorLabels  = ['Kein Vorwissen', 'Grundkenntnisse', 'Mittleres Wissen', 'Fortgeschritten', 'Experte'];
@@ -999,7 +1090,14 @@ function initSliders() {
     {el:'priorSlider',  label:'priorLabel',  labels:priorLabels},
     {el:'formatSlider', label:'formatLabel', labels:formatLabels},
   ];
-  sliders.forEach(({el, label, labels}) => {
+  const allSliders = [
+    ...sliders,
+    {el:'berichtTiefeSlider', label:'berichtTiefeLabel', labels:berichtTiefeLabels},
+    {el:'berichtTonSlider',   label:'berichtTonLabel',   labels:berichtTonLabels},
+    {el:'berichtFokusSlider', label:'berichtFokusLabel', labels:berichtFokusLabels},
+    {el:'berichtZielSlider',  label:'berichtZielLabel',  labels:berichtZielLabels},
+  ];
+  allSliders.forEach(({el, label, labels}) => {
     const s = document.getElementById(el);
     const l = document.getElementById(label);
     if (!s || !l) return;
@@ -1021,13 +1119,15 @@ async function generateFromTopic(){
   // Read sliders if in generate mode
   const detail = document.getElementById('detailSlider') ? parseInt(document.getElementById('detailSlider').value) : 3;
   const level  = document.getElementById('levelSlider')  ? parseInt(document.getElementById('levelSlider').value)  : 3;
-
   const lang   = document.getElementById('langSlider')   ? parseInt(document.getElementById('langSlider').value)   : 2;
   const prior  = document.getElementById('priorSlider')  ? parseInt(document.getElementById('priorSlider').value)  : 2;
   const format = document.getElementById('formatSlider') ? parseInt(document.getElementById('formatSlider').value) : 2;
+  const bTiefe = document.getElementById('berichtTiefeSlider') ? parseInt(document.getElementById('berichtTiefeSlider').value) : 2;
+  const bTon   = document.getElementById('berichtTonSlider')   ? parseInt(document.getElementById('berichtTonSlider').value)   : 2;
+  const bFokus = document.getElementById('berichtFokusSlider') ? parseInt(document.getElementById('berichtFokusSlider').value) : 2;
+  const bZiel  = document.getElementById('berichtZielSlider')  ? parseInt(document.getElementById('berichtZielSlider').value)  : 2;
 
   const bulletCount = [2, 3, 4, 5, 6][detail-1];
-
   const levelHint  = ['Mittelschule', 'Gymnasium', 'Oberstufe', 'Abitur-Niveau', 'Uni-Niveau'][level-1];
   const langHint   = ['sehr einfache Alltagssprache, jeden Fachbegriff sofort erklären', 'normale verständliche Sprache, wichtige Fachbegriffe in Klammern erklären', 'gehobene Sprache, Fachbegriffe gelegentlich erklären', 'Fachsprache bevorzugen, Begriffe nur bei Erstnennung kurz erklären', 'wissenschaftliche Sprache, Fachterminologie ohne Erklärung'][lang-1];
   const priorHint  = ['kein Vorwissen — jeden Begriff und jedes Konzept von Grund auf erklären', 'Grundkenntnisse — Basiskonzepte nur kurz erwähnen', 'mittleres Wissen — nur fortgeschrittene Konzepte erklären', 'fortgeschrittenes Wissen — nur sehr spezifische Fachdetails erklären', 'Expertenwissen — keine Erklärungen, nur dichte Fakten'][prior-1];
@@ -1036,20 +1136,15 @@ async function generateFromTopic(){
     'FORMAT: NATÜRLICH & GEMISCHT. Schreibe wie strukturierte Notizen — mal ein kurzer Stichpunkt, mal ein erklärender Satz, mal zwei Sätze die einen Zusammenhang erklären. Nicht jeder Punkt muss gleich lang sein. Fakten können kurz sein, Konzepte und Zusammenhänge dürfen ausführlicher erklärt werden. Wirke nicht wie eine Maschine die eine Liste abarbeitet, sondern wie jemand der das Thema versteht und erklärt.',
     'FORMAT: FLIESSTEXT. Jeder Bullet ist ein vollständiger erklärender Satz oder 2-3 Sätze die Zusammenhänge erklären. Keine reinen Stichworte — immer vollständige Sätze die das Warum und Wie erklären.'
   ][format-1];
+  const berichtTiefeHint = ['kompakte Kurzzusammenfassung (3 Abschnitte)', 'ausgewogener Überblick (5 Abschnitte)', 'ausführliche Analyse (7 Abschnitte)', 'wissenschaftlich tiefe Abhandlung (8+ Abschnitte)'][bTiefe-1];
+  const berichtTonHint   = ['informeller, zugänglicher Stil', 'neutraler, sachlicher Stil', 'akademischer, formeller Stil'][bTon-1];
+  const berichtFokusHint = ['starker Fokus auf Theorie und Hintergründe', 'ausgewogene Mischung aus Theorie und Praxis', 'starker Fokus auf Praxis, Beispiele und Anwendungen'][bFokus-1];
+  const berichtZielHint  = ['für Laien ohne Vorkenntnisse', 'für allgemeines Publikum', 'für fortgeschrittene Leser', 'für Experten und Fachleute'][bZiel-1];
 
   const prefix = currentGenTemplate === 'bericht' ? 'GENERIERE_BERICHT' : 'GENERIERE_LERNZETTEL';
-  const enrichedTopic = `${prefix}: ${topic}
-
-WICHTIGSTE REGEL — FORMAT:
-${formatHint}
-
-PARAMETER:
-- Ausführlichkeit: ca. ${bulletCount} Hauptpunkte pro Abschnitt, Anzahl Abschnitte je nach Themenumfang
-- Niveau: ${levelHint}
-- Sprache: ${langHint}
-- Vorwissen des Lesers: ${priorHint}
-
-INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie "Definition von X", "Erklärung von Y". Jeder Punkt enthält konkrete Fakten, echte Definitionen, reale Beispiele.`;
+  const enrichedTopic = currentGenTemplate === 'bericht'
+    ? `${prefix}: ${topic}\n\nPARAMETER:\n- Tiefe: ${berichtTiefeHint}\n- Ton: ${berichtTonHint}\n- Schwerpunkt: ${berichtFokusHint}\n- Zielgruppe: ${berichtZielHint}\n\nINHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter.`
+    : `${prefix}: ${topic}\n\nWICHTIGSTE REGEL — FORMAT:\n${formatHint}\n\nPARAMETER:\n- Ausführlichkeit: ca. ${bulletCount} Hauptpunkte pro Abschnitt\n- Niveau: ${levelHint}\n- Sprache: ${langHint}\n- Vorwissen des Lesers: ${priorHint}\n\nINHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie "Definition von X", "Erklärung von Y". Jeder Punkt enthält konkrete Fakten, echte Definitionen, reale Beispiele.`;
 
   const btn=document.getElementById('genSubmitBtn');
   btn.disabled=true;
@@ -1066,9 +1161,11 @@ INHALT: Schreibe ECHTEN inhaltlichen Text zu "${topic}". NIEMALS Platzhalter wie
         document.getElementById('inputText').value=cleaned;
         if(currentGenTemplate==='bericht'){
           parsedDoc=parseReportText(cleaned);
+          parsedDoc._notebookMode=true;
           renderReportPreview(parsedDoc);
         } else {
           parsedDoc=parseText(cleaned);
+          parsedDoc._notebookMode=false;
           renderPreview(parsedDoc);
         }
         // Enable both export buttons
@@ -1150,6 +1247,7 @@ function clearInput(){
   document.getElementById('lzPreview').style.display='none';
   document.getElementById('emptyState').style.display='flex';
   document.getElementById('exportBtn').disabled=true;
+  document.getElementById('aiBtn').textContent='✦ KI bereinigen';
   parsedDoc=null;
   setStatus('✓ Eingabe geleert','ok');
 }
