@@ -292,7 +292,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
       Notefly
     </div>
   </a>
-  <div class="header-tag">Lernzettel Generator</div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="/" style="text-decoration:none;font-size:0.72rem;color:var(--muted2);display:flex;align-items:center;gap:5px;transition:color 0.15s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted2)'">← Startseite</a>
+    <div class="header-tag">Lernzettel Generator</div>
+  </div>
 </header>
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
@@ -313,9 +316,9 @@ textarea::placeholder { color: #383532; font-style: italic; }
       <div class="sidebar-sub">Füge beliebigen Text ein — die KI strukturiert ihn automatisch in ein schönes PDF.</div>
       <div class="instructions">
         <div class="instructions-title">So funktioniert's</div>
-        <div class="step"><div class="step-num">1</div><div>Text einfügen <strong>oder</strong> mit <strong>Aus Thema generieren</strong> einen Lernzettel zu einem Thema erstellen lassen</div></div>
-        <div class="step"><div class="step-num">2</div><div><strong>KI bereinigen</strong> für automatische Strukturierung — oder <strong>Direkt exportieren</strong> ohne KI</div></div>
-        <div class="step"><div class="step-num">3</div><div><strong>Design wählen</strong> → Vorschau bearbeiten → als PDF exportieren</div></div>
+        <div class="step"><div class="step-num">1</div><div>Text einfügen — Mitschriften, ChatGPT-Output, Folien oder eigene Notizen. Vorlage wählen: <strong>Lernzettel</strong> oder <strong>Bericht</strong></div></div>
+        <div class="step"><div class="step-num">2</div><div><strong>KI bereinigen</strong> für automatische Strukturierung — oder <strong>Direkt exportieren</strong> ohne KI. Nicht gefallen? Einfach erneut versuchen.</div></div>
+        <div class="step"><div class="step-num">3</div><div><strong>Design wählen</strong> → Titel, Abschnitte und Bullets direkt in der Vorschau bearbeiten → als PDF exportieren</div></div>
       </div>
     </div>
     <textarea id="inputText" placeholder="Text hier einfügen…"></textarea>
