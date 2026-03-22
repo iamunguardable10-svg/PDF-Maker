@@ -984,9 +984,15 @@ function renderPreview(doc){
 }
 
 function openModal(){
-  const raw=document.getElementById('inputText').value.trim();
-  // Allow opening modal if we have a parsedDoc (including reports)
+  // In generate mode, topicInput is used; in structure mode, inputText
+  const raw = document.getElementById('inputText').value.trim();
+  const topicRaw = document.getElementById('topicInput') ? document.getElementById('topicInput').value.trim() : '';
+  const inGenerateMode = APP_MODE === 'generate';
   if(!parsedDoc){
+    if(inGenerateMode){
+      if(!topicRaw){setStatus('Bitte zuerst generieren','err');return;}
+      setStatus('Bitte zuerst generieren','err');return;
+    }
     if(!raw){setStatus('Bitte zuerst Text eingeben','err');return;}
     if(looksStructured(raw)){
       parsedDoc=parseText(raw);
@@ -1073,6 +1079,19 @@ function toggleAdvanced() {
     else { if(lz) lz.style.display='flex'; }
     if(arrow) arrow.style.transform='rotate(180deg)';
     if(btn) btn.style.color='var(--accent)';
+    // Recalculate slider positions after container becomes visible
+    setTimeout(() => {
+      document.querySelectorAll('#sliders-lernzettel .slider, #sliders-bericht .slider').forEach(s => {
+        const labelMap = {
+          formatSlider:'formatLabel', detailSlider:'detailLabel', levelSlider:'levelLabel',
+          langSlider:'langLabel', priorSlider:'priorLabel',
+          berichtTiefeSlider:'berichtTiefeLabel', berichtTonSlider:'berichtTonLabel',
+          berichtFokusSlider:'berichtFokusLabel', berichtZielSlider:'berichtZielLabel'
+        };
+        const l = document.getElementById(labelMap[s.id]);
+        if (l) updateSliderTrack(s, l);
+      });
+    }, 50);
   } else {
     if(lz) lz.style.display='none';
     if(br) br.style.display='none';
