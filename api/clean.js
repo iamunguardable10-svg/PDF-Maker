@@ -15,34 +15,29 @@ export default async function handler(req) {
   const topic = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim() : null;
 
   const prompt = isGenerate
-    ? `Erstelle einen vollständigen Lernzettel zum Thema: "${topic}".
+    ? `Erstelle einen Lernzettel. Die genauen Parameter stehen unten.
 Gib NUR den formatierten Text zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
 
 Format:
 # Titel
-## Lernzettel
 
 1. Abschnittsname
-- Punkt
-- Punkt
-  - Unterpunkt (GENAU 2 Leerzeichen)
-    - Unter-Unterpunkt (GENAU 4 Leerzeichen)
+- Bullet oder Satz je nach Format-Parameter
+  - Unterpunkt
 
 ** Wichtiger Hinweis als eigene Zeile **
 
 > Merksatz: Ein zusammenfassender Satz.
 
-Pflichtregeln:
-- Mindestens 4 Abschnitte mit je mindestens 4 Bullets
-- KEIN Fettdruck (**text**) innerhalb von Bullet-Texten
-- Emojis verboten
-- Nur Leerzeichen für Einrückung, KEINE Tabs
-- Callout ** ... ** nur für wirklich wichtige Aussagen, als eigene Zeile
-- Merksatz > nur einmal ganz am Ende
-- Kein Text vor oder nach dem Lernzettel
-- TABELLEN: Wenn Inhalte vergleichend oder tabellarisch sind (z.B. Vor/Nachteile, Vergleiche, Vokabeln), verwende Markdown-Tabellen mit passenden Spalten und Zeilenanzahlen:
-  | Spalte 1 | Spalte 2 |
-  | Wert A   | Wert B   |`
+ABSOLUTE PFLICHTREGELN:
+- KEIN Fettdruck in Bullets
+- Keine Emojis
+- Nur Leerzeichen für Einrückung
+- Merksatz nur einmal am Ende
+- TABELLEN: Bei Vergleichen: | Spalte 1 | Spalte 2 |
+- KRITISCH: Schreibe ECHTEN inhaltlichen Text mit konkreten Fakten. NIEMALS Platzhalter wie "Definition von X", "Erklärung von Y", "Beispiel für Z" — immer die echte Definition/Erklärung/das echte Beispiel hinschreiben.
+
+${topic}`
 
     : `Du bist ein präziser Textformatierer. Konvertiere den folgenden Text EXAKT in dieses Format:
 
@@ -77,7 +72,7 @@ F) BEREINIGUNG: Emojis, Trennlinien (---), KI-Floskeln, Angebote wie "Sag mir wa
 G) CALLOUT: ** Text ** nur für explizit wichtige Aussagen, als eigene Zeile.
 
 H) MERKSATZ: Echter inhaltlicher Satz am Ende. NICHT den Platzhalter wörtlich übernehmen.
-I) TABELLEN: Wenn der Original-Text Vergleiche, Gegenüberstellungen oder tabellarische Daten enthält, stelle sie als Markdown-Tabelle mit den perfekt passenden Spalten und Zeilen dar:
+I) TABELLEN: Wenn der Original-Text Vergleiche, Gegenüberstellungen oder tabellarische Daten enthält, stelle sie als Markdown-Tabelle dar:
   | Spalte 1 | Spalte 2 |
   | Wert A   | Wert B   |
 
