@@ -11,162 +11,270 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
   }
 
-  const isGenerate = text.startsWith('GENERIERE_LERNZETTEL: ');
-  const isBericht = text.startsWith('GENERIERE_BERICHT: ') || text.startsWith('STRUKTUR_BERICHT: ');
+  const isGenerateLernzettel = text.startsWith('GENERIERE_LERNZETTEL: ');
+  const isGenerateBericht = text.startsWith('GENERIERE_BERICHT: ');
   const isStrukturBericht = text.startsWith('STRUKTUR_BERICHT: ');
+  const isBericht = isGenerateBericht || isStrukturBericht;
+  const isGenerate = isGenerateLernzettel || isGenerateBericht;
 
-  let rawContent = isGenerate ? text.replace('GENERIERE_LERNZETTEL: ', '').trim()
-    : isBericht ? text.replace(/^(GENERIERE_BERICHT|STRUKTUR_BERICHT): /, '').trim()
-    : null;
+  let rawContent = null;
 
-  let topic = rawContent; 
+  if (isGenerateLernzettel) {
+    rawContent = text.replace('GENERIERE_LERNZETTEL: ', '').trim();
+  } else if (isGenerateBericht) {
+    rawContent = text.replace('GENERIERE_BERICHT: ', '').trim();
+  } else if (isStrukturBericht) {
+    rawContent = text.replace('STRUKTUR_BERICHT: ', '').trim();
+  }
+
+  let topic = rawContent;
   let paramBlock = '';
+
   if (rawContent && rawContent.includes('\n\n')) {
     const parts = rawContent.split('\n\n');
     topic = parts[0].trim();
     paramBlock = parts.slice(1).join('\n\n').trim();
   }
 
-  const prompt = isBericht
-    ? isStrukturBericht
-      ? `Du bist ein präziser Texteditor für sachliche Fachtexte. Formatiere den folgenden Inhalt in einen klar gegliederten Bericht um, und führe den Inhalt aus/ arbeite Zusammenhänge raus.
-Gib ausschließlich den fertigen Bericht zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
+  const lernzettelGeneratePrompt = `
+Erstelle einen parser-sicheren, inhaltlich starken Lernzettel zum Thema: "${topic}"
+
+WICHTIG:
+Die Ausgabe muss EXAKT in einem Format sein, das ein strenger zeilenbasierter Parser sicher lesen kann.
+Gib ausschließlich den finalen Lernzettel zurück.
+Keine Einleitung. Keine Erklärungen. Kein Markdown-Codeblock. Keine Meta-Sätze.
+
+${paramBlock ? `PARAMETER MIT HOHER PRIORITÄT:
+${paramBlock}
+
+Diese Parameter sind verbindliche Stil- und Inhaltsvorgaben. Halte sie ein, aber verletze NIEMALS das Ausgabeformat.
+` : ''}
 
 ZIELFORMAT:
-# [Präziser, thematisch passender Titel]
+# Präziser Titel
+
+## Optionaler Untertitel
+
+1. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+  - Unterpunkt auf Ebene 2
+    - Detailpunkt auf Ebene 3
+
+2. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+- Inhaltspunkt auf Ebene 1
+
+### Optionales Zwischenlabel
+
+**Optionaler wichtiger Hinweis**
+
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
+
+PFLICHTREGELN:
+- Genau eine Titelzeile mit "# ".
+- Optional direkt danach genau eine Zeile mit "## ".
+- Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
+- Unter jedem Abschnitt Bulletpoints mit "- ".
+- Ebene 1 = 0 Leerzeichen vor "- "
+- Ebene 2 = genau 2 Leerzeichen vor "- "
+- Ebene 3 = genau 4 Leerzeichen vor "- "
+- Keine Tabs.
+- Nur echte Abschnittsnamen, keine Platzhalter wie "Erster Abschnitt" oder "Definition von X".
+- Nur echter Inhalt: Definitionen, Zusammenhänge, Beispiele, Anwendungen, Ursachen, Folgen.
+- Kein Fettdruck innerhalb normaler Bulletpoints, außer ein einzelnes Wort ist fachlich zwingend hervorzuheben.
+- Optional genau eine Zeile mit "### ".
+- Optional genau eine vollständige Zeile mit "**...**" als Callout.
+- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn er fachlich Mehrwert hat.
+- Bei Vergleichen oder Kategorien darf eine Tabelle verwendet werden, im Format: | Spalte 1 | Spalte 2 |
+- Keine Emojis.
+- Keine JSON-Ausgabe.
+- Keine Floskeln wie "Hier ist dein Lernzettel".
+- Keine Platzhalter.
+- Keine erfundenen Fakten.
+
+INHALTLICHE PRIORITÄT:
+- Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
+- Nutze die Parameter, um Detailgrad, Sprache, Niveau, Vorwissen und Formatierung zu steuern.
+- Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+
+THEMA:
+${topic}
+`.trim();
+
+  const lernzettelStructurePrompt = `
+Konvertiere den folgenden Text in einen parser-sicheren, vollständigen und gut lernbaren Lernzettel.
+
+WICHTIG:
+Gib ausschließlich das Endergebnis zurück.
+Keine Einleitung. Keine Erklärungen. Kein Codeblock.
+
+ZIELFORMAT:
+# Präziser Titel
+
+## Optionaler Untertitel
+
+1. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+  - Unterpunkt auf Ebene 2
+    - Detailpunkt auf Ebene 3
+
+2. Konkreter Abschnittsname
+- Inhaltspunkt auf Ebene 1
+- Inhaltspunkt auf Ebene 1
+
+### Optionales Zwischenlabel
+
+**Optionaler wichtiger Hinweis**
+
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
+
+PFLICHTREGELN:
+1. VOLLSTÄNDIGKEIT:
+- Jeden inhaltlich relevanten Punkt aus dem Ursprungstext übernehmen.
+- Nichts Wesentliches weglassen.
+
+2. STRUKTUR:
+- Inhalte logisch ordnen, verdichten und hierarchisch gliedern.
+- Nur echte Abschnittsnamen verwenden.
+
+3. FORMAT:
+- Genau eine Zeile mit "# ".
+- Optional genau eine Zeile mit "## ".
+- Danach nummerierte Hauptabschnitte.
+- Bulletpoints mit "- ".
+- Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4.
+- Keine Tabs.
+
+4. STIL:
+- Klar, kompakt, lernorientiert, fachlich korrekt.
+- Kein Fettdruck in normalen Bullets.
+- Keine Meta-Kommentare, keine KI-Floskeln, keine Emojis.
+
+5. OPTIONAL:
+- Genau eine "### " Zeile, wenn sie sinnvoll ist.
+- Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
+- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+
+6. SICHERHEIT:
+- Keine erfundenen Informationen.
+- Nur Inhalte aus dem gegebenen Text übernehmen und sauber ordnen.
+
+TEXT:
+${text}
+`.trim();
+
+  const berichtGeneratePrompt = `
+Erstelle einen parser-sicheren, sachlich formulierten und klar gegliederten Bericht zum Thema: "${topic}"
+
+WICHTIG:
+Die Ausgabe muss in einem strengen, stabilen Format sein.
+Gib ausschließlich den finalen Bericht zurück.
+Keine Einleitung. Keine Erklärungen. Kein Codeblock. Keine Meta-Sätze.
+
+${paramBlock ? `PARAMETER MIT HOHER PRIORITÄT:
+${paramBlock}
+
+Diese Parameter sind verbindliche Stil- und Tiefenvorgaben. Halte sie ein, aber verletze NIEMALS das Ausgabeformat.
+` : ''}
+
+ZIELFORMAT:
+# Präziser, thematisch passender Titel
 
 ## Zusammenfassung
-2-4 Sätze Fließtext mit dem wichtigsten Inhalt in kompakter Form.
+2-4 Sätze mit kompaktem Überblick.
 
 1. Einleitung
-Fließtext zu Hintergrund, Kontext und Relevanz des Themas.
+Fließtext zu Hintergrund, Kontext und Relevanz.
 
-2. [Konkreter Themenaspekt]
-Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
+2. Konkreter Themenaspekt
+Fließtext mit echten Informationen.
 
-3. [Weiterer konkreter Themenaspekt]
-Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
+3. Weiterer konkreter Themenaspekt
+Fließtext mit echten Informationen.
 
-[Füge so viele nummerierte Hauptabschnitte hinzu wie nötig — mindestens 3. Abschnittsnummern fortlaufend: 1, 2, 3 ...]
-
-[Höchste Nummer + 1]. Fazit
-Schlussfolgerung, Einordnung und ggf. Ausblick — so viele Sätze wie nötig.
+4. Fazit
+Fließtext mit Schlussfolgerung und Einordnung.
 
 OPTIONAL:
-**Wichtiger Hinweis**: (hier Hinweis einfügen)
-> Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
-> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet.
+> Quellenhinweis: kurzer Hinweis
+> Merksatz: prägnanter Kernsatz mit echtem Mehrwert
 
+PFLICHTREGELN:
+- Genau eine Zeile mit "# ".
+- Genau eine Zeile mit "## Zusammenfassung".
+- Danach 2-4 Sätze Zusammenfassung.
+- Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
+- Mindestens 4 Hauptabschnitte insgesamt, inklusive Einleitung und Fazit.
+- In den Abschnitten normaler Fließtext.
+- Keine Bulletpoints, außer sie sind fachlich wirklich deutlich sinnvoller.
+- Keine Platzhalter wie "[Konkreter Themenaspekt]".
+- Keine Meta-Sätze.
+- Kein Markdown-Codeblock.
+- Kein unnötiger Fettdruck im Fließtext.
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Optional ein Quellenhinweis.
+- Optional genau ein Merksatz.
+- Keine erfundenen Fakten.
 
+INHALTLICHE PRIORITÄT:
+- Nutze die Parameter, um Tiefe, Ton, Schwerpunkt und Zielgruppe zu steuern.
+- Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
 
-REGELN:
-- Keine Bullets, außer sie machen es deutlich übersichtlicher und verständlicher
-- kein Fettdruck im Fließtext, nur bei extrem wichtigen Wörtern
-- Nur #, ##, nummerierte Hauptabschnitte, > für optionale Hinweise
-- Vollständige Sätze statt Stichworte
-- Keine Informationen erfinden, keine Platzhalter im Ergebnis
-- Inhalt vollständig und logisch geordnet übernehmen
-- Bei Vergleichen oder wenn es sich anbietet darf und soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+THEMA:
+${topic}
+`.trim();
 
-TEXT:
-${rawContent}`
+  const berichtStructurePrompt = `
+Du bist ein präziser Texteditor für sachliche Fachtexte.
+Formatiere den folgenden Inhalt in einen parser-sicheren, klar gegliederten Bericht um.
 
-      : `Erstelle einen sachlich formulierten, klar gegliederten Bericht zum Thema: "${topic}"
-Gib ausschließlich den fertigen Bericht zurück. Keine Erklärungen, keine Regeln, kein Codeblock.
-${paramBlock ? `\nZusätzliche Vorgaben:\n${paramBlock}\n` : ''}
+WICHTIG:
+Gib ausschließlich den fertigen Bericht zurück.
+Keine Einleitung. Keine Erklärung. Kein Markdown-Codeblock.
+
 ZIELFORMAT:
-# [Präziser, thematisch passender Titel]
+# Präziser, thematisch passender Titel
 
 ## Zusammenfassung
-Fließtext mit Überblick über das Thema.
+2-4 Sätze Fließtext mit dem wichtigsten Inhalt.
 
 1. Einleitung
-Fließtext zu Hintergrund, Einordnung und Relevanz.
+Fließtext zu Hintergrund, Kontext und Relevanz.
 
-2. [Konkreter Themenaspekt]
-Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
+2. Konkreter Themenaspekt
+Zusammenhängender Fließtext mit echten Informationen aus dem Ursprungstext.
 
-3. [Weiterer konkreter Themenaspekt]
-Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
+3. Weiterer konkreter Themenaspekt
+Zusammenhängender Fließtext mit echten Informationen aus dem Ursprungstext.
 
-[Füge so viele nummerierte Hauptabschnitte hinzu wie das Thema erfordert — mindestens 3. Die Abschnittsnummern müssen fortlaufend sein: 1, 2, 3, 4 ... KEINE Buchstaben oder X.]
+4. Fazit
+Schlussfolgerung, Einordnung und ggf. Ausblick.
 
-[Höchste Nummer + 1]. Fazit
-Schlussfolgerungen und ggf. Ausblick.
-
-Optional:
-**Wichtiger Hinweis: (hier Hinweis einfügen)**
-> Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
-> Merksatz: [Nur einfügen wenn er echten Mehrwert hat — ein prägnanter Kernsatz der das Wichtigste zusammenfasst]
-
-REGELN:
-- Keine Bullets, außer sie machen es deutlich übersichtlicher und verständlicher
-- kein Fettdruck im Fließtext, nur bei extrem wichtigen Wörtern
-- Nur #, ##, nummerierte Hauptabschnitte, > für optionale Hinweise
-- Vollständige Sätze statt Stichworte
-- Keine Informationen erfinden, keine Platzhalter im Ergebnis
-- Inhalt vollständig und logisch geordnet übernehmen
-- Bei Vergleichen oder wenn es sich anbietet darf und soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |Spalte [X]`
-
-    : isGenerate
-    ? `Erstelle einen klar strukturierten, inhaltlich dichten Lernzettel zum Thema: "${topic}"
-Gib ausschließlich den formatierten Lernzettel zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
-${paramBlock ? `\nBeachte diese zusätzlichen Vorgaben:\n${paramBlock}\n` : ''}
-ZIELFORMAT:
-# Haupttitel
-
-1. Konkreter Abschnittsname
-- Inhaltspunkt auf Ebene 1
-  - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
-    - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
-
-[Baue die Struktur fachlich sinnvoll auf. Nutze echte Abschnittsnamen, keine Platzhalter. Unterpunkte und Detailpunkte nur wenn du sie für sinnvoll hälst]
-
-**Wichtiger Hinweis: (hier Hinweis einfügen)**
-
-> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
+OPTIONAL:
+> Quellenhinweis: Nur wenn im Ursprungstext tatsächlich Quellen erkennbar sind
+> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet
 
 PFLICHTREGELN:
-- Nur echter Inhalt, keine Platzhalter wie "Definition von X" oder "Erster Abschnitt"
-- Klar, kompakt, lernorientiert und fachlich korrekt formulieren
-- KEIN Fettdruck innerhalb von Bullets, außer du hebst damit wirklich wichtige (Fach)wörter hervor
-- Keine Emojis, nur Leerzeichen für Einrückungen
-- Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4
-- Merksatz genau einmal am Ende
-- Callout (wichtiger Hinweis) bei wirklich zentralem Hinweis
-- Bei Vergleichen soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
-- Keine Meta-Sätze wie "hier ist dein Lernzettel"`
+- Genau eine Zeile mit "# ".
+- Genau eine Zeile mit "## Zusammenfassung".
+- Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
+- Mindestens 4 Hauptabschnitte insgesamt, inklusive Einleitung und Fazit.
+- Nur vollständige Sätze statt Stichworte.
+- Keine Platzhalter.
+- Keine Meta-Sätze.
+- Keine erfundenen Informationen.
+- Inhalt vollständig, logisch und sachlich geordnet übernehmen.
+- Keine Bulletpoints, außer sie machen es deutlich verständlicher.
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 
-    : `Konvertiere den folgenden Text in ein sauberes, vollständiges und gut lernbares Lernzettel-Format.
-Gib ausschließlich das Ergebnis zurück. Keine Erklärungen, keine Regeln, kein Codeblock.
-
-ZIELFORMAT:
-# Haupttitel
-
-1. Konkreter Abschnittsname
-- Inhaltspunkt auf Ebene 1
-  - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
-    - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
-
-**Wichtiger Hinweis: (hier Hinweis einfügen)**
-
-> Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
-
-PFLICHTREGELN:
-1. VOLLSTÄNDIGKEIT: Jeden inhaltlich relevanten Punkt übernehmen. Nichts Wesentliches weglassen.
-2. STRUKTUR: Inhalte logisch ordnen, zusammenfassen und hierarchisch gliedern.
-3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs. Entscheide selbst wie du den Text optisch sauber ordnest
-4. KEIN FETTDRUCK IN BULLETS: Keine "- **Begriff**" Formulierungen.
-5. NUR EIN HAUPTTITEL: Genau einmal "# Titel" oben. Danach direkt nummerierte Abschnitte, kein "##".
-6. ECHTE ABSCHNITTSNAMEN: Keine Platzhalter, sondern fachlich passende Überschriften.
-7. BEREINIGUNG: Emojis, Trennlinien, KI-Floskeln, Meta-Kommentare entfernen.
-8. TABELLEN: Bei Vergleichen eine Tabelle verwenden: | Spalte 1 | Spalte 2 |
-9. MERKSATZ: Genau einmal am Ende, nur mit echtem fachlichem Mehrwert.
-10. KEINE ERFINDUNGEN: Nur Inhalte aus dem gegebenen Text übernehmen.
-
----
 TEXT:
-${text}`;
+${rawContent}
+`.trim();
+
+  const prompt = isBericht
+    ? (isStrukturBericht ? berichtStructurePrompt : berichtGeneratePrompt)
+    : (isGenerate ? lernzettelGeneratePrompt : lernzettelStructurePrompt);
 
   const maxChars = 6000;
   const truncatedPrompt = prompt.length > maxChars
@@ -190,6 +298,7 @@ ${text}`;
       messages: [{ role: 'user', content: truncatedPrompt }],
     }),
   });
+
   clearTimeout(timeout);
 
   const data = await response.json();
@@ -213,7 +322,13 @@ ${text}`;
     });
   }
 
-  const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile', 'wichtiger hinweis'];
+  const placeholders = [
+    'nur für explizit wichtige hinweise',
+    'nur für wirklich wichtige hinweise',
+    'callout nur für sehr wichtiges',
+    'wichtiger hinweis als eigene zeile',
+    'wichtiger hinweis'
+  ];
 
   cleaned = cleaned.split('\n').map(line => {
     if (/^(\s*)\*\s+(.+)$/.test(line)) return line.replace(/^(\s*)\*\s+/, '$1- ');
@@ -223,7 +338,7 @@ ${text}`;
   cleaned = cleaned.split('\n').filter(line => {
     const t = line.trim();
     if (/^\*\*.*\*\*$/.test(t)) {
-      const inner = t.replace(/^\*\*\s*|\s*\*\*$/g,'').trim().toLowerCase();
+      const inner = t.replace(/^\*\*\s*|\s*\*\*$/g, '').trim().toLowerCase();
       if (placeholders.some(p => inner.includes(p))) return false;
     }
     return true;
@@ -237,13 +352,16 @@ ${text}`;
     .split('\n')
     .map(line => {
       const trimmed = line.trim();
+
       if (/^\s*-\s/.test(line) && !/^\*\*.*\*\*$/.test(trimmed)) {
         return line.replace(/\*\*([^*]+)\*\*/g, '$1');
       }
+
       if (/^\*\*.*\*\*$/.test(trimmed)) {
         const inner = trimmed.replace(/^\*\*\s*|\s*\*\*$/g, '').trim();
         return inner ? `**${inner}**` : trimmed;
       }
+
       return line;
     })
     .join('\n')
