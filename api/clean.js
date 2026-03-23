@@ -53,7 +53,7 @@ Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 Schlussfolgerung, Einordnung und ggf. Ausblick — so viele Sätze wie nötig.
 
 OPTIONAL:
-**Wichtiger Hinweis: (hier Hinweis einfügen)**
+**Wichtiger Hinweis**: (hier Hinweis einfügen)
 > Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet.
 
