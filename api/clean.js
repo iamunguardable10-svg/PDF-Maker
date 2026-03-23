@@ -29,7 +29,7 @@ export default async function handler(req) {
 
   const prompt = isBericht
     ? isStrukturBericht
-      ? `Du bist ein präziser Texteditor für sachliche Fachtexte. Formatiere den folgenden Inhalt in einen klar gegliederten Bericht um.
+      ? `Du bist ein präziser Texteditor für sachliche Fachtexte. Formatiere den folgenden Inhalt in einen klar gegliederten Bericht um, und führe den Inhalt aus/ arbeite Zusammenhänge raus.
 Gib ausschließlich den fertigen Bericht zurück. Keine Einleitung, keine Erklärung, kein Markdown-Codeblock.
 
 ZIELFORMAT:
@@ -55,14 +55,17 @@ Schlussfolgerung, Einordnung und ggf. Ausblick — so viele Sätze wie nötig.
 OPTIONAL:
 > Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet.
+**[Wichtiger Hinweis]**
+
 
 REGELN:
-- Keine Bullets, kein Fettdruck im Fließtext
+- Keine Bullets, außer sie machen es deutlich übersichtlicher und verständlicher
+- kein Fettdruck im Fließtext, nur bei extrem wichtigen Wörtern
 - Nur #, ##, nummerierte Hauptabschnitte, > für optionale Hinweise
 - Vollständige Sätze statt Stichworte
 - Keine Informationen erfinden, keine Platzhalter im Ergebnis
 - Inhalt vollständig und logisch geordnet übernehmen
-- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Bei Vergleichen oder wenn es sich anbietet darf und soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 
 TEXT:
 ${rawContent}`
@@ -90,18 +93,19 @@ Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
 [Höchste Nummer + 1]. Fazit
 Schlussfolgerungen und ggf. Ausblick.
 
+Optional:
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
-
+**[Wichtiger Hinweis]**
 > Merksatz: [Nur einfügen wenn er echten Mehrwert hat — ein prägnanter Kernsatz der das Wichtigste zusammenfasst]
 
 REGELN:
-- Kein Fettdruck, keine Bullets
-- Nur #, ##, nummerierte Hauptabschnitte und > als Formatierung
-- Vollständige, präzise Sätze, keine leeren Phrasen
-- Keine Platzhalter im fertigen Text
-- Echter inhaltlicher Text mit klarer Gliederung
-- Abschnittsnummern IMMER als arabische Ziffern: 1, 2, 3, 4, 5 — NIEMALS X oder Buchstaben
-- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |`
+- Keine Bullets, außer sie machen es deutlich übersichtlicher und verständlicher
+- kein Fettdruck im Fließtext, nur bei extrem wichtigen Wörtern
+- Nur #, ##, nummerierte Hauptabschnitte, > für optionale Hinweise
+- Vollständige Sätze statt Stichworte
+- Keine Informationen erfinden, keine Platzhalter im Ergebnis
+- Inhalt vollständig und logisch geordnet übernehmen
+- Bei Vergleichen oder wenn es sich anbietet darf und soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |Spalte [X]`
 
     : isGenerate
     ? `Erstelle einen klar strukturierten, inhaltlich dichten Lernzettel zum Thema: "${topic}"
@@ -115,21 +119,21 @@ ZIELFORMAT:
   - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
     - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
 
-[Baue die Struktur fachlich sinnvoll auf. Nutze echte Abschnittsnamen, keine Platzhalter.]
+[Baue die Struktur fachlich sinnvoll auf. Nutze echte Abschnittsnamen, keine Platzhalter. Unterpunkte und Detailpunkte nur wenn du sie für sinnvoll hälst]
 
-**Wichtiger Hinweis**
+**[Wichtiger Hinweis]**
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
 PFLICHTREGELN:
 - Nur echter Inhalt, keine Platzhalter wie "Definition von X" oder "Erster Abschnitt"
 - Klar, kompakt, lernorientiert und fachlich korrekt formulieren
-- KEIN Fettdruck innerhalb von Bullets
+- KEIN Fettdruck innerhalb von Bullets, außer du hebst damit wirklich wichtige (Fach)wörter hervor
 - Keine Emojis, nur Leerzeichen für Einrückungen
 - Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4
 - Merksatz genau einmal am Ende
-- Callout nur bei wirklich zentralem Hinweis
-- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Callout (wichtiger Hinweis) bei wirklich zentralem Hinweis
+- Bei Vergleichen soll eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 - Keine Meta-Sätze wie "hier ist dein Lernzettel"`
 
     : `Konvertiere den folgenden Text in ein sauberes, vollständiges und gut lernbares Lernzettel-Format.
@@ -143,14 +147,14 @@ ZIELFORMAT:
   - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
     - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
 
-**Wichtiger Hinweis**
+**[Wichtiger Hinweis]**
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
 PFLICHTREGELN:
 1. VOLLSTÄNDIGKEIT: Jeden inhaltlich relevanten Punkt übernehmen. Nichts Wesentliches weglassen.
 2. STRUKTUR: Inhalte logisch ordnen, zusammenfassen und hierarchisch gliedern.
-3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs.
+3. EINRÜCKUNG: Ebene 1 = 0 Leerzeichen, Ebene 2 = genau 2, Ebene 3 = genau 4. Keine Tabs. Entscheide selbst wie du den Text optisch sauber ordnest
 4. KEIN FETTDRUCK IN BULLETS: Keine "- **Begriff**" Formulierungen.
 5. NUR EIN HAUPTTITEL: Genau einmal "# Titel" oben. Danach direkt nummerierte Abschnitte, kein "##".
 6. ECHTE ABSCHNITTSNAMEN: Keine Platzhalter, sondern fachlich passende Überschriften.
