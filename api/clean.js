@@ -19,7 +19,7 @@ export default async function handler(req) {
     : isBericht ? text.replace(/^(GENERIERE_BERICHT|STRUKTUR_BERICHT): /, '').trim()
     : null;
 
-  let topic = rawContent;
+  let topic = rawContent; 
   let paramBlock = '';
   if (rawContent && rawContent.includes('\n\n')) {
     const parts = rawContent.split('\n\n');
