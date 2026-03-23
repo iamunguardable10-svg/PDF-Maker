@@ -53,9 +53,10 @@ Zusammenhängender Fließtext mit echten Informationen aus dem Ausgangstext.
 Schlussfolgerung, Einordnung und ggf. Ausblick — so viele Sätze wie nötig.
 
 OPTIONAL:
+**Wichtiger Hinweis: (hier Hinweis einfügen)**
 > Quellenhinweis: Nur einfügen, wenn im Ursprungstext tatsächlich Quellen erkennbar sind. Sonst weglassen.
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz, nur wenn er echten Mehrwert bietet.
-**[Wichtiger Hinweis]**
+
 
 
 REGELN:
@@ -94,8 +95,8 @@ Ausführlicher, sachlicher Fließtext — so viele Sätze wie nötig.
 Schlussfolgerungen und ggf. Ausblick.
 
 Optional:
+**Wichtiger Hinweis: (hier Hinweis einfügen)**
 > Quellenhinweis: Dieser Bericht basiert auf allgemeinem Fachwissen zum Thema ${topic}.
-**[Wichtiger Hinweis]**
 > Merksatz: [Nur einfügen wenn er echten Mehrwert hat — ein prägnanter Kernsatz der das Wichtigste zusammenfasst]
 
 REGELN:
@@ -121,7 +122,7 @@ ZIELFORMAT:
 
 [Baue die Struktur fachlich sinnvoll auf. Nutze echte Abschnittsnamen, keine Platzhalter. Unterpunkte und Detailpunkte nur wenn du sie für sinnvoll hälst]
 
-**[Wichtiger Hinweis]**
+**Wichtiger Hinweis: (hier Hinweis einfügen)**
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
@@ -147,7 +148,7 @@ ZIELFORMAT:
   - Unterpunkt auf Ebene 2 (genau 2 Leerzeichen Einrückung)
     - Detailpunkt auf Ebene 3 (genau 4 Leerzeichen Einrückung)
 
-**[Wichtiger Hinweis]**
+**Wichtiger Hinweis: (hier Hinweis einfügen)**
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz.
 
@@ -212,7 +213,7 @@ ${text}`;
     });
   }
 
-  const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile'];
+  const placeholders = ['nur für explizit wichtige hinweise','nur für wirklich wichtige hinweise','callout nur für sehr wichtiges','wichtiger hinweis als eigene zeile', 'wichtiger hinweis'];
 
   cleaned = cleaned.split('\n').map(line => {
     if (/^(\s*)\*\s+(.+)$/.test(line)) return line.replace(/^(\s*)\*\s+/, '$1- ');
