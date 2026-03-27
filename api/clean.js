@@ -92,6 +92,12 @@ PFLICHTREGELN:
 - Keine Platzhalter.
 - Keine erfundenen Fakten.
 
+OPTIONALE VISUELLE ELEMENTE (nur einsetzen wenn fachlich sinnvoll):
+- Definitionskarten: ">> Begriff :: Erklärung" — für Fachbegriffe, Vokabeln, Konzepte. Mehrere hintereinander möglich.
+- Prozessschritte: "=> Schritt" — für Abläufe, Algorithmen, historische Folgen. Mindestens 2, maximal 6 Schritte.
+- Highlight-Badges: "!! Wert — Beschriftung" — für Schlüsselzahlen, Jahreszahlen, Kernbegriffe. Maximal 4 pro Abschnitt.
+- Pro Abschnitt höchstens einen dieser Typen einsetzen. Nicht übertreiben.
+
 INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
 - Nutze die Parameter, um Detailgrad, Sprache, Niveau, Vorwissen und Formatierung zu steuern.
@@ -155,6 +161,10 @@ PFLICHTREGELN:
 - Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Definitionskarten: ">> Begriff :: Erklärung" — nur wenn der Text Fachbegriffe enthält.
+- Prozessschritte: "=> Schritt" — nur wenn ein Ablauf/Prozess beschrieben wird (min. 2, max. 6).
+- Highlight-Badges: "!! Wert — Beschriftung" — nur für prägnante Zahlen oder Kernbegriffe (max. 4).
+- Pro Abschnitt höchstens einen dieser optionalen Typen einsetzen.
 
 6. SICHERHEIT:
 - Keine erfundenen Informationen.
@@ -199,6 +209,8 @@ Fließtext mit Schlussfolgerung und Einordnung.
 OPTIONAL:
 > Quellenhinweis: kurzer Hinweis
 > Merksatz: prägnanter Kernsatz mit echtem Mehrwert
+>> Begriff :: Erklärung — für Fachbegriffe im Bericht (mehrere hintereinander möglich)
+!! Wert — Beschriftung — für Schlüsselzahlen oder -fakten (max. 4 pro Abschnitt)
 
 PFLICHTREGELN:
 - Genau eine Zeile mit "# ".
