@@ -86,7 +86,7 @@ PFLICHTREGELN:
 - Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
 - Unter jedem Abschnitt entweder Bulletpoints ("- ") ODER eines der visuellen Elemente — nie beides mischen.
 - Ebene 1 = 0 Leerzeichen vor "- ", Ebene 2 = 2 Leerzeichen, Ebene 3 = 4 Leerzeichen. Keine Tabs.
-- Nur echte Abschnittsnamen, keine Platzhalter. Kein Fettdruck in normalen Bullets.
+- Abschnittsnamen MÜSSEN themenspezifisch sein — NIEMALS generische Namen wie "Grundlagen", "Einleitung", "Übersicht", "Definition". Abschnittsnamen NIEMALS in **fett** schreiben.
 - "### Zwischenlabel" NUR wenn direkt danach Inhalt folgt — NIEMALS als letztes Element einer Sektion.
 - Optional genau eine vollständige Zeile mit "**...**" als Callout.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn fachlich sinnvoll.
@@ -110,7 +110,7 @@ UNTERSTÜTZTE SYNTAX (optional, nur wenn sinnvoll):
 - "> Merksatz: ..." für einen prägnanten Kernsatz am Ende
 - "**Wichtiger Hinweis**" als Callout-Box
 - "| Spalte 1 | Spalte 2 |" für Vergleichstabellen
-- "$Formel$" für mathematische Ausdrücke (KaTeX-Syntax)
+- "$Formel$" für mathematische Ausdrücke in KaTeX-Syntax, z.B. "$E = mc^2$", "$\\frac{a}{b}$" — NIEMALS Formeln in normale Klammern schreiben
 
 THEMA:
 ${topic}
@@ -150,7 +150,7 @@ PFLICHTREGELN:
 
 2. STRUKTUR:
 - Inhalte logisch ordnen, verdichten und hierarchisch gliedern.
-- Nur echte Abschnittsnamen verwenden.
+- Abschnittsnamen MÜSSEN themenspezifisch sein — NIEMALS "Grundlagen", "Einleitung", "Übersicht", "Definition" oder andere generische Namen. Immer das konkrete Teilthema benennen.
 
 3. FORMAT:
 - Genau eine Zeile mit "# ".

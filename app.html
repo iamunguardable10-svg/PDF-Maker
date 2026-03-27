@@ -211,9 +211,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-retro .lz-page-num{color:#c8b888!important;border-top-color:#e8e0d0!important}
 /* Shared */
 .lz-bullets{padding:0 6px;display:flex;flex-direction:column;gap:4px}
-.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18}
+.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18;overflow-wrap:break-word;word-break:break-word;min-width:0}
+.lz-bullet span,.lz-sub-bullet span,.lz-sub-sub-bullet span{min-width:0;overflow-wrap:break-word;word-break:break-word}
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
+.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
 .lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
@@ -473,7 +474,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <button class="btn-direct-link" onclick="directExport()">⚡ Direkt als PDF</button>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <button class="btn" id="exportImgBtn" onclick="doExportImage(true)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
+          <button class="btn" id="exportImgBtn" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
@@ -614,7 +615,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
         </div>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <button class="btn" id="exportImgBtnGen" onclick="doExportImage(true)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
+          <button class="btn" id="exportImgBtnGen" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
       </div>
       <div class="status-msg" id="status"></div>
@@ -848,9 +849,10 @@ const previewStyles = `
 .lz-page.font-thin .lz-bullet,.lz-page.font-thin .lz-sub-bullet,.lz-page.font-thin .lz-notebook-text,.lz-page.font-thin .lz-report-para{font-weight:300}
 .lz-page.font-bold .lz-bullet,.lz-page.font-bold .lz-sub-bullet,.lz-page.font-bold .lz-notebook-text,.lz-page.font-bold .lz-report-para{font-weight:600}
 .lz-bullets{padding:0 6px;display:flex;flex-direction:column;gap:4px}
-.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18}
+.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18;overflow-wrap:break-word;word-break:break-word;min-width:0}
+.lz-bullet span,.lz-sub-bullet span,.lz-sub-sub-bullet span{min-width:0;overflow-wrap:break-word;word-break:break-word}
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
+.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
 .lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
@@ -1011,15 +1013,15 @@ function parseText(raw){
   for(let i=0;i<lines.length;i++){
     const line=lines[i],trimmed=line.trim();
     if(!trimmed)continue;
-    if(/^#\s+/.test(trimmed)){doc.title=trimmed.replace(/^#\s+/,'').trim();continue;}
+    if(/^#\s+/.test(trimmed)){doc.title=trimmed.replace(/^#\s+/,'').replace(/\*\*/g,'').trim();continue;}
     if(/^##\s+/.test(trimmed)){
-      const text=trimmed.replace(/^##\s+/,'').trim();
+      const text=trimmed.replace(/^##\s+/,'').replace(/\*\*/g,'').trim();
       if(!subtitleAlreadyUsed&&doc.sections.length===0&&!currentSection){doc.subtitle=text;subtitleAlreadyUsed=true;}
       else{newSection(text);lastCreatedSectionTitle=text;}
       continue;
     }
-    if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').trim(),true);continue;}
-    if(/^>\s+/.test(trimmed)){doc.merksatz=trimmed.replace(/^>\s+/,'').trim();continue;}
+    if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').replace(/\*\*/g,'').trim(),true);continue;}
+    if(/^>\s*/.test(trimmed)&&trimmed.length>1){doc.merksatz=trimmed.replace(/^>\s*/,'').trim();continue;}
     if(/^\*\*[^*]/.test(trimmed)){const text=trimmed.replace(/^\*\*\s*/,'').replace(/\s*\*\*:?\s*$/,'').replace(/\*\*/g,'').trim();if(text){ensureSection();currentSection.callout=text;continue;}}
     if(/^>>\s+/.test(trimmed)){const content=trimmed.replace(/^>>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();currentSection.defs.push(sep>-1?{term:content.slice(0,sep).trim(),def:content.slice(sep+2).trim()}:{term:content,def:''});continue;}
     if(/^=>\s+/.test(trimmed)){ensureSection();currentSection.steps.push(trimmed.replace(/^=>\s+/,'').trim());continue;}
@@ -1027,7 +1029,7 @@ function parseText(raw){
     if(/^<>\s+/.test(trimmed)){const content=trimmed.replace(/^<>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.cols)currentSection.cols=[];currentSection.cols.push(sep>-1?{left:content.slice(0,sep).trim(),right:content.slice(sep+2).trim()}:{left:content,right:''});continue;}
     const nm=line.match(/^(\s*)(\d+)\.\s+(.*)$/);
     if(nm){
-      const indent=nm[1].length,text=nm[3].trim();
+      const indent=nm[1].length,text=nm[3].replace(/\*\*/g,'').trim();
       if(indent===0){
         if(text.toLowerCase()===lastCreatedSectionTitle.toLowerCase()){lastCreatedSectionTitle='';continue;}
         const genericNames=['erster abschnitt','zweiter abschnitt','dritter abschnitt','vierter abschnitt','fünfter abschnitt','sechster abschnitt','siebter abschnitt','achter abschnitt','neunter abschnitt','zehnter abschnitt','abschnitt'];
@@ -1777,12 +1779,9 @@ async function doExportImage(transparent, popupId){
   if(!lzPreview||lzPreview.style.display==='none'){setStatus('Keine Vorschau vorhanden','err');return;}
   const target=lzPreview.querySelector('.lz-page')||lzPreview;
   setStatus('⏳ Bild wird erstellt…','');
-  let bgColor=null;
-  if(!transparent){
-    const cs=window.getComputedStyle(target);
-    const raw=cs.backgroundColor;
-    bgColor=(raw&&raw!=='rgba(0, 0, 0, 0)'&&raw!=='transparent')?raw:'#ffffff';
-  }
+  // Always use design background for crisp rendering (transparent causes milky anti-aliasing)
+  const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
+  const bgColor = designBgMap[currentDesign.id] || '#ffffff';
   try{
     const canvas=await html2canvas(target,{
       scale:2,
