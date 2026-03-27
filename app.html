@@ -1396,6 +1396,7 @@ async function generateFromTopic(){
         // Enable both export buttons
         const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
         const ebg=document.getElementById('exportBtnGen'); if(ebg) ebg.disabled=false;
+        ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
         setStatus(`✓ Lernzettel zu "${topic}" generiert`,'ok');
         saveHistory(parsedDoc);
         btn.disabled=false;btn.textContent='✦ Generieren';return;
@@ -1556,6 +1557,7 @@ function clearInput(){
   document.getElementById('lzPreview').style.display='none';
   document.getElementById('emptyState').style.display='flex';
   document.getElementById('exportBtn').disabled=true;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
   document.getElementById('aiBtn').textContent='✦ KI bereinigen';
   parsedDoc=null;
   setStatus('✓ Eingabe geleert','ok');
@@ -1588,6 +1590,34 @@ function directExport(){
     renderPreview(parsedDoc);
   }
   setStatus('✓ Vorschau erstellt — bereit zum Export','ok');
+}
+
+async function exportImage(){
+  if(!parsedDoc||typeof html2canvas==='undefined'){setStatus('Bild-Export nicht verfügbar','err');return;}
+  const lzPreview=document.getElementById('lzPreview');
+  if(!lzPreview||lzPreview.style.display==='none'){setStatus('Keine Vorschau vorhanden','err');return;}
+  const page=lzPreview.querySelector('.lz-page');
+  const target=page||lzPreview;
+  setStatus('⏳ Bild wird erstellt…','');
+  try{
+    const canvas=await html2canvas(target,{
+      scale:2,
+      useCORS:true,
+      allowTaint:false,
+      backgroundColor:null,
+      logging:false
+    });
+    const dataUrl=canvas.toDataURL('image/png');
+    const a=document.createElement('a');
+    const title=(parsedDoc.title||'notefly').replace(/[^a-zA-Z0-9äöüÄÖÜß\-_ ]/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'notefly';
+    a.href=dataUrl;
+    a.download=`${title}.png`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>document.body.removeChild(a),500);
+    setStatus('✓ Bild gespeichert!','ok');
+  }catch(e){
+    setStatus('Fehler beim Bild-Export','err');
+  }
 }
 
 function exportPDF(){
