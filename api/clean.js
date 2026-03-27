@@ -93,10 +93,10 @@ PFLICHTREGELN:
 - Keine erfundenen Fakten.
 
 OPTIONALE VISUELLE ELEMENTE (nur einsetzen wenn fachlich sinnvoll):
-- Definitionskarten: ">> Begriff :: Erklärung" — für Fachbegriffe, Vokabeln, Konzepte. Mehrere hintereinander möglich.
-- Prozessschritte: "=> Schritt" — für Abläufe, Algorithmen, historische Folgen. Mindestens 2, maximal 6 Schritte.
-- Highlight-Badges: "!! Wert — Beschriftung" — für Schlüsselzahlen, Jahreszahlen, Kernbegriffe. Maximal 4 pro Abschnitt.
-- Pro Abschnitt höchstens einen dieser Typen einsetzen. Nicht übertreiben.
+- Definitionskarten: ">> Begriff :: Erklärung" — für Fachbegriffe, Vokabeln, Konzepte. Mehrere hintereinander möglich. Nur wenn es wirklich um Definitionen geht.
+- Prozessschritte: "=> Schritt" — für Abläufe, Algorithmen, historische Folgen. Mindestens 2, maximal 6 Schritte. Nur für echte Prozesse.
+- Highlight-Badges: "!! Wert — Beschriftung" — für Schlüsselzahlen, Jahreszahlen, Kernbegriffe. Maximal 4 pro Abschnitt. Nur für wirklich prägnante Fakten.
+- Nicht übertreiben: pro Abschnitt höchstens einen dieser Typen einsetzen.
 
 INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
@@ -161,9 +161,9 @@ PFLICHTREGELN:
 - Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
-- Definitionskarten: ">> Begriff :: Erklärung" — nur wenn der Text Fachbegriffe enthält.
-- Prozessschritte: "=> Schritt" — nur wenn ein Ablauf/Prozess beschrieben wird (min. 2, max. 6).
-- Highlight-Badges: "!! Wert — Beschriftung" — nur für prägnante Zahlen oder Kernbegriffe (max. 4).
+- Definitionskarten: ">> Begriff :: Erklärung" — nur wenn der Text Fachbegriffe oder Vokabeln enthält.
+- Prozessschritte: "=> Schritt" — nur wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6).
+- Highlight-Badges: "!! Wert — Beschriftung" — nur für prägnante Zahlen, Daten oder Kernbegriffe (max. 4 pro Abschnitt).
 - Pro Abschnitt höchstens einen dieser optionalen Typen einsetzen.
 
 6. SICHERHEIT:
