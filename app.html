@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root {
   --bg: #0f0f0f; --card: #161616; --sidebar: #111111; --ink: #f0ede8;
@@ -421,7 +422,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
         </div>
         <button class="btn btn-direct" onclick="directExport()">⚡ Direkt exportieren</button>
-        <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+        <div class="btn-group">
+          <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
+          <button class="btn" id="exportImgBtn" onclick="exportImage()" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild</button>
+        </div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
 
@@ -559,7 +563,10 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()">✦ Generieren</button>
           <button class="btn btn-design" onclick="openModal()">◈ Design</button>
         </div>
-        <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+        <div class="btn-group">
+          <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
+          <button class="btn" id="exportImgBtnGen" onclick="exportImage()" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild</button>
+        </div>
       </div>
 
       <div class="color-row" id="colorRow" style="display:none">
@@ -1123,6 +1130,7 @@ function renderReportPreview(doc){
   lzPreview.innerHTML=html;
   document.getElementById('exportBtn').disabled=false;
   const eb=document.getElementById('exportBtnGen'); if(eb) eb.disabled=false;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
   const toggle=document.getElementById('renderToggle');
   if(toggle) toggle.classList.remove('visible'); // no toggle for reports
 }
@@ -1134,6 +1142,7 @@ function renderPreview(doc){
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
   document.getElementById('exportBtn').disabled=false;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
   // Show render toggle
   const toggle=document.getElementById('renderToggle');
   if(toggle) toggle.classList.add('visible');
@@ -1416,13 +1425,14 @@ function moveSection(idx, dir) {
   syncTextarea(); renderPreview(parsedDoc);
 }
 function deleteSection(idx) {
-  if (!parsedDoc) return;
+  if (!parsedDoc || parsedDoc.sections.length <= 1) return;
+  if (!confirm('Abschnitt wirklich löschen?')) return;
   parsedDoc.sections.splice(idx, 1);
   syncTextarea(); renderPreview(parsedDoc);
 }
 function addSection(afterIdx) {
   if (!parsedDoc) return;
-  const newSec = {title:'Neuer Abschnitt',items:[],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};
+  const newSec = {title:'Neuer Abschnitt',items:[{text:'Inhalt hier eingeben',isLabel:false,sub:[]}],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};
   parsedDoc.sections.splice(afterIdx + 1, 0, newSec);
   syncTextarea(); renderPreview(parsedDoc);
 }
@@ -1432,29 +1442,18 @@ function toggleColorRow() {
   const row = document.getElementById('colorRow');
   row.style.display = row.style.display === 'none' ? 'flex' : 'none';
 }
-function applyAccentColor(val) {
-  if (!parsedDoc || !currentDesign) return;
-  const design = designs.find(d => d.id === currentDesign);
-  if (!design) return;
-  design.sectionColors = design.sectionColors.map(c => ({...c, title: val, dot: val}));
-  renderPreview(parsedDoc);
+function applyAccentColor(hex) {
+  document.documentElement.style.setProperty('--accent', hex);
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const light=`rgb(${Math.min(255,r+30)},${Math.min(255,g+30)},${Math.min(255,b+30)})`;
+  document.documentElement.style.setProperty('--accent2', light);
+  document.documentElement.style.setProperty('--accent-dim', `rgba(${r},${g},${b},0.12)`);
 }
 function resetAccentColor() {
-  if (!parsedDoc || !currentDesign) return;
-  const origDesigns = [
-    { id:'lernzettel', sectionColors:[{bg:'#fdf0f2',title:'#c0364f',dot:'#f4a8b0'},{bg:'#eef8f2',title:'#2d7a4f',dot:'#a8ddb8'},{bg:'#fdf6e8',title:'#8a5e12',dot:'#f9c97a'},{bg:'#eaf4fd',title:'#1a5f8a',dot:'#a8cff4'},{bg:'#f3edfb',title:'#5a2d9a',dot:'#c8b4e8'}]},
-    { id:'minimal', sectionColors:[{bg:'transparent',title:'#8a8580',dot:'#1c1a18'},{bg:'transparent',title:'#8a8580',dot:'#1c1a18'},{bg:'transparent',title:'#8a8580',dot:'#1c1a18'},{bg:'transparent',title:'#8a8580',dot:'#1c1a18'},{bg:'transparent',title:'#8a8580',dot:'#1c1a18'}]},
-    { id:'dark', sectionColors:[{bg:'#1a1410',title:'#e8a94d',dot:'#e8a94d'},{bg:'#101418',title:'#5ba4cf',dot:'#5ba4cf'},{bg:'#141018',title:'#9d7cd8',dot:'#9d7cd8'},{bg:'#101814',title:'#73c991',dot:'#73c991'},{bg:'#180e10',title:'#f87070',dot:'#f87070'}]},
-    { id:'pastell', sectionColors:[{bg:'#fdf0f5',title:'#b0608a',dot:'#e8b4cc'},{bg:'#f0f5fd',title:'#6080b0',dot:'#b4cce8'},{bg:'#f5fdf0',title:'#608060',dot:'#b4e8b4'},{bg:'#fdf5f0',title:'#b07060',dot:'#e8ccb4'},{bg:'#f5f0fd',title:'#8060b0',dot:'#ccb4e8'}]},
-    { id:'editorial', sectionColors:[{bg:'#1c1a18',title:'#c9a84c',dot:'#c9a84c'},{bg:'#1a1c18',title:'#8cb87a',dot:'#8cb87a'},{bg:'#181c1c',title:'#7ab8b8',dot:'#7ab8b8'},{bg:'#1c181c',title:'#b87ab8',dot:'#b87ab8'},{bg:'#1c1818',title:'#b87a7a',dot:'#b87a7a'}]},
-    { id:'neon', sectionColors:[{bg:'#0d0d24',title:'#00ffcc',dot:'#00ffcc'},{bg:'#0d1a0d',title:'#39ff14',dot:'#39ff14'},{bg:'#1a0d1a',title:'#ff00ff',dot:'#ff00ff'},{bg:'#1a0d0d',title:'#ff3333',dot:'#ff3333'},{bg:'#0d1a1a',title:'#00ccff',dot:'#00ccff'}]},
-    { id:'retro', sectionColors:[{bg:'#f5edd8',title:'#8b3a0f',dot:'#d4824a'},{bg:'#e8f0d8',title:'#2a5e2a',dot:'#6a9a4a'},{bg:'#dce8f0',title:'#1a4a6e',dot:'#4a7a9a'},{bg:'#f0e8d8',title:'#6e3a1a',dot:'#9a6a4a'},{bg:'#e8dce8',title:'#4a2a6e',dot:'#7a5a9a'}]}
-  ];
-  const orig = origDesigns.find(d => d.id === currentDesign);
-  if (!orig) return;
-  const design = designs.find(d => d.id === currentDesign);
-  if (design) design.sectionColors = orig.sectionColors.map(c => ({...c}));
-  renderPreview(parsedDoc);
+  document.documentElement.style.removeProperty('--accent');
+  document.documentElement.style.removeProperty('--accent2');
+  document.documentElement.style.removeProperty('--accent-dim');
+  document.getElementById('accentPicker').value = '#c9a84c';
 }
 
 // ── HISTORY ───────────────────────────────────────────────────
@@ -1786,16 +1785,16 @@ function exportPDF(){
     }
     sec.items.forEach(item=>{
       const textColor=isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24];
-      function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(it.text,cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(s.text,cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}});}return t;}
+      function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(stripMath(it.text),cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(stripMath(s.text),cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(stripMath(ch),cw-24).length*4+1;});}});}return t;}
       checkPage(itemH(item));
-      if(item.isLabel){y+=2;const lines=pdf.splitTextToSize(item.text,cw-14);const lblH=lines.length*4.5+2;checkPage(lblH+2);setFill(dotRgb);pdf.rect(margin,y,2,lblH,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);pdf.text(lines,margin+6,y+3.5);y+=lblH+1;}
-      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
+      if(item.isLabel){y+=2;const lines=pdf.splitTextToSize(stripMath(item.text),cw-14);const lblH=lines.length*4.5+2;checkPage(lblH+2);setFill(dotRgb);pdf.rect(margin,y,2,lblH,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);pdf.text(lines,margin+6,y+3.5);y+=lblH+1;}
+      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(stripMath(item.text),cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
       if(item.sub){item.sub.forEach(s=>{
-        function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(sb.text,cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}return h;}
+        function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(stripMath(sb.text),cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(stripMath(ch),cw-24).length*4+1;});}return h;}
         checkPage(subH(s));
-        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
-        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
-        if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);const cl=pdf.splitTextToSize(ch,cw-24);checkPage(cl.length*4+1);setFill(dotRgb);pdf.circle(margin+16,y+1.6,0.9,'F');pdf.setFont('helvetica','normal');setRGB(isDark?[122,117,112]:[106,100,96]);pdf.text(cl,margin+20,y+2.8);y+=cl.length*4+1;});}
+        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(stripMath(s.text),cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
+        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(stripMath(s.text),cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
+        if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);const cl=pdf.splitTextToSize(stripMath(ch),cw-24);checkPage(cl.length*4+1);setFill(dotRgb);pdf.circle(margin+16,y+1.6,0.9,'F');pdf.setFont('helvetica','normal');setRGB(isDark?[122,117,112]:[106,100,96]);pdf.text(cl,margin+20,y+2.8);y+=cl.length*4+1;});}
       });}
     });
     y+=4;
@@ -1829,81 +1828,6 @@ function exportPDF(){
   }
 }
 
-// ── FEATURE 1: Section editing controls ──────────────────────
-function moveSection(idx,dir){
-  if(!parsedDoc)return;
-  const s=parsedDoc.sections,ni=idx+dir;
-  if(ni<0||ni>=s.length)return;
-  [s[idx],s[ni]]=[s[ni],s[idx]];
-  syncTextarea();renderPreview(parsedDoc);
-}
-function deleteSection(idx){
-  if(!parsedDoc||parsedDoc.sections.length<=1)return;
-  if(!confirm('Abschnitt wirklich löschen?'))return;
-  parsedDoc.sections.splice(idx,1);
-  syncTextarea();renderPreview(parsedDoc);
-}
-function addSection(afterIdx){
-  if(!parsedDoc)return;
-  const ns={title:'Neuer Abschnitt',items:[{text:'Inhalt hier eingeben',isLabel:false,sub:[]}],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};
-  parsedDoc.sections.splice(afterIdx+1,0,ns);
-  syncTextarea();renderPreview(parsedDoc);
-}
-
-// ── FEATURE 3: Custom accent color picker ────────────────────
-function toggleColorRow(){
-  const row=document.getElementById('colorRow');
-  row.style.display=row.style.display==='none'?'flex':'none';
-}
-function applyAccentColor(hex){
-  document.documentElement.style.setProperty('--accent',hex);
-  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  const light=`rgb(${Math.min(255,r+30)},${Math.min(255,g+30)},${Math.min(255,b+30)})`;
-  document.documentElement.style.setProperty('--accent2',light);
-  document.documentElement.style.setProperty('--accent-dim',`rgba(${r},${g},${b},0.12)`);
-}
-function resetAccentColor(){
-  document.documentElement.style.removeProperty('--accent');
-  document.documentElement.style.removeProperty('--accent2');
-  document.documentElement.style.removeProperty('--accent-dim');
-  document.getElementById('accentPicker').value='#c9a84c';
-}
-
-// ── FEATURE 5: History ────────────────────────────────────────
-const HIST_KEY='notefly_v1_history';
-function saveHistory(doc,raw){
-  try{
-    const h=loadHistory();
-    h.unshift({id:Date.now(),title:doc.title||'Unbenannt',raw,ts:new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})});
-    localStorage.setItem(HIST_KEY,JSON.stringify(h.slice(0,5)));
-    renderHistoryUI();
-  }catch(e){}
-}
-function loadHistory(){
-  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch(e){return[];}
-}
-function toggleHistory(){
-  const p=document.getElementById('historyPanel');
-  p.style.display=p.style.display==='none'?'block':'none';
-}
-function renderHistoryUI(){
-  const h=loadHistory();
-  const list=document.getElementById('historyList');
-  const toggle=document.getElementById('historyToggle');
-  const badge=document.getElementById('historyCount');
-  if(!list||!toggle)return;
-  if(h.length===0){toggle.style.display='none';return;}
-  toggle.style.display='flex';
-  if(badge)badge.textContent=h.length;
-  list.innerHTML=h.map((e,i)=>`<div class="history-item" onclick="restoreHistory(${i})"><div class="history-item-title">${escapeText(e.title)}</div><div class="history-item-ts">${escapeText(e.ts)}</div></div>`).join('');
-}
-function restoreHistory(idx){
-  const h=loadHistory();
-  if(!h[idx])return;
-  document.getElementById('inputText').value=h[idx].raw;
-  document.getElementById('historyPanel').style.display='none';
-  setStatus('Aus Verlauf wiederhergestellt','ok');
-}
 </script>
 <footer style="background:#0a0a0a;border-top:1px solid #242220;padding:12px 48px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#5a5755;letter-spacing:0.05em;">
   <span>© 2026 <span style="color:#7a7775">Ben Hebling</span></span>

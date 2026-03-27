@@ -96,6 +96,8 @@ OPTIONALE VISUELLE ELEMENTE (nur einsetzen wenn fachlich sinnvoll):
 - Definitionskarten: ">> Begriff :: Erklärung" — für Fachbegriffe, Vokabeln, Konzepte. Mehrere hintereinander möglich. Nur wenn es wirklich um Definitionen geht.
 - Prozessschritte: "=> Schritt" — für Abläufe, Algorithmen, historische Folgen. Mindestens 2, maximal 6 Schritte. Nur für echte Prozesse.
 - Highlight-Badges: "!! Wert — Beschriftung" — für Schlüsselzahlen, Jahreszahlen, Kernbegriffe. Maximal 4 pro Abschnitt. Nur für wirklich prägnante Fakten.
+- Zwei-Spalten-Vergleich: "<> Linke Seite :: Rechte Seite" — für direkte Gegenüberstellungen, Pro/Contra, Vergleiche zweier Konzepte. Mehrere Zeilen hintereinander möglich.
+- Mathematische Formeln: "$Formel$" für Inline-Formeln (z.B. "$E = mc^2$"), "$$Formel$$" für Block-Formeln — nur für fachlich korrekte mathematische Ausdrücke.
 - Nicht übertreiben: pro Abschnitt höchstens einen dieser Typen einsetzen.
 
 INHALTLICHE PRIORITÄT:
@@ -164,6 +166,8 @@ PFLICHTREGELN:
 - Definitionskarten: ">> Begriff :: Erklärung" — nur wenn der Text Fachbegriffe oder Vokabeln enthält.
 - Prozessschritte: "=> Schritt" — nur wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6).
 - Highlight-Badges: "!! Wert — Beschriftung" — nur für prägnante Zahlen, Daten oder Kernbegriffe (max. 4 pro Abschnitt).
+- Zwei-Spalten-Vergleich: "<> Linke Seite :: Rechte Seite" — für direkte Gegenüberstellungen, Pro/Contra, Vergleiche zweier Konzepte. Mehrere Zeilen hintereinander möglich.
+- Mathematische Formeln: "$Formel$" für Inline-Formeln (z.B. "$E = mc^2$"), "$$Formel$$" für Block-Formeln — nur für fachlich korrekte mathematische Ausdrücke.
 - Pro Abschnitt höchstens einen dieser optionalen Typen einsetzen.
 
 6. SICHERHEIT:
