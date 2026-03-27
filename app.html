@@ -14,13 +14,13 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
-@media (max-width: 1100px) { body { display: block; } .app { display: block; } }
+@media (max-width: 1400px) { body { display: block; } .app { display: block; } }
 header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 200; border-bottom: 1px solid var(--border); }
 .logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
 .logo-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
 .header-tag { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 .app { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); }
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .app { grid-template-columns: 1fr; }
   header { padding: 0 20px; }
   .sidebar { position: static !important; height: auto !important; overflow: visible !important; }
