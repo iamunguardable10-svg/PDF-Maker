@@ -82,10 +82,11 @@ PFLICHTREGELN:
 - Nur echte Abschnittsnamen, keine Platzhalter wie "Erster Abschnitt" oder "Definition von X".
 - Nur echter Inhalt: Definitionen, Zusammenhänge, Beispiele, Anwendungen, Ursachen, Folgen.
 - Kein Fettdruck innerhalb normaler Bulletpoints, außer ein einzelnes Wort ist fachlich zwingend hervorzuheben.
-- Optional genau eine Zeile mit "### ".
+- Optional: "### Zwischenlabel" als Zwischenüberschrift, NUR wenn direkt danach Inhalt (Bulletpoints) folgt. NIEMALS ### als letztes Element einer Sektion oder ohne nachfolgenden Inhalt.
 - Optional genau eine vollständige Zeile mit "**...**" als Callout.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn er fachlich Mehrwert hat.
 - Bei Vergleichen oder Kategorien darf eine Tabelle verwendet werden, im Format: | Spalte 1 | Spalte 2 |
+- Keine leeren Labels: NIEMALS ein ### Label als letztes Element einer Sektion oder eines Abschnitts.
 - Keine Emojis.
 - Keine JSON-Ausgabe.
 - Keine Floskeln wie "Hier ist dein Lernzettel".
@@ -104,6 +105,13 @@ INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
 - Nutze die Parameter, um Detailgrad, Sprache, Niveau, Vorwissen und Formatierung zu steuern.
 - Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+
+UNTERSTÜTZTE SYNTAX (optional, nur wenn sinnvoll):
+- "### Label" als Zwischenüberschrift innerhalb eines Abschnitts (NUR wenn Inhalt folgt!)
+- "> Merksatz: ..." für einen prägnanten Kernsatz am Ende
+- "**Wichtiger Hinweis**" als Callout-Box
+- "| Spalte 1 | Spalte 2 |" für Vergleichstabellen
+- "$Formel$" für mathematische Ausdrücke (KaTeX-Syntax)
 
 THEMA:
 ${topic}
@@ -159,7 +167,7 @@ PFLICHTREGELN:
 - Keine Meta-Kommentare, keine KI-Floskeln, keine Emojis.
 
 5. OPTIONAL:
-- Genau eine "### " Zeile, wenn sie sinnvoll ist.
+- Genau eine "### " Zeile, wenn sie sinnvoll ist — NUR wenn direkt danach Inhalt (Bulletpoints) folgt. NIEMALS als letztes Element einer Sektion.
 - Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
@@ -169,6 +177,7 @@ PFLICHTREGELN:
 - Zwei-Spalten-Vergleich: "<> Linke Seite :: Rechte Seite" — für direkte Gegenüberstellungen, Pro/Contra, Vergleiche zweier Konzepte. Mehrere Zeilen hintereinander möglich.
 - Mathematische Formeln: "$Formel$" für Inline-Formeln (z.B. "$E = mc^2$"), "$$Formel$$" für Block-Formeln — nur für fachlich korrekte mathematische Ausdrücke.
 - Pro Abschnitt höchstens einen dieser optionalen Typen einsetzen.
+- Keine leeren Labels: NIEMALS ### am Sektionsende ohne nachfolgenden Inhalt.
 
 6. SICHERHEIT:
 - Keine erfundenen Informationen.
@@ -236,6 +245,11 @@ PFLICHTREGELN:
 INHALTLICHE PRIORITÄT:
 - Nutze die Parameter, um Tiefe, Ton, Schwerpunkt und Zielgruppe zu steuern.
 - Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+
+UNTERSTÜTZTE SYNTAX:
+- "> Merksatz: ..." für einen prägnanten Kernsatz am Ende
+- "> Quellenhinweis: ..." für Quellenangaben
+- "| Spalte 1 | Spalte 2 |" für Vergleichstabellen
 
 THEMA:
 ${topic}

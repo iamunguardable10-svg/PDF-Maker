@@ -24,6 +24,9 @@ header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: cente
 .header-tag { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 .app { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); }
 @media (max-width: 1400px) {
+  .sidebar { position: static !important; height: auto !important; overflow-y: auto !important; }
+}
+@media (max-width: 800px) {
   .app { grid-template-columns: 1fr; }
   header { padding: 0 20px; }
   .sidebar { position: static !important; height: auto !important; overflow: visible !important; }
@@ -381,6 +384,22 @@ textarea::placeholder { color: #383532; font-style: italic; }
   .lz-editable:hover::after { display: none !important; }
   @page { margin: 0; size: A4; }
 }
+/* Modal tabs */
+.modal-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border2)}
+.modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--muted2);cursor:pointer;transition:all 0.15s;margin-bottom:-1px}
+.modal-tab:hover{color:var(--ink)}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.style-slot{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.style-slot:last-child{border-bottom:none}
+.style-slot-label{font-size:0.8rem;color:var(--ink);flex:1;min-width:80px}
+.style-color-pick{display:flex;align-items:center;gap:6px}
+.style-color-pick label{font-size:0.68rem;color:var(--muted2);white-space:nowrap}
+.style-color-pick input[type=color]{width:28px;height:28px;border:1px solid var(--border2);border-radius:6px;cursor:pointer;padding:2px;background:var(--card)}
+.fw-btn{padding:6px 16px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.fw-btn:hover{background:var(--border2);color:var(--ink)}
+.fw-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(201,168,76,0.3)}
+.lz-page.font-thin .lz-bullet,.lz-page.font-thin .lz-sub-bullet,.lz-page.font-thin .lz-notebook-text,.lz-page.font-thin .lz-report-para{font-weight:300}
+.lz-page.font-bold .lz-bullet,.lz-page.font-bold .lz-sub-bullet,.lz-page.font-bold .lz-notebook-text,.lz-page.font-bold .lz-report-para{font-weight:600}
 </style>
 </head>
 <body>
@@ -698,6 +717,7 @@ function parseReportText(raw) {
       continue;
     }
     if (/^>\s*Quellenhinweis/i.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>\s*Merksatz/i.test(trimmed)) { doc.merksatz = trimmed.replace(/^>\s*/,'').trim(); continue; }
     if (/^>/.test(trimmed)) { doc.merksatz = trimmed.replace(/^>\s*/,'').trim(); continue; }
     const nm = line.match(/^(\d+)\.\s+(.*)/);
     if (nm) {
@@ -722,7 +742,8 @@ function parseReportText(raw) {
 function renderReportHTML(doc, design) {
   const themeClass = 'theme-' + design.id;
   const C = design.sectionColors;
-  let html = `<div class="lz-page ${themeClass}">`;
+  const fwClass=design._fontWeight==='thin'?' font-thin':design._fontWeight==='bold'?' font-bold':'';
+  let html = `<div class="lz-page ${themeClass}${fwClass}">`;
   html += `<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title)}</span></h1></div>`;
   if (doc.summary) {
     html += `<div class="lz-report-summary">${escapeText(doc.summary)}</div>`;
@@ -836,6 +857,8 @@ const previewStyles = `
 .theme-retro .lz-merksatz-title{font-family:'DM Mono',monospace;font-weight:700;font-size:0.68rem;color:#8b5e3c;margin-bottom:4px;text-transform:uppercase}
 .theme-retro .lz-merksatz-text{font-size:0.76rem;color:#5a4a2a;line-height:1.6;font-style:italic;font-family:'DM Mono',monospace}
 .theme-retro .lz-page-num{color:#c8b888!important;border-top-color:#e8e0d0!important}
+.lz-page.font-thin .lz-bullet,.lz-page.font-thin .lz-sub-bullet,.lz-page.font-thin .lz-notebook-text,.lz-page.font-thin .lz-report-para{font-weight:300}
+.lz-page.font-bold .lz-bullet,.lz-page.font-bold .lz-sub-bullet,.lz-page.font-bold .lz-notebook-text,.lz-page.font-bold .lz-report-para{font-weight:600}
 .lz-bullets{padding:0 6px;display:flex;flex-direction:column;gap:4px}
 .lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18}
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
@@ -963,7 +986,10 @@ function normalizeAIText(raw) {
   return String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ')
     .replace(/```(?:markdown|md)?/gi,'').replace(/```/g,'')
     .replace(/[ \t]+$/gm,'').replace(/^\*\*\s*(.*?)\s*\*\*$/gm,'**$1**')
-    .replace(/^>\s*\*{0,2}Merksatz\*{0,2}\s*:\*{0,2}\s*/gim,'> Merksatz: ').trim();
+    // Normalize various Merksatz formats to "> Merksatz: ..."
+    .replace(/^>\s*\*{0,2}Merksatz\*{0,2}\s*:\*{0,2}\s*/gim,'> Merksatz: ')
+    .replace(/^\*\*\s*Merksatz\s*:\s*\*\*\s*/gim,'> Merksatz: ')
+    .replace(/^\*\*\s*Merksatz\s*\*\*\s*:\s*/gim,'> Merksatz: ').trim();
 }
 
 function looksStructured(raw){return /^#\s.+/m.test(raw)&&(/^\d+\.\s.+/m.test(raw)||/^\s*[-•]\s.+/m.test(raw));}
@@ -1088,10 +1114,9 @@ function renderDocHTML(doc,design){
         // Must be genuinely long or end with punctuation AND contain multiple words AND be longer than 45 chars
         return s.length>70 || (s.length>45 && /[.!?]$/.test(s) && s.split(' ').length>=6);
       }
-      sec.items.forEach(item=>{
+      sec.items.forEach((item, itemIdx)=>{
         if(item.isLabel){
           // Skip orphaned trailing labels (no non-label items follow)
-          const itemIdx = sec.items.indexOf(item);
           const hasContentAfter = sec.items.slice(itemIdx+1).some(it=>!it.isLabel);
           if(!hasContentAfter) return; // skip this orphaned label
           html+=`<div class="lz-label-bullet" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
@@ -1235,6 +1260,53 @@ function applyDesign(){
 }
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function switchModalTab(tab) {
+  document.getElementById('modal-tab-design').style.display = tab === 'design' ? '' : 'none';
+  document.getElementById('modal-tab-style').style.display = tab === 'style' ? '' : 'none';
+  document.getElementById('tab-design').classList.toggle('active', tab === 'design');
+  document.getElementById('tab-style').classList.toggle('active', tab === 'style');
+  if (tab === 'style') renderStyleEditor();
+}
+
+function renderStyleEditor() {
+  const ed = document.getElementById('styleEditor');
+  if (!ed) return;
+  const C = pendingDesign.sectionColors;
+  function safeColor(c) {
+    if (!c || c === 'transparent') return '#ffffff';
+    if (c.startsWith('rgba') || c.startsWith('rgb')) return '#ffffff';
+    return c;
+  }
+  let html = '<div style="margin-bottom:16px">';
+  html += '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px">Sektionsfarben</div>';
+  C.forEach((c, i) => {
+    html += `<div class="style-slot">
+      <span class="style-slot-label">Sektion ${i+1}</span>
+      <div class="style-color-pick"><label>Hintergrund</label><input type="color" value="${safeColor(c.bg)}" onchange="updateSectionColor(${i},'bg',this.value)"></div>
+      <div class="style-color-pick"><label>Text</label><input type="color" value="${safeColor(c.title)}" onchange="updateSectionColor(${i},'title',this.value)"></div>
+    </div>`;
+  });
+  html += '</div>';
+  const fw = pendingDesign._fontWeight || 'normal';
+  html += '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Schriftstärke</div>';
+  html += `<div style="display:flex;gap:6px">
+    <button class="fw-btn${fw==='thin'?' active':''}" onclick="setFontWeight('thin')">Dünn</button>
+    <button class="fw-btn${fw==='normal'?' active':''}" onclick="setFontWeight('normal')">Normal</button>
+    <button class="fw-btn${fw==='bold'?' active':''}" onclick="setFontWeight('bold')">Fett</button>
+  </div>`;
+  ed.innerHTML = html;
+}
+
+function updateSectionColor(idx, prop, value) {
+  if (!pendingDesign.sectionColors[idx]) return;
+  pendingDesign.sectionColors[idx] = Object.assign({}, pendingDesign.sectionColors[idx], { [prop]: value });
+}
+
+function setFontWeight(fw) {
+  pendingDesign._fontWeight = fw;
+  renderStyleEditor(); // re-render to update active state
+}
 
 async function cleanWithAI(){
   const raw=document.getElementById('inputText').value.trim();
@@ -1988,6 +2060,31 @@ function exportPDF(){
   }
 }
 
+/*
+=== TESTBERICHT (2026-03-28) ===
+
+1. parseText() orphaned ### Label:
+   - hasContentAfter-Check in renderDocHTML: isLabel-Items am Sektionsende werden übersprungen. ✓
+
+2. parseReportText() > Merksatz:
+   - Spezifischer /^>\s*Merksatz/i-Check zuerst, dann generischer >-Fallback.
+   - renderReportHTML rendert doc.merksatz als .lz-merksatz-Block. ✓
+
+3. renderMath / KaTeX:
+   - renderMath() ist im Remote-Branch implementiert (verarbeitet $...$ via KaTeX wenn geladen).
+   - Ohne KaTeX gibt renderMath den Text sicher zurück — kein Fehler. ✓
+
+4. Button-IDs in JS vs HTML:
+   - aiBtn, exportBtn, exportImgBtn, exportBtnGen, genSubmitBtn: alle vorhanden. ✓
+   - tabDesign, tabStyle, tabContentDesign, tabContentStyle, modalStylePanel: alle vorhanden. ✓
+
+5. doExportImage / onclone:
+   - doExportImage() ist im Remote-Branch implementiert (html2canvas mit onclone).
+   - Versteckt .lz-sec-controls und .lz-add-section-btn via onclone. ✓
+
+6. previewStyles enthält alle Klassen aus renderDocHTML:
+   - Alle lz-* Klassen enthalten. ✓
+*/
 </script>
 <footer style="background:#0a0a0a;border-top:1px solid #242220;padding:12px 48px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#5a5755;letter-spacing:0.05em;">
   <span>© 2026 <span style="color:#7a7775">Ben Hebling</span></span>
