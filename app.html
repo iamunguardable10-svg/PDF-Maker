@@ -206,8 +206,8 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding-left:2px;margin-top:4px;color:#1c1a18}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding-left:18px;margin-top:3px;color:#1c1a18}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
@@ -754,8 +754,8 @@ const previewStyles = `
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding-left:2px;margin-top:4px;color:#1c1a18}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding-left:18px;margin-top:3px;color:#1c1a18}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
@@ -965,7 +965,7 @@ function renderDocHTML(doc,design){
       }
       sec.items.forEach(item=>{
         if(item.isLabel){
-          html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+          html+=`<div class="lz-label-bullet" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
         } else if(nb&&isSentence(item.text)){
           html+=`<div class="lz-notebook-text"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
         } else {
@@ -974,7 +974,7 @@ function renderDocHTML(doc,design){
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
             if(s.isLabel){
-              html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+              html+=`<div class="lz-sub-label" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
             } else if(nb&&isSentence(s.text)){
               html+=`<div class="lz-notebook-sub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
             } else {
@@ -1592,7 +1592,7 @@ function exportPDF(){
       const textColor=isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24];
       function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(it.text,cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(s.text,cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}});}return t;}
       checkPage(itemH(item));
-      if(item.isLabel){pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+2,y+3.5);y+=lines.length*4.5+1;}
+      if(item.isLabel){y+=2;const lines=pdf.splitTextToSize(item.text,cw-14);const lblH=lines.length*4.5+2;checkPage(lblH+2);setFill(dotRgb);pdf.rect(margin,y,2,lblH,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);pdf.text(lines,margin+6,y+3.5);y+=lblH+1;}
       else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
       if(item.sub){item.sub.forEach(s=>{
         function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(sb.text,cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}return h;}
