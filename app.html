@@ -56,8 +56,6 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-generate { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-generate:hover { background: var(--border2); color: var(--ink); }
 .btn-generate.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(201,168,76,0.3); }
-.btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
-.btn-direct:hover { background: var(--border2); color: var(--ink); }
 .slider-group { position: relative; }
 .slider-tooltip { position: absolute; top: -22px; transform: translateX(-50%); background: var(--accent); color: #0a0a0a; font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; pointer-events: none; font-family: 'DM Sans', sans-serif; transition: left 0.1s; }
 .slider-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--accent); }
@@ -1225,7 +1223,6 @@ function closeModal(){document.getElementById('modalOverlay').classList.add('hid
 function applyDesign(){
   currentDesign=pendingDesign;
   styleOverrides=null; // reset style overrides when changing design
-  ['stylePanel1','stylePanel2'].forEach(id=>{const p=document.getElementById(id);if(p&&p.style.display==='flex')renderStylePanel(id);});
   closeModal();
   if(parsedDoc){
     if(parsedDoc._reportMode){
@@ -1737,7 +1734,7 @@ async function doExportImage(transparent, popupId){
       onclone:(clonedDoc)=>{
         clonedDoc.querySelectorAll('.lz-sec-controls,.lz-add-section-btn').forEach(el=>el.remove());
         const s=clonedDoc.createElement('style');
-        s.textContent='.lz-editable:hover{background:transparent!important;outline:none!important}.lz-editable:hover::after{display:none!important}';
+        s.textContent='.lz-editable:hover{background:transparent!important;outline:none!important}.lz-editable:hover::after{display:none!important}.lz-sec-controls{display:none!important}.lz-add-section-btn{display:none!important}';
         clonedDoc.head.appendChild(s);
       }
     });
