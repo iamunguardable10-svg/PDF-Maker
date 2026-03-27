@@ -213,6 +213,14 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
 .lz-page-num{text-align:center;font-size:0.65rem;color:#ccc;margin-top:16px;padding:12px 0 4px;letter-spacing:0.1em;border-top:1px solid #f0ede8}
 .lz-doc-title{position:relative}
+.lz-doc-subtitle{font-size:0.75rem;margin-top:6px;font-weight:500;padding-left:8px;opacity:0.85}
+.theme-lernzettel .lz-doc-subtitle{color:#2d6a4f}
+.theme-minimal .lz-doc-subtitle{color:#8a8580;padding-left:0}
+.theme-dark .lz-doc-subtitle{color:#52b788}
+.theme-pastell .lz-doc-subtitle{color:#a0608a}
+.theme-editorial .lz-doc-subtitle{color:#c9a84c}
+.theme-neon .lz-doc-subtitle{color:#00ffcc}
+.theme-retro .lz-doc-subtitle{color:#8b5e3c;font-family:'DM Mono',monospace}
 .lz-editable{cursor:text;border-radius:4px;transition:background 0.15s;position:relative}
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
@@ -566,7 +574,8 @@ function parseReportText(raw) {
       doc.summary = sumLines.join(' ');
       continue;
     }
-    if (/^>\s*Quellenhinweis/.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>\s*Quellenhinweis/i.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>/.test(trimmed)) { doc.merksatz = trimmed.replace(/^>\s*/,'').trim(); continue; }
     const nm = line.match(/^(\d+)\.\s+(.*)/);
     if (nm) {
       currentSection = { num: nm[1], title: nm[2].trim(), paras: [] };
@@ -606,6 +615,12 @@ function renderReportHTML(doc, design) {
   html += `</div>`;
   if (doc.source) {
     html += `<div class="lz-report-source">${escapeText(doc.source)}</div>`;
+  }
+  if (doc.merksatz) {
+    const ms=doc.merksatz,colon=ms.indexOf(':');
+    const msTitle=colon>-1?(ms.slice(0,colon).replace(/^Merksatz\s*/i,'').trim()||'Merksatz'):'Merksatz';
+    const msText=colon>-1?ms.slice(colon+1).trim():ms;
+    html+=`<div class="lz-merksatz"><div class="lz-merksatz-icon">✎</div><div><div class="lz-merksatz-title">${escapeText(msTitle)}</div><div class="lz-merksatz-text">${escapeText(msText)}</div></div></div>`;
   }
   html += `<div class="lz-page-num">— 1 —</div></div>`;
   return html;
@@ -735,6 +750,8 @@ const previewStyles = `
 .theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}.theme-neon .lz-table th{color:#0a0a12}
 .theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}.theme-retro .lz-table td{color:#2a1f0a}
+.lz-doc-subtitle{font-size:0.75rem;margin-top:6px;font-weight:500;padding-left:8px;opacity:0.85}
+.theme-lernzettel .lz-doc-subtitle{color:#2d6a4f}.theme-minimal .lz-doc-subtitle{color:#8a8580;padding-left:0}.theme-dark .lz-doc-subtitle{color:#52b788}.theme-pastell .lz-doc-subtitle{color:#a0608a}.theme-editorial .lz-doc-subtitle{color:#c9a84c}.theme-neon .lz-doc-subtitle{color:#00ffcc}.theme-retro .lz-doc-subtitle{color:#8b5e3c;font-family:'DM Mono',monospace}
 `;
 
 // ── DESIGNS ──────────────────────────────────────────────────
@@ -786,7 +803,7 @@ function normalizeAIText(raw) {
   return String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ')
     .replace(/```(?:markdown|md)?/gi,'').replace(/```/g,'')
     .replace(/[ \t]+$/gm,'').replace(/^\*\*\s*(.*?)\s*\*\*$/gm,'**$1**')
-    .replace(/^>\s*Merksatz\s*:\s*/gim,'> Merksatz: ').trim();
+    .replace(/^>\s*\*{0,2}Merksatz\*{0,2}\s*:\*{0,2}\s*/gim,'> Merksatz: ').trim();
 }
 
 function looksStructured(raw){return /^#\s.+/m.test(raw)&&(/^\d+\.\s.+/m.test(raw)||/^\s*[-•]\s.+/m.test(raw));}
@@ -874,7 +891,7 @@ function parseText(raw){
 function renderDocHTML(doc,design){
   const C=design.sectionColors,themeClass='theme-'+design.id;
   let html=`<div class="lz-page ${themeClass}">`;
-  html+=`<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title||'Lernzettel')}</span></h1></div>`;
+  html+=`<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title||'Lernzettel')}</span></h1>${doc.subtitle?`<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`:''}</div>`;
   html+=`<div class="lz-body">`;
   doc.sections.forEach((sec,si)=>{
     const c=C[si%C.length];
@@ -921,9 +938,9 @@ function renderDocHTML(doc,design){
             if(s.children&&s.children.length){
               s.children.forEach(ch=>{
                 if(nb&&isSentence(ch)){
-                  html+=`<div class="lz-notebook-subsub"><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                  html+=`<div class="lz-notebook-subsub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(ch)}</span></div>`;
                 } else {
-                  html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                  html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(ch)}</span></div>`;
                 }
               });
             }
@@ -1271,7 +1288,8 @@ function editField(el,type,sectionIdx,itemRef){
     if(type==='title'){parsedDoc.title=newVal;}
     else if(type==='section'&&sectionIdx!==null){parsedDoc.sections[sectionIdx].title=newVal;}
     else if(type==='bullet'){
-      outer:for(const sec of parsedDoc.sections){
+      const searchSecs=sectionIdx!==null?[parsedDoc.sections[sectionIdx]]:parsedDoc.sections;
+      outer:for(const sec of searchSecs){
         for(const item of sec.items){
           if(item.text===current){item.text=newVal;break outer;}
           for(const sub of(item.sub||[])){
