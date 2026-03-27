@@ -50,23 +50,33 @@ ${paramBlock}
 Diese Parameter sind verbindliche Stil- und Inhaltsvorgaben. Halte sie ein, aber verletze NIEMALS das Ausgabeformat.
 ` : ''}
 
-ZIELFORMAT:
+ZIELFORMAT (zeigt alle erlaubten Elemente — wähle passende für das Thema):
 # Präziser Titel
 
 ## Optionaler Untertitel
 
-1. Konkreter Abschnittsname
+1. Abschnitt mit Definitionen
+>> Fachbegriff :: Präzise Erklärung in einem Satz
+>> Weiterer Begriff :: Erklärung
+
+2. Abschnitt mit Ablauf
+=> Erster konkreter Schritt
+=> Zweiter konkreter Schritt
+=> Dritter konkreter Schritt
+
+3. Abschnitt mit Kennzahlen
+!! 1905 — Einsteins Relativitätstheorie
+!! $E = mc^2$ — Masse-Energie-Äquivalenz
+- Zusätzlicher Bulletpoint mit Erklärung
+
+4. Abschnitt mit Vergleich
+<> Vorteil A :: Nachteil A
+<> Vorteil B :: Nachteil B
+
+5. Abschnitt mit Bulletpoints
 - Inhaltspunkt auf Ebene 1
   - Unterpunkt auf Ebene 2
     - Detailpunkt auf Ebene 3
-
-2. Konkreter Abschnittsname
-- Inhaltspunkt auf Ebene 1
-- Inhaltspunkt auf Ebene 1
-
-### Optionales Zwischenlabel
-
-**Optionaler wichtiger Hinweis**
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
 
@@ -74,32 +84,21 @@ PFLICHTREGELN:
 - Genau eine Titelzeile mit "# ".
 - Optional direkt danach genau eine Zeile mit "## ".
 - Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
-- Unter jedem Abschnitt Bulletpoints mit "- ".
-- Ebene 1 = 0 Leerzeichen vor "- "
-- Ebene 2 = genau 2 Leerzeichen vor "- "
-- Ebene 3 = genau 4 Leerzeichen vor "- "
-- Keine Tabs.
-- Nur echte Abschnittsnamen, keine Platzhalter wie "Erster Abschnitt" oder "Definition von X".
-- Nur echter Inhalt: Definitionen, Zusammenhänge, Beispiele, Anwendungen, Ursachen, Folgen.
-- Kein Fettdruck innerhalb normaler Bulletpoints, außer ein einzelnes Wort ist fachlich zwingend hervorzuheben.
-- Optional: "### Zwischenlabel" als Zwischenüberschrift, NUR wenn direkt danach Inhalt (Bulletpoints) folgt. NIEMALS ### als letztes Element einer Sektion oder ohne nachfolgenden Inhalt.
+- Unter jedem Abschnitt entweder Bulletpoints ("- ") ODER eines der visuellen Elemente — nie beides mischen.
+- Ebene 1 = 0 Leerzeichen vor "- ", Ebene 2 = 2 Leerzeichen, Ebene 3 = 4 Leerzeichen. Keine Tabs.
+- Nur echte Abschnittsnamen, keine Platzhalter. Kein Fettdruck in normalen Bullets.
+- "### Zwischenlabel" NUR wenn direkt danach Inhalt folgt — NIEMALS als letztes Element einer Sektion.
 - Optional genau eine vollständige Zeile mit "**...**" als Callout.
-- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn er fachlich Mehrwert hat.
-- Bei Vergleichen oder Kategorien darf eine Tabelle verwendet werden, im Format: | Spalte 1 | Spalte 2 |
-- Keine leeren Labels: NIEMALS ein ### Label als letztes Element einer Sektion oder eines Abschnitts.
-- Keine Emojis.
-- Keine JSON-Ausgabe.
-- Keine Floskeln wie "Hier ist dein Lernzettel".
-- Keine Platzhalter.
-- Keine erfundenen Fakten.
+- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn fachlich sinnvoll.
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Keine Emojis, keine Floskeln, keine erfundenen Fakten.
 
-OPTIONALE VISUELLE ELEMENTE (nur einsetzen wenn fachlich sinnvoll):
-- Definitionskarten: ">> Begriff :: Erklärung" — für Fachbegriffe, Vokabeln, Konzepte. Mehrere hintereinander möglich. Nur wenn es wirklich um Definitionen geht.
-- Prozessschritte: "=> Schritt" — für Abläufe, Algorithmen, historische Folgen. Mindestens 2, maximal 6 Schritte. Nur für echte Prozesse.
-- Highlight-Badges: "!! Wert — Beschriftung" — für Schlüsselzahlen, Jahreszahlen, Kernbegriffe. Maximal 4 pro Abschnitt. Nur für wirklich prägnante Fakten.
-- Zwei-Spalten-Vergleich: "<> Linke Seite :: Rechte Seite" — für direkte Gegenüberstellungen, Pro/Contra, Vergleiche zweier Konzepte. Mehrere Zeilen hintereinander möglich.
-- Mathematische Formeln: "$Formel$" für Inline-Formeln (z.B. "$E = mc^2$"), "$$Formel$$" für Block-Formeln — nur für fachlich korrekte mathematische Ausdrücke.
-- Nicht übertreiben: pro Abschnitt höchstens einen dieser Typen einsetzen.
+VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlich passt:
+- ">> Begriff :: Erklärung" — für Fachbegriffe (mehrere hintereinander, ersetzen Bullets komplett im Abschnitt)
+- "=> Schritt" — für Abläufe, Algorithmen, Prozesse (min. 2, max. 6 Schritte, ersetzen Bullets im Abschnitt)
+- "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernformeln (max. 4 pro Abschnitt, können vor Bullets stehen)
+- "<> Links :: Rechts" — für Vergleiche, Pro/Contra (mehrere hintereinander, ersetzen Bullets im Abschnitt)
+- "$Formel$" inline oder "$$Formel$$" als Block — nur für echte Mathematik, in Bullets oder !! einbetten
 
 INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
@@ -166,20 +165,20 @@ PFLICHTREGELN:
 - Kein Fettdruck in normalen Bullets.
 - Keine Meta-Kommentare, keine KI-Floskeln, keine Emojis.
 
-5. OPTIONAL:
-- Genau eine "### " Zeile, wenn sie sinnvoll ist — NUR wenn direkt danach Inhalt (Bulletpoints) folgt. NIEMALS als letztes Element einer Sektion.
-- Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
+5. VISUELLE ELEMENTE — setze mindestens 1-2 davon ein, wo der Inhalt es hergibt:
+- ">> Begriff :: Erklärung" — wenn der Text Definitionen oder Fachbegriffe enthält (mehrere hintereinander, ersetzen Bullets im Abschnitt)
+- "=> Schritt" — wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6, ersetzen Bullets im Abschnitt)
+- "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernbegriffe im Text (max. 4 pro Abschnitt)
+- "<> Links :: Rechts" — wenn der Text Vergleiche oder Pro/Contra enthält (mehrere hintereinander möglich)
+- "$Formel$" inline oder "$$Formel$$" als Block — wenn der Text mathematische Ausdrücke enthält
+- Pro Abschnitt höchstens einen dieser Typen. Kein ### ohne nachfolgenden Inhalt.
+
+6. OPTIONAL:
+- Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn echten Mehrwert.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
-- Definitionskarten: ">> Begriff :: Erklärung" — nur wenn der Text Fachbegriffe oder Vokabeln enthält.
-- Prozessschritte: "=> Schritt" — nur wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6).
-- Highlight-Badges: "!! Wert — Beschriftung" — nur für prägnante Zahlen, Daten oder Kernbegriffe (max. 4 pro Abschnitt).
-- Zwei-Spalten-Vergleich: "<> Linke Seite :: Rechte Seite" — für direkte Gegenüberstellungen, Pro/Contra, Vergleiche zweier Konzepte. Mehrere Zeilen hintereinander möglich.
-- Mathematische Formeln: "$Formel$" für Inline-Formeln (z.B. "$E = mc^2$"), "$$Formel$$" für Block-Formeln — nur für fachlich korrekte mathematische Ausdrücke.
-- Pro Abschnitt höchstens einen dieser optionalen Typen einsetzen.
-- Keine leeren Labels: NIEMALS ### am Sektionsende ohne nachfolgenden Inhalt.
 
-6. SICHERHEIT:
+7. SICHERHEIT:
 - Keine erfundenen Informationen.
 - Nur Inhalte aus dem gegebenen Text übernehmen und sauber ordnen.
 
@@ -324,7 +323,7 @@ ${rawContent}
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       max_tokens: 3000,
-      temperature: 0.1,
+      temperature: 0.35,
       messages: [{ role: 'user', content: truncatedPrompt }],
     }),
   });
