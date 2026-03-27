@@ -473,13 +473,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <button class="btn-direct-link" onclick="directExport()">⚡ Direkt als PDF</button>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <div class="img-export-wrap" style="flex:1">
-            <button class="btn" id="exportImgBtn" onclick="toggleImgPopup('imgPopup1')" disabled style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild ▾</button>
-            <div class="img-export-popup" id="imgPopup1">
-              <button class="img-export-opt" onclick="doExportImage(false,'imgPopup1')">◼ Mit Design-Hintergrund<span class="opt-desc">1:1 wie die Vorschau</span></button>
-              <button class="img-export-opt" onclick="doExportImage(true,'imgPopup1')">◻ Transparent<span class="opt-desc">PNG ohne Hintergrund</span></button>
-            </div>
-          </div>
+          <button class="btn" id="exportImgBtn" onclick="doExportImage(true)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
@@ -620,13 +614,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
         </div>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <div class="img-export-wrap" style="flex:1">
-            <button class="btn" id="exportImgBtnGen" onclick="toggleImgPopup('imgPopup2')" disabled style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild ▾</button>
-            <div class="img-export-popup" id="imgPopup2">
-              <button class="img-export-opt" onclick="doExportImage(false,'imgPopup2')">◼ Mit Design-Hintergrund<span class="opt-desc">1:1 wie die Vorschau</span></button>
-              <button class="img-export-opt" onclick="doExportImage(true,'imgPopup2')">◻ Transparent<span class="opt-desc">PNG ohne Hintergrund</span></button>
-            </div>
-          </div>
+          <button class="btn" id="exportImgBtnGen" onclick="doExportImage(true)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
       </div>
       <div class="status-msg" id="status"></div>
@@ -974,7 +962,7 @@ function renderMath(str){
   }).join('');
 }
 
-function stripMath(str){return String(str||'').replace(/\$\$(.+?)\$\$/gs,'$1').replace(/\$(.+?)\$/g,'$1');}
+function stripMath(str){return String(str||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\$\$(.+?)\$\$/gs,'$1').replace(/\$(.+?)\$/g,'$1');}
 
 function setStatus(msg, type='') {
   const el=document.getElementById('status');
@@ -1032,7 +1020,7 @@ function parseText(raw){
     }
     if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').trim(),true);continue;}
     if(/^>\s+/.test(trimmed)){doc.merksatz=trimmed.replace(/^>\s+/,'').trim();continue;}
-    if(/^\*\*.*\*\*$/.test(trimmed)){const text=trimmed.replace(/^\*\*\s*|\s*\*\*$/g,'').trim();ensureSection();currentSection.callout=text;continue;}
+    if(/^\*\*[^*]/.test(trimmed)){const text=trimmed.replace(/^\*\*\s*/,'').replace(/\s*\*\*:?\s*$/,'').replace(/\*\*/g,'').trim();if(text){ensureSection();currentSection.callout=text;continue;}}
     if(/^>>\s+/.test(trimmed)){const content=trimmed.replace(/^>>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();currentSection.defs.push(sep>-1?{term:content.slice(0,sep).trim(),def:content.slice(sep+2).trim()}:{term:content,def:''});continue;}
     if(/^=>\s+/.test(trimmed)){ensureSection();currentSection.steps.push(trimmed.replace(/^=>\s+/,'').trim());continue;}
     if(/^!!\s+/.test(trimmed)){const content=trimmed.replace(/^!!\s+/,'').trim();const m=content.match(/^(.*?)\s*(?:[—–-]|::)\s*(.*)/);ensureSection();currentSection.highlights.push(m?{value:m[1].trim(),label:m[2].trim()}:{value:content,label:''});continue;}
