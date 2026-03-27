@@ -328,13 +328,31 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-section-title{display:flex;align-items:center}
 .lz-add-section-btn{text-align:center;font-size:0.68rem;color:rgba(0,0,0,0.25);padding:4px;cursor:pointer;border:1px dashed rgba(0,0,0,0.12);border-radius:6px;margin:4px 6px;transition:all 0.15s}
 .lz-add-section-btn:hover{color:rgba(0,0,0,0.5);border-color:rgba(0,0,0,0.3);background:rgba(0,0,0,0.02)}
-.btn-color{background:transparent;color:var(--muted2);border:1px solid var(--border2);font-weight:500;flex:0 0 auto;padding:11px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.78rem;transition:all 0.15s}
-.btn-color:hover{background:var(--border2);color:var(--ink)}
-.color-row{display:flex;align-items:center;gap:8px;padding:8px 0 4px;border-top:1px solid var(--border)}
-.color-row-label{font-size:0.72rem;color:var(--muted2);flex:1}
-.color-picker-input{width:36px;height:28px;border:1px solid var(--border2);border-radius:6px;cursor:pointer;padding:2px;background:var(--card)}
-.color-reset-btn{background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--muted2);width:28px;height:28px;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center}
-.color-reset-btn:hover{background:var(--border2);color:var(--ink)}
+/* ── STYLE PANEL ─────────────────────────────────────── */
+.btn-style{background:transparent;color:var(--muted2);border:1px solid var(--border2);font-weight:500;padding:11px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.78rem;transition:all 0.15s;width:100%}
+.btn-style:hover,.btn-style.active{background:var(--border2);color:var(--ink)}
+.style-panel{background:#161412;border:1px solid var(--border2);border-radius:10px;padding:12px;margin-top:4px;display:none;flex-direction:column;gap:8px}
+.sp-row{display:flex;align-items:center;gap:8px}
+.sp-slot-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sp-slot-label{font-size:0.68rem;color:var(--muted2);flex:1;white-space:nowrap}
+.sp-pickers{display:flex;gap:4px;margin-left:auto}
+.sp-picker-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.sp-picker-wrap input[type=color]{width:30px;height:24px;border:1px solid var(--border2);border-radius:5px;padding:2px;background:var(--card);cursor:pointer}
+.sp-picker-wrap span{font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+.sp-divider{height:1px;background:var(--border);margin:4px 0}
+.sp-weight-btns{display:flex;gap:3px;margin-left:auto}
+.sp-wbtn{background:transparent;border:1px solid var(--border2);border-radius:5px;color:var(--muted2);padding:3px 8px;font-size:0.65rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.1s}
+.sp-wbtn:hover{background:var(--border2);color:var(--ink)}
+.sp-wbtn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
+.sp-reset{margin-top:4px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px;font-size:0.68rem;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:all 0.15s}
+.sp-reset:hover{background:var(--border2);color:var(--ink)}
+/* ── IMAGE EXPORT POPUP ───────────────────────────────── */
+.img-export-wrap{position:relative}
+.img-export-popup{position:absolute;bottom:calc(100% + 6px);right:0;background:#161412;border:1px solid var(--border2);border-radius:9px;padding:6px;display:none;flex-direction:column;gap:4px;min-width:170px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+.img-export-popup.open{display:flex}
+.img-export-opt{background:transparent;border:none;color:var(--ink);padding:8px 12px;border-radius:6px;font-size:0.76rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all 0.12s}
+.img-export-opt:hover{background:var(--border2)}
+.img-export-opt .opt-desc{display:block;font-size:0.62rem;color:var(--muted);margin-top:1px}
 .lz-cols{display:flex;flex-direction:column;gap:4px;margin:8px 0}
 .lz-col-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .lz-col-left{padding:6px 10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.77rem;border-left:2.5px solid;border-radius:0 4px 4px 0;line-height:1.45}
@@ -424,8 +442,16 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <button class="btn btn-direct" onclick="directExport()">⚡ Direkt exportieren</button>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <button class="btn" id="exportImgBtn" onclick="exportImage()" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild</button>
+          <div class="img-export-wrap" style="flex:1">
+            <button class="btn" id="exportImgBtn" onclick="toggleImgPopup('imgPopup1')" disabled style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild ▾</button>
+            <div class="img-export-popup" id="imgPopup1">
+              <button class="img-export-opt" onclick="doExportImage(false,'imgPopup1')">◼ Mit Design-Hintergrund<span class="opt-desc">1:1 wie die Vorschau</span></button>
+              <button class="img-export-opt" onclick="doExportImage(true,'imgPopup1')">◻ Transparent<span class="opt-desc">PNG ohne Hintergrund</span></button>
+            </div>
+          </div>
         </div>
+        <button class="btn btn-style" id="btnStyle1" onclick="toggleStylePanel('stylePanel1')">◈ Stil anpassen</button>
+        <div class="style-panel" id="stylePanel1"></div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
 
@@ -565,16 +591,17 @@ textarea::placeholder { color: #383532; font-style: italic; }
         </div>
         <div class="btn-group">
           <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
-          <button class="btn" id="exportImgBtnGen" onclick="exportImage()" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild</button>
+          <div class="img-export-wrap" style="flex:1">
+            <button class="btn" id="exportImgBtnGen" onclick="toggleImgPopup('imgPopup2')" disabled style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Bild ▾</button>
+            <div class="img-export-popup" id="imgPopup2">
+              <button class="img-export-opt" onclick="doExportImage(false,'imgPopup2')">◼ Mit Design-Hintergrund<span class="opt-desc">1:1 wie die Vorschau</span></button>
+              <button class="img-export-opt" onclick="doExportImage(true,'imgPopup2')">◻ Transparent<span class="opt-desc">PNG ohne Hintergrund</span></button>
+            </div>
+          </div>
         </div>
+        <button class="btn btn-style" id="btnStyle2" onclick="toggleStylePanel('stylePanel2')">◈ Stil anpassen</button>
+        <div class="style-panel" id="stylePanel2"></div>
       </div>
-
-      <div class="color-row" id="colorRow" style="display:none">
-        <span class="color-row-label">Akzentfarbe</span>
-        <input type="color" id="accentPicker" class="color-picker-input" value="#c9a84c" oninput="applyAccentColor(this.value)">
-        <button class="color-reset-btn" onclick="resetAccentColor()" title="Zurücksetzen">↺</button>
-      </div>
-      <button class="btn btn-color" onclick="toggleColorRow()">◐ Farbe</button>
       <div class="status-msg" id="status"></div>
     </div>
   </div>
@@ -1019,12 +1046,13 @@ function parseText(raw){
 
 function renderDocHTML(doc,design){
   const C=design.sectionColors,themeClass='theme-'+design.id;
-  let html=`<div class="lz-page ${themeClass}">`;
+  const fw=styleOverrides&&styleOverrides.fontWeight;
+  let html=`<div class="lz-page ${themeClass}"${fw?` style="font-weight:${fw}"`:''}>`;
   html+=`<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title||'Lernzettel')}</span></h1>${doc.subtitle?`<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`:''}</div>`;
   html+=`<div class="lz-body">`;
   doc.sections.forEach((sec,si)=>{
     const base=C[si%C.length];
-    const c=customAccentColor?{...base,title:customAccentColor,dot:customAccentColor}:base;
+    const c=styleOverrides?styleOverrides.sections[si%styleOverrides.sections.length]:base;
     html+=`<div class="lz-section">`;
     if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span><span class="lz-sec-controls"><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},-1)" title="Nach oben">↑</button><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},1)" title="Nach unten">↓</button><button class="lz-sec-btn lz-sec-del" onclick="event.stopPropagation();deleteSection(${si})" title="Abschnitt löschen">✕</button></span></div>`;
     if(sec.callout)html+=`<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
@@ -1182,6 +1210,8 @@ function closeModal(){document.getElementById('modalOverlay').classList.add('hid
 
 function applyDesign(){
   currentDesign=pendingDesign;
+  styleOverrides=null; // reset style overrides when changing design
+  ['stylePanel1','stylePanel2'].forEach(id=>{const p=document.getElementById(id);if(p&&p.style.display==='flex')renderStylePanel(id);});
   closeModal();
   if(parsedDoc){
     if(parsedDoc._reportMode){
@@ -1439,28 +1469,112 @@ function addSection(afterIdx) {
   syncTextarea(); renderPreview(parsedDoc);
 }
 
-// ── ACCENT COLOR ──────────────────────────────────────────────
-function toggleColorRow() {
-  const row = document.getElementById('colorRow');
-  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+// ── STYLE PANEL ───────────────────────────────────────────────
+let styleOverrides = null;
+
+function toggleStylePanel(panelId) {
+  const panel = document.getElementById(panelId);
+  const otherId = panelId === 'stylePanel1' ? 'stylePanel2' : 'stylePanel1';
+  const other = document.getElementById(otherId);
+  const isOpen = panel.style.display === 'flex';
+  if (other) other.style.display = 'none';
+  document.querySelectorAll('.btn-style').forEach(b => b.classList.remove('active'));
+  if (isOpen) {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = 'flex';
+    renderStylePanel(panelId);
+    const btn = panelId === 'stylePanel1' ? document.getElementById('btnStyle1') : document.getElementById('btnStyle2');
+    if (btn) btn.classList.add('active');
+  }
 }
-let customAccentColor = null;
-function applyAccentColor(hex) {
-  customAccentColor = hex;
-  document.documentElement.style.setProperty('--accent', hex);
-  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  document.documentElement.style.setProperty('--accent2', `rgb(${Math.min(255,r+30)},${Math.min(255,g+30)},${Math.min(255,b+30)})`);
-  document.documentElement.style.setProperty('--accent-dim', `rgba(${r},${g},${b},0.12)`);
+
+function renderStylePanel(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const C = styleOverrides ? styleOverrides.sections : currentDesign.sectionColors;
+  const fw = styleOverrides ? styleOverrides.fontWeight : null;
+  let html = '';
+  C.forEach((c, i) => {
+    const bg = c.bg === 'transparent' ? '#1a1a1a' : c.bg;
+    html += `<div class="sp-row">
+      <span class="sp-slot-dot" style="background:${escapeAttr(c.title)}"></span>
+      <span class="sp-slot-label">Abschnitt ${i+1}</span>
+      <div class="sp-pickers">
+        <label class="sp-picker-wrap" title="Hintergrundfarbe">
+          <input type="color" value="${escapeAttr(bg)}" oninput="updateSectionColor(${i},'bg',this.value,'${panelId}')">
+          <span>BG</span>
+        </label>
+        <label class="sp-picker-wrap" title="Textfarbe">
+          <input type="color" value="${escapeAttr(c.title)}" oninput="updateSectionColor(${i},'title',this.value,'${panelId}')">
+          <span>Text</span>
+        </label>
+      </div>
+    </div>`;
+  });
+  html += `<div class="sp-divider"></div>
+    <div class="sp-row">
+      <span class="sp-slot-label">Schriftstärke</span>
+      <div class="sp-weight-btns">
+        <button class="sp-wbtn${!fw||fw==='300'?' active':''}" onclick="updateFontWeight('300','${panelId}')">Dünn</button>
+        <button class="sp-wbtn${fw==='400'?' active':''}" onclick="updateFontWeight('400','${panelId}')">Normal</button>
+        <button class="sp-wbtn${fw==='500'?' active':''}" onclick="updateFontWeight('500','${panelId}')">Fett</button>
+      </div>
+    </div>
+    <button class="sp-reset" onclick="resetStyleOverrides('${panelId}')">↺ Zurücksetzen</button>`;
+  panel.innerHTML = html;
+}
+
+function getOrInitOverrides() {
+  if (!styleOverrides) {
+    styleOverrides = {
+      sections: currentDesign.sectionColors.map(c => ({...c})),
+      fontWeight: null
+    };
+  }
+  return styleOverrides;
+}
+
+function updateSectionColor(slotIdx, key, val, panelId) {
+  const o = getOrInitOverrides();
+  o.sections[slotIdx][key] = val;
+  if (key === 'title') o.sections[slotIdx].dot = val;
+  renderStylePanel(panelId);
+  const other = panelId === 'stylePanel1' ? 'stylePanel2' : 'stylePanel1';
+  renderStylePanel(other);
   if (parsedDoc) renderPreview(parsedDoc);
 }
-function resetAccentColor() {
-  customAccentColor = null;
-  document.documentElement.style.removeProperty('--accent');
-  document.documentElement.style.removeProperty('--accent2');
-  document.documentElement.style.removeProperty('--accent-dim');
-  document.getElementById('accentPicker').value = '#c9a84c';
+
+function updateFontWeight(fw, panelId) {
+  const o = getOrInitOverrides();
+  o.fontWeight = fw;
+  renderStylePanel(panelId);
+  const other = panelId === 'stylePanel1' ? 'stylePanel2' : 'stylePanel1';
+  renderStylePanel(other);
   if (parsedDoc) renderPreview(parsedDoc);
 }
+
+function resetStyleOverrides(panelId) {
+  styleOverrides = null;
+  renderStylePanel(panelId);
+  const other = panelId === 'stylePanel1' ? 'stylePanel2' : 'stylePanel1';
+  renderStylePanel(other);
+  if (parsedDoc) renderPreview(parsedDoc);
+}
+
+// ── IMAGE EXPORT POPUP ────────────────────────────────────────
+function toggleImgPopup(popupId) {
+  const popup = document.getElementById(popupId);
+  if (!popup) return;
+  // Close any other open popups
+  document.querySelectorAll('.img-export-popup').forEach(p => { if(p.id!==popupId) p.classList.remove('open'); });
+  popup.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.img-export-wrap')) {
+    document.querySelectorAll('.img-export-popup').forEach(p => p.classList.remove('open'));
+  }
+});
 
 // ── HISTORY ───────────────────────────────────────────────────
 const HISTORY_KEY = 'notefly_history';
@@ -1597,20 +1711,28 @@ function directExport(){
   setStatus('✓ Vorschau erstellt — bereit zum Export','ok');
 }
 
-async function exportImage(){
+async function doExportImage(transparent, popupId){
+  if(popupId){const p=document.getElementById(popupId);if(p)p.classList.remove('open');}
   if(!parsedDoc||typeof html2canvas==='undefined'){setStatus('Bild-Export nicht verfügbar','err');return;}
   const lzPreview=document.getElementById('lzPreview');
   if(!lzPreview||lzPreview.style.display==='none'){setStatus('Keine Vorschau vorhanden','err');return;}
   const page=lzPreview.querySelector('.lz-page');
   const target=page||lzPreview;
   setStatus('⏳ Bild wird erstellt…','');
+  // Determine background color
+  let bgColor=null;
+  if(!transparent){
+    const computed=window.getComputedStyle(target).backgroundColor;
+    bgColor=computed&&computed!=='rgba(0, 0, 0, 0)'?computed:'#ffffff';
+  }
   try{
     const canvas=await html2canvas(target,{
       scale:2,
       useCORS:true,
       allowTaint:false,
-      backgroundColor:null,
-      logging:false
+      backgroundColor:bgColor,
+      logging:false,
+      removeContainer:true
     });
     const dataUrl=canvas.toDataURL('image/png');
     const a=document.createElement('a');
