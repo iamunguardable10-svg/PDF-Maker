@@ -84,6 +84,20 @@ Format F — Tabelle (für strukturierte Vergleiche):
 | Spalte 1 | Spalte 2 |
 | Wert A | Wert B |
 
+Format G — Chronologie/Timeline (für historische Ereignisse, Entwicklungen):
+7. Themenspezifischer Abschnittsname
+~~ 1905 :: Einstein veröffentlicht die Spezielle Relativitätstheorie
+~~ 1915 :: Allgemeine Relativitätstheorie folgt
+
+Format H — Zitat (für wichtige Aussagen, Definitionen durch bekannte Personen):
+8. Themenspezifischer Abschnittsname
+"" Das Ganze ist mehr als die Summe seiner Teile — Aristoteles
+
+Format I — Formelbox (für wichtige mathematische Formeln hervorgehoben):
+9. Themenspezifischer Abschnittsname
+@@ $E = mc^2$ — Masse-Energie-Äquivalenz
+@@ $F = m \cdot a$ — Zweites Newtonsches Gesetz
+
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
 
 PFLICHTREGELN:
@@ -99,7 +113,7 @@ PFLICHTREGELN:
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 - Keine Emojis, keine Floskeln, keine erfundenen Fakten.
 - NIEMALS einen Abschnitt ohne Inhalt generieren. Jeder nummerierte Abschnitt muss mindestens 2 Bulletpoints oder ein visuelles Element enthalten.
-- PFLICHT: Mindestens 3 verschiedene Formate (A–F) pro Lernzettel verwenden — kein Lernzettel darf nur Bulletpoints enthalten.
+- PFLICHT: Mindestens 3 verschiedene Formate (A–I) pro Lernzettel verwenden — kein Lernzettel darf nur Bulletpoints enthalten.
 - PFLICHT: Wähle Formate nach dem Thema, nicht nach der Reihenfolge im ZIELFORMAT.
 
 VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlich passt:
@@ -115,6 +129,9 @@ VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlic
     × FALSCH:  - Klassische vs. Quantenmechanik
     ✓ RICHTIG: <> Klassische Mechanik :: Quantenmechanik
 - "$Formel$" inline oder "$$Formel$$" als Block — nur für echte Mathematik, in Bullets oder !! einbetten
+- "~~ Datum :: Ereignis" — für chronologische Abfolgen, Zeitstrahlen, historische Daten (mehrere hintereinander)
+- '"" Zitat — Autor" — für bedeutende Aussagen, Definitionen bekannter Persönlichkeiten
+- "@@ $Formel$ — Bezeichnung" — für besonders wichtige Formeln als hervorgehobene Formelbox (max. 3 pro Abschnitt)
 
 INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
@@ -125,6 +142,9 @@ INHALTLICHE PRIORITÄT:
   • "=>" für Prozessschritte: => Primer anlagern, => DNA-Polymerase synthetisiert neuen Strang
   • "!!" für Zahlen/Daten/Formeln: !! 1953 — Watson & Crick entdecken Doppelhelix | !! $F = ma$ — Zweites Newtonsches Gesetz
   • "<>" für Gegenüberstellungen: <> Mitose :: Zellteilung für Wachstum :: Meiose :: Zellteilung für Fortpflanzung
+  • "~~" für Zeitstrahlen: ~~ 1789 :: Beginn der Französischen Revolution — NUR für chronologische Ereignisse
+  • '""' für Zitate: "" Der Mensch ist ein soziales Wesen — Aristoteles — NUR wenn wirklich ein bekanntes Zitat passt
+  • "@@" für Formelboxen: @@ $\Delta G = \Delta H - T\Delta S$ — Gibbs-Helmholtz-Gleichung — NUR für die 1-3 zentralsten Formeln
 
 UNTERSTÜTZTE SYNTAX (optional, nur wenn sinnvoll):
 - "### Label" als Zwischenüberschrift innerhalb eines Abschnitts (NUR wenn Inhalt folgt!)
@@ -197,6 +217,9 @@ PFLICHTREGELN:
     × FALSCH:  - Vor- und Nachteile
     ✓ RICHTIG: <> Vorteile :: Nachteile
 - "$Formel$" inline oder "$$Formel$$" als Block — wenn der Text mathematische Ausdrücke enthält
+- "~~ Datum :: Ereignis" — wenn der Text chronologische Ereignisse oder einen Zeitstrahl enthält
+- '"" Zitat — Autor" — wenn der Text wichtige Zitate oder Aussagen bekannter Personen enthält
+- "@@ $Formel$ — Bezeichnung" — für die 1-3 zentralsten Formeln als hervorgehobene Formelbox
 - Pro Abschnitt höchstens einen dieser Typen. Kein ### ohne nachfolgenden Inhalt.
 
 6. OPTIONAL:
