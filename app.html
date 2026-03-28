@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notefly — Lernzettel Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { 
   --bg: #0f0f0f; --card: #161616; --sidebar: #111111; --ink: #f0ede8;
@@ -14,12 +18,15 @@
 } 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
-@media (max-width: 800px) { body { display: block; } .app { display: block; } }
+@media (max-width: 1400px) { body { display: block; } .app { display: block; } }
 header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 200; border-bottom: 1px solid var(--border); }
 .logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
 .logo-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
 .header-tag { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 .app { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); }
+@media (max-width: 1400px) {
+  .sidebar { position: static !important; height: auto !important; overflow-y: auto !important; }
+}
 @media (max-width: 800px) {
   .app { grid-template-columns: 1fr; }
   header { padding: 0 20px; }
@@ -28,7 +35,7 @@ header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: cente
   textarea { min-height: 140px; resize: vertical; }
 }
 .sidebar { background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 56px; height: calc(100vh - 56px); overflow: hidden; }
-.sidebar-top { padding: 28px 28px 0; overflow-y: auto; flex-shrink: 0; }
+.sidebar-top { padding: 28px 28px 0; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
 .sidebar-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
 .sidebar-sub { font-size: 0.75rem; color: var(--muted2); line-height: 1.5; margin-bottom: 20px; }
 .instructions { background: #1a1816; border-radius: 10px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border2); }
@@ -37,7 +44,7 @@ header { background: #0a0a0a; padding: 0 48px; display: flex; align-items: cente
 .step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 9px; font-size: 0.74rem; color: var(--muted2); line-height: 1.55; }
 .step:last-child { margin-bottom: 0; }
 .step-num { width: 17px; height: 17px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(201,168,76,0.3); border-radius: 50%; font-size: 0.58rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-textarea { flex: 1; width: 100%; min-height: 200px; padding: 16px 28px; border: none; border-top: 1px solid var(--border); outline: none; resize: none; overflow-y: auto; font-family: 'DM Mono', monospace; font-size: 0.78rem; line-height: 1.8; color: #c8c4be; background: #0e0e0e; caret-color: var(--accent); }
+textarea { flex: 1; width: 100%; min-height: 200px; padding: 16px 28px; border: none; border-top: 1px solid var(--border); outline: none; resize: none; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; font-family: 'DM Mono', monospace; font-size: 0.78rem; line-height: 1.8; color: #c8c4be; background: #0e0e0e; caret-color: var(--accent); }
 textarea::placeholder { color: #383532; font-style: italic; }
 .sidebar-actions { padding: 16px 28px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 9px; background: var(--sidebar); }
 .btn-group { display: flex; gap: 8px; }
@@ -53,8 +60,6 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-generate { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
 .btn-generate:hover { background: var(--border2); color: var(--ink); }
 .btn-generate.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(201,168,76,0.3); }
-.btn-direct { background: transparent; color: var(--muted2); border: 1px solid var(--border2); font-weight: 500; }
-.btn-direct:hover { background: var(--border2); color: var(--ink); }
 .slider-group { position: relative; }
 .slider-tooltip { position: absolute; top: -22px; transform: translateX(-50%); background: var(--accent); color: #0a0a0a; font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; pointer-events: none; font-family: 'DM Sans', sans-serif; transition: left 0.1s; }
 .slider-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--accent); }
@@ -67,15 +72,15 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .status-msg { font-size: 0.7rem; color: var(--muted); text-align: center; min-height: 16px; }
 .status-msg.ok { color: var(--accent); }
 .status-msg.err { color: #e05555; }
-.preview-panel { overflow-y: auto; padding: 36px 48px; background: var(--bg); }
+.preview-panel { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 36px 48px; background: var(--bg); }
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 16px; text-align: center; }
 .empty-visual { width: 80px; height: 80px; background: var(--card); border-radius: 16px; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
 .empty-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
 .empty-desc { font-size: 0.8rem; color: var(--muted2); max-width: 280px; line-height: 1.6; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; display: flex; align-items: flex-start; justify-content: center; padding: 24px; backdrop-filter: blur(6px); animation: fadeIn 0.2s ease; overflow-y: auto; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; display: flex; align-items: flex-start; justify-content: center; padding: 24px; backdrop-filter: blur(6px); animation: fadeIn 0.2s ease; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .modal-overlay.hidden { display: none; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.modal { background: #1a1816; border: 1px solid var(--border2); border-radius: 16px; padding: 40px; max-width: 1100px; width: 100%; box-shadow: 0 32px 80px rgba(0,0,0,0.6); animation: slideUp 0.25s ease; max-height: 90vh; overflow-y: auto; }
+.modal { background: #1a1816; border: 1px solid var(--border2); border-radius: 16px; padding: 40px; max-width: 1100px; width: 100%; box-shadow: 0 32px 80px rgba(0,0,0,0.6); animation: slideUp 0.25s ease; max-height: none; overflow-y: visible; -webkit-overflow-scrolling: touch; }
 @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .modal-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; color: var(--ink); }
 .modal-sub { font-size: 0.8rem; color: var(--muted2); margin-bottom: 28px; }
@@ -96,6 +101,11 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .btn-cancel:hover { background: var(--border2); color: var(--ink); }
 .btn-apply { background: var(--accent); color: #0a0a0a; font-weight: 700; flex: 0 0 auto; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; }
 .btn-apply:hover { background: var(--accent2); }
+.modal-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--card);border-radius:8px;padding:3px}
+.modal-tab{flex:1;padding:8px 12px;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.76rem;font-weight:500;cursor:pointer;background:transparent;color:var(--muted2);transition:all 0.15s}
+.modal-tab.active{background:#1e1c1a;color:var(--ink)}
+.btn-direct-link{background:none;border:none;color:var(--muted);font-size:0.7rem;cursor:pointer;padding:2px 0;font-family:'DM Sans',sans-serif;text-align:left;transition:color 0.15s}
+.btn-direct-link:hover{color:var(--muted2)}
 /* Preview page */
 .lz-page { background: white; max-width: 680px; margin: 0 auto; border-radius: 14px; box-shadow: 0 2px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04); overflow: hidden; animation: fadeUp 0.3s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -202,17 +212,62 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-retro .lz-page-num{color:#c8b888!important;border-top-color:#e8e0d0!important}
 /* Shared */
 .lz-bullets{padding:0 6px;display:flex;flex-direction:column;gap:4px}
-.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18}
+.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18;overflow-wrap:break-word;word-break:break-word;min-width:0}
+.lz-bullet span,.lz-sub-bullet span,.lz-sub-sub-bullet span{min-width:0;overflow-wrap:break-word;word-break:break-word}
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
+.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding-left:2px;margin-top:4px;color:#1c1a18}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding-left:18px;margin-top:3px;color:#1c1a18}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
 .lz-page-num{text-align:center;font-size:0.65rem;color:#ccc;margin-top:16px;padding:12px 0 4px;letter-spacing:0.1em;border-top:1px solid #f0ede8}
 .lz-doc-title{position:relative}
+/* Definition cards */
+.lz-def-grid{display:flex;flex-direction:column;gap:3px;margin:8px 0}
+.lz-def-row{display:flex;align-items:stretch;border-radius:6px;overflow:hidden;font-size:0.78rem;line-height:1.5;min-height:30px}
+.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0;word-break:break-word;overflow-wrap:break-word}
+.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18;word-break:break-word;overflow-wrap:break-word;min-width:0}
+.theme-dark .lz-def-desc{background:rgba(255,255,255,0.04);color:#d0cdc8}
+.theme-neon .lz-def-desc{background:rgba(255,255,255,0.03);color:#d0d8f0}
+.theme-retro .lz-def-desc{color:#2a1f0a;font-family:'DM Mono',monospace}
+.theme-retro .lz-def-term{font-family:'DM Mono',monospace}
+.theme-editorial .lz-def-desc{color:#3a3835}
+/* Process steps */
+.lz-steps{display:flex;flex-direction:column;margin:8px 0;padding:0 6px}
+.lz-step{display:flex;align-items:flex-start;gap:12px;position:relative;padding-bottom:14px}
+.lz-step:last-child{padding-bottom:4px}
+.lz-step:not(:last-child)::after{content:'';position:absolute;left:10px;top:24px;bottom:0;width:2px;background:rgba(0,0,0,0.1);border-radius:1px}
+.lz-step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:800;flex-shrink:0;border:2px solid currentColor}
+.lz-step-text{font-size:0.79rem;line-height:1.55;color:#1c1a18;padding-top:2px;flex:1}
+.theme-dark .lz-step-text{color:#d0cdc8}
+.theme-dark .lz-step:not(:last-child)::after{background:rgba(255,255,255,0.1)}
+.theme-neon .lz-step-text{color:#d0d8f0}
+.theme-neon .lz-step:not(:last-child)::after{background:rgba(0,255,204,0.2)}
+.theme-retro .lz-step-text{color:#2a1f0a;font-family:'DM Mono',monospace}
+.theme-editorial .lz-step-text{color:#3a3835}
+/* Highlight badges */
+.lz-highlights{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;padding:0 6px}
+.lz-highlight{border-radius:8px;padding:12px 16px;border-left:3px solid;background:rgba(0,0,0,0.02);flex:1;min-width:130px}
+.lz-highlight-value{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;line-height:1.3;word-break:break-word}
+.lz-highlight-label{font-size:0.7rem;color:#6a6460;margin-top:4px;line-height:1.45}
+.theme-dark .lz-highlight{background:rgba(255,255,255,0.03)}
+.theme-dark .lz-highlight-label{color:#7a7570}
+.theme-neon .lz-highlight{background:rgba(255,255,255,0.02)}
+.theme-neon .lz-highlight-label{color:#6060a0}
+.theme-retro .lz-highlight{background:rgba(0,0,0,0.03)}
+.theme-retro .lz-highlight-label{color:#8b6a42}
+.theme-retro .lz-highlight-value{font-family:'DM Mono',monospace}
+.theme-editorial .lz-highlight-label{color:#7a7570}
+.lz-doc-subtitle{font-size:0.75rem;margin-top:6px;font-weight:500;padding-left:8px;opacity:0.85}
+.theme-lernzettel .lz-doc-subtitle{color:#2d6a4f}
+.theme-minimal .lz-doc-subtitle{color:#8a8580;padding-left:0}
+.theme-dark .lz-doc-subtitle{color:#52b788}
+.theme-pastell .lz-doc-subtitle{color:#a0608a}
+.theme-editorial .lz-doc-subtitle{color:#c9a84c}
+.theme-neon .lz-doc-subtitle{color:#00ffcc}
+.theme-retro .lz-doc-subtitle{color:#8b5e3c;font-family:'DM Mono',monospace}
 .lz-editable{cursor:text;border-radius:4px;transition:background 0.15s;position:relative}
 .lz-editable:hover{background:rgba(201,168,76,0.08);outline:1px dashed rgba(201,168,76,0.4)}
 .lz-editable:hover::after{content:'✎';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:0.65rem;color:#c9a84c;opacity:0.7}
@@ -273,15 +328,88 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}
 .theme-retro .lz-table td{color:#2a1f0a}
+.lz-sec-controls{display:none;align-items:center;gap:3px;margin-left:auto;flex-shrink:0}
+.lz-section-title:hover .lz-sec-controls{display:flex}
+.lz-sec-btn{background:rgba(255,255,255,0.25);border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;color:inherit;line-height:1;padding:0}
+.lz-sec-btn:hover{background:rgba(255,255,255,0.45)}
+.lz-sec-del:hover{background:rgba(220,80,80,0.4)!important}
+.lz-section-title{display:flex;align-items:center}
+.lz-add-section-btn{text-align:center;font-size:0.68rem;color:rgba(0,0,0,0.25);padding:4px;cursor:pointer;border:1px dashed rgba(0,0,0,0.12);border-radius:6px;margin:4px 6px;transition:all 0.15s}
+.lz-add-section-btn:hover{color:rgba(0,0,0,0.5);border-color:rgba(0,0,0,0.3);background:rgba(0,0,0,0.02)}
+/* ── STYLE PANEL ─────────────────────────────────────── */
+.btn-style{background:transparent;color:var(--muted2);border:1px solid var(--border2);font-weight:500;padding:11px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.78rem;transition:all 0.15s;width:100%}
+.btn-style:hover,.btn-style.active{background:var(--border2);color:var(--ink)}
+.style-panel{background:#161412;border:1px solid var(--border2);border-radius:10px;padding:12px;margin-top:4px;display:none;flex-direction:column;gap:8px}
+.sp-row{display:flex;align-items:center;gap:8px}
+.sp-slot-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sp-slot-label{font-size:0.68rem;color:var(--muted2);flex:1;white-space:nowrap}
+.sp-pickers{display:flex;gap:4px;margin-left:auto}
+.sp-picker-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.sp-picker-wrap input[type=color]{width:30px;height:24px;border:1px solid var(--border2);border-radius:5px;padding:2px;background:var(--card);cursor:pointer}
+.sp-picker-wrap span{font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+.sp-divider{height:1px;background:var(--border);margin:4px 0}
+.sp-weight-btns{display:flex;gap:3px;margin-left:auto}
+.sp-wbtn{background:transparent;border:1px solid var(--border2);border-radius:5px;color:var(--muted2);padding:3px 8px;font-size:0.65rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.1s}
+.sp-wbtn:hover{background:var(--border2);color:var(--ink)}
+.sp-wbtn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
+.sp-reset{margin-top:4px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px;font-size:0.68rem;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:all 0.15s}
+.sp-reset:hover{background:var(--border2);color:var(--ink)}
+/* ── IMAGE EXPORT POPUP ───────────────────────────────── */
+.img-export-wrap{position:relative}
+.img-export-popup{position:absolute;bottom:calc(100% + 6px);right:0;background:#161412;border:1px solid var(--border2);border-radius:9px;padding:6px;display:none;flex-direction:column;gap:4px;min-width:170px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+.img-export-popup.open{display:flex}
+.img-export-opt{background:transparent;border:none;color:var(--ink);padding:8px 12px;border-radius:6px;font-size:0.76rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all 0.12s}
+.img-export-opt:hover{background:var(--border2)}
+.img-export-opt .opt-desc{display:block;font-size:0.62rem;color:var(--muted);margin-top:1px}
+.lz-cols{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.lz-col-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lz-col-left{padding:6px 10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.77rem;border-left:2.5px solid;border-radius:0 4px 4px 0;line-height:1.45}
+.lz-col-right{padding:6px 10px;font-size:0.77rem;background:rgba(0,0,0,0.025);border-radius:4px;line-height:1.45;color:#1c1a18}
+.theme-dark .lz-col-right{background:rgba(255,255,255,0.04);color:#d0cdc8}
+.theme-neon .lz-col-right{background:rgba(255,255,255,0.03);color:#d0d8f0}
+.theme-retro .lz-col-right{color:#2a1f0a}
+.theme-retro .lz-col-left{font-family:'DM Mono',monospace}
+.history-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0;font-size:0.72rem;font-weight:600;color:var(--muted2);border-top:1px solid var(--border);margin-top:12px;transition:color 0.15s}
+.history-toggle:hover{color:var(--ink)}
+.history-badge{background:var(--accent-dim);color:var(--accent);border-radius:10px;padding:1px 7px;font-size:0.62rem;font-weight:700}
+.history-panel{margin-top:6px;display:flex;flex-direction:column;gap:4px}
+.history-item{padding:8px 10px;background:#1a1816;border-radius:7px;cursor:pointer;border:1px solid var(--border);transition:all 0.15s}
+.history-item:hover{border-color:var(--accent);background:#1e1c1a}
+.history-item-title{font-size:0.74rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item-ts{font-size:0.65rem;color:var(--muted);margin-top:2px}
 @media print {
+  @page { margin: 0; size: A4; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  html, body { margin: 0 !important; padding: 0 !important; background: transparent !important; }
   body > *:not(#printArea) { display: none !important; }
-  #printArea { display: block !important; position: fixed; inset: 0; background: white; z-index: 9999; padding: 20px; margin: 0; }
-  #printArea .lz-page { max-width: 100%; border-radius: 0; box-shadow: none; animation: none; }
+  #printArea { display: block !important; position: static !important; width: 100% !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+  #printArea .lz-page { max-width: 100% !important; width: 100% !important; border-radius: 0 !important; box-shadow: none !important; animation: none !important; padding: 24px 32px !important; margin: 0 !important; }
+  /* Prevent sections from being cut mid-content */
+  .lz-section { break-inside: avoid; page-break-inside: avoid; }
+  .lz-section-title { break-after: avoid; page-break-after: avoid; }
+  .lz-highlights,.lz-highlight,.lz-def-grid,.lz-def-row,.lz-steps,.lz-step,.lz-cols,.lz-col-row,.lz-merksatz,.lz-callout { break-inside: avoid; page-break-inside: avoid; }
+  .lz-sec-controls, .lz-add-section-btn, .render-toggle { display: none !important; }
+  /* Hide jsPDF page number — browser adds its own */
+  .lz-page-num { display: none !important; }
   .lz-editable:hover { background: transparent !important; outline: none !important; }
   .lz-editable:hover::after { display: none !important; }
-  @page { margin: 0; size: A4; }
 }
+/* Modal tabs */
+.modal-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border2)}
+.modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--muted2);cursor:pointer;transition:all 0.15s;margin-bottom:-1px}
+.modal-tab:hover{color:var(--ink)}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.style-slot{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.style-slot:last-child{border-bottom:none}
+.style-slot-label{font-size:0.8rem;color:var(--ink);flex:1;min-width:80px}
+.style-color-pick{display:flex;align-items:center;gap:6px}
+.style-color-pick label{font-size:0.68rem;color:var(--muted2);white-space:nowrap}
+.style-color-pick input[type=color]{width:28px;height:28px;border:1px solid var(--border2);border-radius:6px;cursor:pointer;padding:2px;background:var(--card)}
+.fw-btn{padding:6px 16px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.fw-btn:hover{background:var(--border2);color:var(--ink)}
+.fw-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(201,168,76,0.3)}
+.lz-page.font-thin .lz-bullet,.lz-page.font-thin .lz-sub-bullet,.lz-page.font-thin .lz-notebook-text,.lz-page.font-thin .lz-report-para{font-weight:300}
+.lz-page.font-bold .lz-bullet,.lz-page.font-bold .lz-sub-bullet,.lz-page.font-bold .lz-notebook-text,.lz-page.font-bold .lz-report-para{font-weight:600}
 </style>
 </head>
 <body>
@@ -301,7 +429,16 @@ textarea::placeholder { color: #383532; font-style: italic; }
   <div class="modal">
     <div class="modal-title">Design wählen</div>
     <div class="modal-sub">Wähle einen Stil — klick auf eine Karte um sie auszuwählen.</div>
-    <div class="design-grid" id="designGrid"></div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabDesign" onclick="switchModalTab('design')">Design</button>
+      <button class="modal-tab" id="tabStyle" onclick="switchModalTab('style')">Farben & Stil</button>
+    </div>
+    <div id="tabContentDesign">
+      <div class="design-grid" id="designGrid"></div>
+    </div>
+    <div id="tabContentStyle" style="display:none">
+      <div class="style-panel" id="modalStylePanel" style="display:flex"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
       <button class="btn-apply" onclick="applyDesign()">Design übernehmen →</button>
@@ -309,6 +446,46 @@ textarea::placeholder { color: #383532; font-style: italic; }
   </div>
 </div>
 <div id="printArea" style="display:none"></div>
+
+<div id="pdfExportModal" class="pdf-modal-overlay" style="display:none" onclick="if(event.target===this)closePdfModal()">
+  <div class="pdf-modal">
+    <div class="pdf-modal-head">
+      <div>
+        <h2>PDF exportieren</h2>
+        <p>Wähle deinen Export-Modus</p>
+      </div>
+      <button class="pdf-modal-close" onclick="closePdfModal()">✕</button>
+    </div>
+    <div class="pdf-modal-grid">
+      <div class="pdf-modal-option pdf-option-rec" onclick="exportPdfBrowserPrint()">
+        <div class="pdf-modal-badge">⭐ Empfohlen</div>
+        <div class="pdf-modal-icon">🖨</div>
+        <div class="pdf-modal-title">Browser-Druck</div>
+        <div class="pdf-modal-desc">Pixel-perfekte Ausgabe über den Druckdialog — sieht exakt wie die Vorschau aus</div>
+        <ul class="pdf-modal-list">
+          <li class="ok">✓ Echte Schriften (Syne, DM Sans)</li>
+          <li class="ok">✓ Mathe-Formeln vollständig gerendert</li>
+          <li class="ok">✓ Farben &amp; Design 1:1 wie Vorschau</li>
+          <li class="ok">✓ Vektorgrafiken — beliebig skalierbar</li>
+        </ul>
+        <button class="pdf-modal-btn pdf-modal-btn-primary">Als PDF speichern →</button>
+      </div>
+      <div class="pdf-modal-option pdf-option-alt" onclick="exportPdfDirect()">
+        <div class="pdf-modal-icon">⬇</div>
+        <div class="pdf-modal-title">Direkt-Download</div>
+        <div class="pdf-modal-desc">Sofortiger Download ohne Druckdialog</div>
+        <ul class="pdf-modal-list">
+          <li class="ok">✓ Kein Druckdialog nötig</li>
+          <li class="ok">✓ Sofortiger Download</li>
+          <li class="warn">⚠ Schriften approximiert</li>
+          <li class="warn">⚠ Formeln als Text (kein KaTeX)</li>
+        </ul>
+        <button class="pdf-modal-btn pdf-modal-btn-secondary">Herunterladen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
   <div class="sidebar">
     <div class="sidebar-top">
@@ -319,6 +496,12 @@ textarea::placeholder { color: #383532; font-style: italic; }
         <div class="step"><div class="step-num">1</div><div>Text einfügen — Mitschriften, ChatGPT-Output, Folien oder eigene Notizen. Vorlage wählen: <strong>Lernzettel</strong> oder <strong>Bericht</strong></div></div>
         <div class="step"><div class="step-num">2</div><div><strong>KI bereinigen</strong> für automatische Strukturierung — oder <strong>Direkt exportieren</strong> ohne KI. Nicht gefallen? Einfach erneut versuchen.</div></div>
         <div class="step"><div class="step-num">3</div><div><strong>Design wählen</strong> → Titel, Abschnitte und Bullets direkt in der Vorschau bearbeiten → als PDF exportieren</div></div>
+      </div>
+      <div class="history-panel" id="historyPanel" style="display:none">
+        <div class="history-list" id="historyList"></div>
+      </div>
+      <div class="history-toggle" onclick="toggleHistory()" id="historyToggle" style="display:none">
+        <span>Verlauf</span><span id="historyCount" class="history-badge">0</span>
       </div>
     </div>
     <textarea id="inputText" placeholder="Text hier einfügen…"></textarea>
@@ -337,8 +520,11 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-ai" id="aiBtn" onclick="cleanWithAI()">✦ KI bereinigen</button>
           <button class="btn btn-design" onclick="openModal()">◈ Design wählen</button>
         </div>
-        <button class="btn btn-direct" onclick="directExport()">⚡ Direkt exportieren</button>
-        <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+        <button class="btn-direct-link" onclick="directExport()">⚡ Direkt als PDF</button>
+        <div class="btn-group">
+          <button class="btn btn-export" id="exportBtn" onclick="showPdfModal()" disabled style="flex:1">⬇ PDF</button>
+          <button class="btn" id="exportImgBtn" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
+        </div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
 
@@ -476,9 +662,11 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-ai" id="genSubmitBtn" onclick="generateFromTopic()">✦ Generieren</button>
           <button class="btn btn-design" onclick="openModal()">◈ Design</button>
         </div>
-        <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled>⬇ Als PDF exportieren</button>
+        <div class="btn-group">
+          <button class="btn btn-export" id="exportBtnGen" onclick="showPdfModal()" disabled style="flex:1">⬇ PDF</button>
+          <button class="btn" id="exportImgBtnGen" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
+        </div>
       </div>
-
       <div class="status-msg" id="status"></div>
     </div>
   </div>
@@ -566,7 +754,9 @@ function parseReportText(raw) {
       doc.summary = sumLines.join(' ');
       continue;
     }
-    if (/^>\s*Quellenhinweis/.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>\s*Quellenhinweis/i.test(trimmed)) { doc.source = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>\s*Merksatz/i.test(trimmed)) { doc.merksatz = trimmed.replace(/^>\s*/,'').trim(); continue; }
+    if (/^>/.test(trimmed)) { doc.merksatz = trimmed.replace(/^>\s*/,'').trim(); continue; }
     const nm = line.match(/^(\d+)\.\s+(.*)/);
     if (nm) {
       currentSection = { num: nm[1], title: nm[2].trim(), paras: [] };
@@ -590,7 +780,8 @@ function parseReportText(raw) {
 function renderReportHTML(doc, design) {
   const themeClass = 'theme-' + design.id;
   const C = design.sectionColors;
-  let html = `<div class="lz-page ${themeClass}">`;
+  const fwClass=design._fontWeight==='thin'?' font-thin':design._fontWeight==='bold'?' font-bold':'';
+  let html = `<div class="lz-page ${themeClass}${fwClass}">`;
   html += `<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title)}</span></h1></div>`;
   if (doc.summary) {
     html += `<div class="lz-report-summary">${escapeText(doc.summary)}</div>`;
@@ -606,6 +797,12 @@ function renderReportHTML(doc, design) {
   html += `</div>`;
   if (doc.source) {
     html += `<div class="lz-report-source">${escapeText(doc.source)}</div>`;
+  }
+  if (doc.merksatz) {
+    const ms=doc.merksatz,colon=ms.indexOf(':');
+    const msTitle=colon>-1?(ms.slice(0,colon).replace(/^Merksatz\s*/i,'').trim()||'Merksatz'):'Merksatz';
+    const msText=colon>-1?ms.slice(colon+1).trim():ms;
+    html+=`<div class="lz-merksatz"><div class="lz-merksatz-icon">✎</div><div><div class="lz-merksatz-title">${escapeText(msTitle)}</div><div class="lz-merksatz-text">${escapeText(msText)}</div></div></div>`;
   }
   html += `<div class="lz-page-num">— 1 —</div></div>`;
   return html;
@@ -698,13 +895,16 @@ const previewStyles = `
 .theme-retro .lz-merksatz-title{font-family:'DM Mono',monospace;font-weight:700;font-size:0.68rem;color:#8b5e3c;margin-bottom:4px;text-transform:uppercase}
 .theme-retro .lz-merksatz-text{font-size:0.76rem;color:#5a4a2a;line-height:1.6;font-style:italic;font-family:'DM Mono',monospace}
 .theme-retro .lz-page-num{color:#c8b888!important;border-top-color:#e8e0d0!important}
+.lz-page.font-thin .lz-bullet,.lz-page.font-thin .lz-sub-bullet,.lz-page.font-thin .lz-notebook-text,.lz-page.font-thin .lz-report-para{font-weight:300}
+.lz-page.font-bold .lz-bullet,.lz-page.font-bold .lz-sub-bullet,.lz-page.font-bold .lz-notebook-text,.lz-page.font-bold .lz-report-para{font-weight:600}
 .lz-bullets{padding:0 6px;display:flex;flex-direction:column;gap:4px}
-.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18}
+.lz-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;line-height:1.55;color:#1c1a18;overflow-wrap:break-word;word-break:break-word;min-width:0}
+.lz-bullet span,.lz-sub-bullet span,.lz-sub-sub-bullet span{min-width:0;overflow-wrap:break-word;word-break:break-word}
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755}
+.lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding-left:2px;margin-top:4px;color:#1c1a18}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding-left:18px;margin-top:3px;color:#1c1a18}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
@@ -735,6 +935,31 @@ const previewStyles = `
 .theme-neon .lz-table td{color:#d0d8f0;border-bottom-color:rgba(255,255,255,0.06)}.theme-neon .lz-table th{color:#0a0a12}
 .theme-neon .lz-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}.theme-retro .lz-table td{color:#2a1f0a}
+.lz-doc-subtitle{font-size:0.75rem;margin-top:6px;font-weight:500;padding-left:8px;opacity:0.85}
+.theme-lernzettel .lz-doc-subtitle{color:#2d6a4f}.theme-minimal .lz-doc-subtitle{color:#8a8580;padding-left:0}.theme-dark .lz-doc-subtitle{color:#52b788}.theme-pastell .lz-doc-subtitle{color:#a0608a}.theme-editorial .lz-doc-subtitle{color:#c9a84c}.theme-neon .lz-doc-subtitle{color:#00ffcc}.theme-retro .lz-doc-subtitle{color:#8b5e3c;font-family:'DM Mono',monospace}
+.lz-def-grid{display:flex;flex-direction:column;gap:3px;margin:8px 0}.lz-def-row{display:flex;align-items:stretch;border-radius:6px;overflow:hidden;font-size:0.78rem;line-height:1.5;min-height:30px}.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0;word-break:break-word;overflow-wrap:break-word}.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18;word-break:break-word;overflow-wrap:break-word;min-width:0}.theme-dark .lz-def-desc{background:rgba(255,255,255,0.04);color:#d0cdc8}.theme-neon .lz-def-desc{background:rgba(255,255,255,0.03);color:#d0d8f0}.theme-retro .lz-def-desc{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-retro .lz-def-term{font-family:'DM Mono',monospace}.theme-editorial .lz-def-desc{color:#3a3835}
+.lz-steps{display:flex;flex-direction:column;margin:8px 0;padding:0 6px}.lz-step{display:flex;align-items:flex-start;gap:12px;position:relative;padding-bottom:14px}.lz-step:last-child{padding-bottom:4px}.lz-step:not(:last-child)::after{content:'';position:absolute;left:10px;top:24px;bottom:0;width:2px;background:rgba(0,0,0,0.1);border-radius:1px}.lz-step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:800;flex-shrink:0;border:2px solid currentColor}.lz-step-text{font-size:0.79rem;line-height:1.55;color:#1c1a18;padding-top:2px;flex:1}.theme-dark .lz-step-text{color:#d0cdc8}.theme-dark .lz-step:not(:last-child)::after{background:rgba(255,255,255,0.1)}.theme-neon .lz-step-text{color:#d0d8f0}.theme-neon .lz-step:not(:last-child)::after{background:rgba(0,255,204,0.2)}.theme-retro .lz-step-text{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-editorial .lz-step-text{color:#3a3835}
+.lz-highlights{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;padding:0 6px}.lz-highlight{border-radius:8px;padding:12px 16px;border-left:3px solid;background:rgba(0,0,0,0.02);flex:1;min-width:130px;max-width:100%;overflow:hidden;word-wrap:break-word;overflow-wrap:break-word}.lz-highlight-value{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;line-height:1.3;word-break:break-word;overflow-wrap:break-word}.lz-highlight-label{font-size:0.7rem;color:#6a6460;margin-top:4px;line-height:1.45;word-wrap:break-word;overflow-wrap:break-word}.theme-dark .lz-highlight{background:rgba(255,255,255,0.03)}.theme-dark .lz-highlight-label{color:#7a7570}.theme-neon .lz-highlight{background:rgba(255,255,255,0.02)}.theme-neon .lz-highlight-label{color:#6060a0}.theme-retro .lz-highlight{background:rgba(0,0,0,0.03)}.theme-retro .lz-highlight-label{color:#8b6a42}.theme-retro .lz-highlight-value{font-family:'DM Mono',monospace}.theme-editorial .lz-highlight-label{color:#7a7570}
+.lz-sec-controls{display:none;align-items:center;gap:3px;margin-left:auto;flex-shrink:0}
+.lz-section-title:hover .lz-sec-controls{display:flex}
+.lz-sec-btn{background:rgba(255,255,255,0.25);border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;color:inherit;line-height:1;padding:0}
+.lz-sec-btn:hover{background:rgba(255,255,255,0.45)}
+.lz-sec-del:hover{background:rgba(220,80,80,0.4)!important}
+.lz-section-title{display:flex;align-items:center}
+.lz-add-section-btn{text-align:center;font-size:0.68rem;color:rgba(0,0,0,0.25);padding:4px;cursor:pointer;border:1px dashed rgba(0,0,0,0.12);border-radius:6px;margin:4px 6px;transition:all 0.15s}
+.lz-add-section-btn:hover{color:rgba(0,0,0,0.5);border-color:rgba(0,0,0,0.3);background:rgba(0,0,0,0.02)}
+.theme-dark .lz-add-section-btn,.theme-neon .lz-add-section-btn{color:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.1)}
+.theme-dark .lz-add-section-btn:hover,.theme-neon .lz-add-section-btn:hover{color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.3)}
+.lz-cols{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.lz-col-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lz-col-left{padding:6px 10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.77rem;border-left:2.5px solid;border-radius:0 4px 4px 0;line-height:1.45}
+.lz-col-right{padding:6px 10px;font-size:0.77rem;background:rgba(0,0,0,0.025);border-radius:4px;line-height:1.45;color:#1c1a18}
+.theme-dark .lz-col-right{background:rgba(255,255,255,0.04);color:#d0cdc8}
+.theme-neon .lz-col-right{background:rgba(255,255,255,0.03);color:#d0d8f0}
+.theme-retro .lz-col-right{color:#2a1f0a}
+.theme-retro .lz-col-left{font-family:'DM Mono',monospace}
+.katex-display{display:block;text-align:center;margin:4px 0}
+.katex{font-size:1em}
 `;
 
 // ── DESIGNS ──────────────────────────────────────────────────
@@ -776,6 +1001,58 @@ let parsedDoc = null;
 function escapeText(str=''){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function escapeAttr(str=''){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 
+function renderMath(str){
+  const s=String(str||'');
+  if(typeof katex==='undefined'){
+    // KaTeX not loaded — strip $...$ markers so formulas still read cleanly
+    return escapeText(s.replace(/\$\$(.+?)\$\$/gs,'$1').replace(/\$([^$\n]+?)\$/g,'$1'));
+  }
+  const parts=s.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
+  return parts.map(p=>{
+    if(p.startsWith('$$')&&p.endsWith('$$')){
+      try{return katex.renderToString(p.slice(2,-2),{displayMode:true,throwOnError:false});}
+      catch(e){return escapeText(p.slice(2,-2));}
+    }
+    if(p.startsWith('$')&&p.endsWith('$')&&p.length>2){
+      try{return katex.renderToString(p.slice(1,-1),{displayMode:false,throwOnError:false});}
+      catch(e){return escapeText(p.slice(1,-1));}
+    }
+    return escapeText(p);
+  }).join('');
+}
+
+function latexToText(s){
+  // Multi-pass LaTeX → readable text conversion for PDF export
+  let t=String(s);
+  // Fractions: \frac{a}{b} → (a)/(b), handle 2 passes for nested
+  for(let i=0;i<3;i++) t=t.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g,'($1)/($2)');
+  t=t
+    .replace(/\\sqrt\{([^{}]*)\}/g,'√($1)')
+    .replace(/\\bar\{([^{}]*)\}/g,'$1̄')
+    .replace(/\\overline\{([^{}]*)\}/g,'$1̄')
+    .replace(/\\hat\{([^{}]*)\}/g,'$1̂')
+    .replace(/\\vec\{([^{}]*)\}/g,'$1⃗')
+    .replace(/\^\{([^{}]+)\}/g,'^$1')
+    .replace(/\_\{([^{}]+)\}/g,'_$1')
+    .replace(/\^2/g,'²').replace(/\^3/g,'³')
+    .replace(/\\cdot/g,'·').replace(/\\times/g,'×').replace(/\\div/g,'÷')
+    .replace(/\\pm/g,'±').replace(/\\mp/g,'∓')
+    .replace(/\\infty/g,'∞').replace(/\\partial/g,'∂').replace(/\\nabla/g,'∇')
+    .replace(/\\geq/g,'≥').replace(/\\leq/g,'≤').replace(/\\neq/g,'≠').replace(/\\approx/g,'≈')
+    .replace(/\\alpha/g,'α').replace(/\\beta/g,'β').replace(/\\gamma/g,'γ').replace(/\\delta/g,'δ')
+    .replace(/\\epsilon/g,'ε').replace(/\\zeta/g,'ζ').replace(/\\eta/g,'η').replace(/\\theta/g,'θ')
+    .replace(/\\lambda/g,'λ').replace(/\\mu/g,'μ').replace(/\\nu/g,'ν').replace(/\\xi/g,'ξ')
+    .replace(/\\pi/g,'π').replace(/\\rho/g,'ρ').replace(/\\sigma/g,'σ').replace(/\\tau/g,'τ')
+    .replace(/\\phi/g,'φ').replace(/\\chi/g,'χ').replace(/\\psi/g,'ψ').replace(/\\omega/g,'ω')
+    .replace(/\\Sigma/g,'Σ').replace(/\\Pi/g,'Π').replace(/\\Delta/g,'Δ').replace(/\\Omega/g,'Ω')
+    .replace(/\\sum/g,'Σ').replace(/\\prod/g,'Π').replace(/\\int/g,'∫').replace(/\\oint/g,'∮')
+    .replace(/\\left[\(\[{|]/g,'').replace(/\\right[\)\]}|]/g,'')
+    .replace(/\{([^{}]*)\}/g,'$1')  // remove remaining braces
+    .replace(/\\/g,'');             // remove remaining backslashes
+  return t.trim();
+}
+function stripMath(str){return String(str||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\$\$(.+?)\$\$/gs,(_,f)=>latexToText(f)).replace(/\$(.+?)\$/g,(_,f)=>latexToText(f));}
+
 function setStatus(msg, type='') {
   const el=document.getElementById('status');
   el.textContent=msg; el.className='status-msg '+type;
@@ -786,7 +1063,10 @@ function normalizeAIText(raw) {
   return String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ')
     .replace(/```(?:markdown|md)?/gi,'').replace(/```/g,'')
     .replace(/[ \t]+$/gm,'').replace(/^\*\*\s*(.*?)\s*\*\*$/gm,'**$1**')
-    .replace(/^>\s*Merksatz\s*:\s*/gim,'> Merksatz: ').trim();
+    // Normalize various Merksatz formats to "> Merksatz: ..."
+    .replace(/^>\s*\*{0,2}Merksatz\*{0,2}\s*:\*{0,2}\s*/gim,'> Merksatz: ')
+    .replace(/^\*\*\s*Merksatz\s*:\s*\*\*\s*/gim,'> Merksatz: ')
+    .replace(/^\*\*\s*Merksatz\s*\*\*\s*:\s*/gim,'> Merksatz: ').trim();
 }
 
 function looksStructured(raw){return /^#\s.+/m.test(raw)&&(/^\d+\.\s.+/m.test(raw)||/^\s*[-•]\s.+/m.test(raw));}
@@ -812,7 +1092,7 @@ function parseText(raw){
   const lines=String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ').split('\n');
   const doc={title:'',subtitle:'',sections:[],merksatz:null};
   let currentSection=null,subtitleAlreadyUsed=false,lastTopItem=null,lastSubItem=null,lastCreatedSectionTitle='';
-  function newSection(title=''){currentSection={title,items:[],callout:null,table:null};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
+  function newSection(title=''){currentSection={title,items:[],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
   function ensureSection(){if(!currentSection)return newSection('');return currentSection;}
   function pushTopItem(text,isLabel=false){const sec=ensureSection();const item={text,isLabel,sub:[]};sec.items.push(item);lastTopItem=item;lastSubItem=null;return item;}
   function pushSubItem(text,isLabel=false){if(!lastTopItem)return pushTopItem(text,isLabel);const sub={text,isLabel,children:[]};lastTopItem.sub.push(sub);lastSubItem=sub;return sub;}
@@ -820,19 +1100,23 @@ function parseText(raw){
   for(let i=0;i<lines.length;i++){
     const line=lines[i],trimmed=line.trim();
     if(!trimmed)continue;
-    if(/^#\s+/.test(trimmed)){doc.title=trimmed.replace(/^#\s+/,'').trim();continue;}
+    if(/^#\s+/.test(trimmed)){doc.title=trimmed.replace(/^#\s+/,'').replace(/\*\*/g,'').trim();continue;}
     if(/^##\s+/.test(trimmed)){
-      const text=trimmed.replace(/^##\s+/,'').trim();
+      const text=trimmed.replace(/^##\s+/,'').replace(/\*\*/g,'').trim();
       if(!subtitleAlreadyUsed&&doc.sections.length===0&&!currentSection){doc.subtitle=text;subtitleAlreadyUsed=true;}
       else{newSection(text);lastCreatedSectionTitle=text;}
       continue;
     }
-    if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').trim(),true);continue;}
-    if(/^>\s+/.test(trimmed)){doc.merksatz=trimmed.replace(/^>\s+/,'').trim();continue;}
-    if(/^\*\*.*\*\*$/.test(trimmed)){const text=trimmed.replace(/^\*\*\s*|\s*\*\*$/g,'').trim();ensureSection();currentSection.callout=text;continue;}
+    if(/^###\s+/.test(trimmed)){pushTopItem(trimmed.replace(/^###\s+/,'').replace(/\*\*/g,'').trim(),true);continue;}
+    if(/^>\s*/.test(trimmed)&&trimmed.length>1){doc.merksatz=trimmed.replace(/^>\s*/,'').trim();continue;}
+    if(/^\*\*[^*]/.test(trimmed)){const text=trimmed.replace(/^\*\*\s*/,'').replace(/\s*\*\*:?\s*$/,'').replace(/\*\*/g,'').trim();if(text){ensureSection();currentSection.callout=text;continue;}}
+    if(/^>>\s+/.test(trimmed)){const content=trimmed.replace(/^>>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();currentSection.defs.push(sep>-1?{term:content.slice(0,sep).trim(),def:content.slice(sep+2).trim()}:{term:content,def:''});continue;}
+    if(/^=>\s+/.test(trimmed)){ensureSection();currentSection.steps.push(trimmed.replace(/^=>\s+/,'').trim());continue;}
+    if(/^!!\s+/.test(trimmed)){const content=trimmed.replace(/^!!\s+/,'').trim();const m=content.match(/^(.*?)\s*(?:[—–-]|::)\s*(.*)/);ensureSection();currentSection.highlights.push(m?{value:m[1].trim(),label:m[2].trim()}:{value:content,label:''});continue;}
+    if(/^<>\s+/.test(trimmed)){const content=trimmed.replace(/^<>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.cols)currentSection.cols=[];currentSection.cols.push(sep>-1?{left:content.slice(0,sep).trim(),right:content.slice(sep+2).trim()}:{left:content,right:''});continue;}
     const nm=line.match(/^(\s*)(\d+)\.\s+(.*)$/);
     if(nm){
-      const indent=nm[1].length,text=nm[3].trim();
+      const indent=nm[1].length,text=nm[3].replace(/\*\*/g,'').trim();
       if(indent===0){
         if(text.toLowerCase()===lastCreatedSectionTitle.toLowerCase()){lastCreatedSectionTitle='';continue;}
         const genericNames=['erster abschnitt','zweiter abschnitt','dritter abschnitt','vierter abschnitt','fünfter abschnitt','sechster abschnitt','siebter abschnitt','achter abschnitt','neunter abschnitt','zehnter abschnitt','abschnitt'];
@@ -873,14 +1157,23 @@ function parseText(raw){
 
 function renderDocHTML(doc,design){
   const C=design.sectionColors,themeClass='theme-'+design.id;
-  let html=`<div class="lz-page ${themeClass}">`;
-  html+=`<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title||'Lernzettel')}</span></h1></div>`;
+  const fw=styleOverrides&&styleOverrides.fontWeight;
+  let html=`<div class="lz-page ${themeClass}"${fw?` style="font-weight:${fw}"`:''}>`;
+  html+=`<div class="lz-doc-title"><h1><span class="lz-editable" onclick="editField(this,'title',null,null)">${escapeText(doc.title||'Lernzettel')}</span></h1>${doc.subtitle?`<div class="lz-doc-subtitle">${escapeText(doc.subtitle)}</div>`:''}</div>`;
   html+=`<div class="lz-body">`;
   doc.sections.forEach((sec,si)=>{
-    const c=C[si%C.length];
+    const base=C[si%C.length];
+    const c=styleOverrides?styleOverrides.sections[si%styleOverrides.sections.length]:base;
+    // Skip completely empty sections (title only, no content) — AI sometimes generates these
+    const hasContent=!!(sec.items?.length||sec.defs?.length||sec.steps?.length||sec.highlights?.length||sec.cols?.length||sec.callout||sec.table?.length);
+    if(!hasContent&&sec.title&&!sec._userAdded)return;
     html+=`<div class="lz-section">`;
-    if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span></div>`;
+    if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span><span class="lz-sec-controls"><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},-1)" title="Nach oben">↑</button><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},1)" title="Nach unten">↓</button><button class="lz-sec-btn lz-sec-del" onclick="event.stopPropagation();deleteSection(${si})" title="Abschnitt löschen">✕</button></span></div>`;
     if(sec.callout)html+=`<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
+    if(sec.defs&&sec.defs.length){html+=`<div class="lz-def-grid">`;sec.defs.forEach(d=>{html+=`<div class="lz-def-row"><div class="lz-def-term" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${renderMath(d.term)}</div><div class="lz-def-desc">${renderMath(d.def)}</div></div>`;});html+=`</div>`;}
+    if(sec.steps&&sec.steps.length){html+=`<div class="lz-steps">`;sec.steps.forEach((step,si)=>{html+=`<div class="lz-step"><div class="lz-step-num" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${si+1}</div><div class="lz-step-text">${renderMath(step)}</div></div>`;});html+=`</div>`;}
+    if(sec.highlights&&sec.highlights.length){html+=`<div class="lz-highlights">`;sec.highlights.forEach(h=>{html+=`<div class="lz-highlight" style="border-color:${escapeAttr(c.dot)}"><div class="lz-highlight-value" style="color:${escapeAttr(c.title)}">${renderMath(h.value)}</div>${h.label?`<div class="lz-highlight-label">${renderMath(h.label)}</div>`:''}</div>`;});html+=`</div>`;}
+    if(sec.cols&&sec.cols.length){html+=`<div class="lz-cols">`;sec.cols.forEach(col=>{html+=`<div class="lz-col-row"><div class="lz-col-left" style="border-color:${escapeAttr(c.dot)};color:${escapeAttr(c.title)}">${renderMath(col.left)}</div><div class="lz-col-right">${renderMath(col.right)}</div></div>`;});html+=`</div>`;}
     if(sec.table&&sec.table.length){
       html+=`<div style="padding:0 6px 8px"><table class="lz-table" style="border-color:${escapeAttr(c.dot)}">`;
       sec.table.forEach((row,ri)=>{
@@ -901,29 +1194,32 @@ function renderDocHTML(doc,design){
         // Must be genuinely long or end with punctuation AND contain multiple words AND be longer than 45 chars
         return s.length>70 || (s.length>45 && /[.!?]$/.test(s) && s.split(' ').length>=6);
       }
-      sec.items.forEach(item=>{
+      sec.items.forEach((item, itemIdx)=>{
         if(item.isLabel){
-          html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+          // Skip orphaned trailing labels (no non-label items follow)
+          const hasContentAfter = sec.items.slice(itemIdx+1).some(it=>!it.isLabel);
+          if(!hasContentAfter) return; // skip this orphaned label
+          html+=`<div class="lz-label-bullet" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
         } else if(nb&&isSentence(item.text)){
-          html+=`<div class="lz-notebook-text"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+          html+=`<div class="lz-notebook-text"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
         } else {
-          html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(item.text)}</span></div>`;
+          html+=`<div class="lz-bullet"><div class="lz-dot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
         }
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
             if(s.isLabel){
-              html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+              html+=`<div class="lz-sub-label" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
             } else if(nb&&isSentence(s.text)){
-              html+=`<div class="lz-notebook-sub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+              html+=`<div class="lz-notebook-sub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
             } else {
-              html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${escapeText(s.text)}</span></div>`;
+              html+=`<div class="lz-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
             }
             if(s.children&&s.children.length){
               s.children.forEach(ch=>{
                 if(nb&&isSentence(ch)){
-                  html+=`<div class="lz-notebook-subsub"><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                  html+=`<div class="lz-notebook-subsub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(ch)}</span></div>`;
                 } else {
-                  html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'subsub',${si},null)">${escapeText(ch)}</span></div>`;
+                  html+=`<div class="lz-sub-sub-bullet"><div class="lz-subdot" style="background:${escapeAttr(c.dot)}"></div><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(ch)}</span></div>`;
                 }
               });
             }
@@ -933,6 +1229,7 @@ function renderDocHTML(doc,design){
       html+=`</div>`;
     }
     html+=`</div>`;
+    html+=`<div class="lz-add-section-btn" onclick="addSection(${si})">+ Abschnitt hinzufügen</div>`;
   });
   html+=`</div>`;
   if(doc.merksatz){
@@ -971,14 +1268,18 @@ function renderDesignGrid(){
   });
 }
 
+function applyMathInElement(el){if(typeof renderMathInElement!=='undefined')renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}
+
 function renderReportPreview(doc){
   const html=`<style>${previewStyles}</style>${renderReportHTML(doc,currentDesign)}`;
   document.getElementById('emptyState').style.display='none';
   const lzPreview=document.getElementById('lzPreview');
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
+  applyMathInElement(lzPreview);
   document.getElementById('exportBtn').disabled=false;
   const eb=document.getElementById('exportBtnGen'); if(eb) eb.disabled=false;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
   const toggle=document.getElementById('renderToggle');
   if(toggle) toggle.classList.remove('visible'); // no toggle for reports
 }
@@ -989,7 +1290,9 @@ function renderPreview(doc){
   const lzPreview=document.getElementById('lzPreview');
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
+  applyMathInElement(lzPreview);
   document.getElementById('exportBtn').disabled=false;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
   // Show render toggle
   const toggle=document.getElementById('renderToggle');
   if(toggle) toggle.classList.add('visible');
@@ -1028,6 +1331,7 @@ function closeModal(){document.getElementById('modalOverlay').classList.add('hid
 
 function applyDesign(){
   currentDesign=pendingDesign;
+  styleOverrides=null; // reset style overrides when changing design
   closeModal();
   if(parsedDoc){
     if(parsedDoc._reportMode){
@@ -1040,6 +1344,53 @@ function applyDesign(){
 }
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function switchModalTab(tab) {
+  document.getElementById('modal-tab-design').style.display = tab === 'design' ? '' : 'none';
+  document.getElementById('modal-tab-style').style.display = tab === 'style' ? '' : 'none';
+  document.getElementById('tab-design').classList.toggle('active', tab === 'design');
+  document.getElementById('tab-style').classList.toggle('active', tab === 'style');
+  if (tab === 'style') renderStyleEditor();
+}
+
+function renderStyleEditor() {
+  const ed = document.getElementById('styleEditor');
+  if (!ed) return;
+  const C = pendingDesign.sectionColors;
+  function safeColor(c) {
+    if (!c || c === 'transparent') return '#ffffff';
+    if (c.startsWith('rgba') || c.startsWith('rgb')) return '#ffffff';
+    return c;
+  }
+  let html = '<div style="margin-bottom:16px">';
+  html += '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px">Sektionsfarben</div>';
+  C.forEach((c, i) => {
+    html += `<div class="style-slot">
+      <span class="style-slot-label">Sektion ${i+1}</span>
+      <div class="style-color-pick"><label>Hintergrund</label><input type="color" value="${safeColor(c.bg)}" onchange="updateSectionColor(${i},'bg',this.value)"></div>
+      <div class="style-color-pick"><label>Text</label><input type="color" value="${safeColor(c.title)}" onchange="updateSectionColor(${i},'title',this.value)"></div>
+    </div>`;
+  });
+  html += '</div>';
+  const fw = pendingDesign._fontWeight || 'normal';
+  html += '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Schriftstärke</div>';
+  html += `<div style="display:flex;gap:6px">
+    <button class="fw-btn${fw==='thin'?' active':''}" onclick="setFontWeight('thin')">Dünn</button>
+    <button class="fw-btn${fw==='normal'?' active':''}" onclick="setFontWeight('normal')">Normal</button>
+    <button class="fw-btn${fw==='bold'?' active':''}" onclick="setFontWeight('bold')">Fett</button>
+  </div>`;
+  ed.innerHTML = html;
+}
+
+function updateSectionColor(idx, prop, value) {
+  if (!pendingDesign.sectionColors[idx]) return;
+  pendingDesign.sectionColors[idx] = Object.assign({}, pendingDesign.sectionColors[idx], { [prop]: value });
+}
+
+function setFontWeight(fw) {
+  pendingDesign._fontWeight = fw;
+  renderStyleEditor(); // re-render to update active state
+}
 
 async function cleanWithAI(){
   const raw=document.getElementById('inputText').value.trim();
@@ -1069,6 +1420,7 @@ async function cleanWithAI(){
           renderPreview(parsedDoc);
         }
         setStatus('✓ Vorschau aktualisiert','ok');
+        saveHistory(parsedDoc);
         btn.disabled=false;btn.textContent='↺ Erneut versuchen';return;
       }
       if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));
@@ -1164,6 +1516,7 @@ function initSliders() {
   });
 }
 window.addEventListener('DOMContentLoaded', () => {
+  renderHistoryUI();
   initSliders();
   // Re-run after layout is complete so offsetWidth is correct
   setTimeout(() => {
@@ -1241,7 +1594,9 @@ async function generateFromTopic(){
         // Enable both export buttons
         const eb=document.getElementById('exportBtn'); if(eb) eb.disabled=false;
         const ebg=document.getElementById('exportBtnGen'); if(ebg) ebg.disabled=false;
+        ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
         setStatus(`✓ Lernzettel zu "${topic}" generiert`,'ok');
+        saveHistory(parsedDoc);
         btn.disabled=false;btn.textContent='✦ Generieren';return;
       }
       if(attempt<maxRetries)await new Promise(r=>setTimeout(r,1500));
@@ -1259,6 +1614,164 @@ function setRenderMode(mode) {
   renderPreview(parsedDoc);
 }
 
+// ── SECTION EDITING ───────────────────────────────────────────
+function moveSection(idx, dir) {
+  if (!parsedDoc) return;
+  const secs = parsedDoc.sections;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= secs.length) return;
+  [secs[idx], secs[newIdx]] = [secs[newIdx], secs[idx]];
+  syncTextarea(); renderPreview(parsedDoc);
+}
+function deleteSection(idx) {
+  if (!parsedDoc || parsedDoc.sections.length <= 1) return;
+  if (!confirm('Abschnitt wirklich löschen?')) return;
+  parsedDoc.sections.splice(idx, 1);
+  syncTextarea(); renderPreview(parsedDoc);
+}
+function addSection(afterIdx) {
+  if (!parsedDoc) return;
+  const newSec = {title:'Neuer Abschnitt',items:[{text:'Inhalt hier eingeben',isLabel:false,sub:[]}],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};
+  parsedDoc.sections.splice(afterIdx + 1, 0, newSec);
+  syncTextarea(); renderPreview(parsedDoc);
+}
+
+// ── STYLE PANEL ───────────────────────────────────────────────
+let styleOverrides = null;
+
+function switchModalTab(tab){
+  document.getElementById('tabContentDesign').style.display=tab==='design'?'block':'none';
+  document.getElementById('tabContentStyle').style.display=tab==='style'?'block':'none';
+  document.getElementById('tabDesign').classList.toggle('active',tab==='design');
+  document.getElementById('tabStyle').classList.toggle('active',tab==='style');
+  if(tab==='style') renderStylePanel('modalStylePanel');
+}
+
+function renderStylePanel(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const C = styleOverrides ? styleOverrides.sections : currentDesign.sectionColors;
+  const fw = styleOverrides ? styleOverrides.fontWeight : null;
+  let html = '';
+  C.forEach((c, i) => {
+    const bg = c.bg === 'transparent' ? '#1a1a1a' : c.bg;
+    html += `<div class="sp-row">
+      <span class="sp-slot-dot" style="background:${escapeAttr(c.title)}"></span>
+      <span class="sp-slot-label">Abschnitt ${i+1}</span>
+      <div class="sp-pickers">
+        <label class="sp-picker-wrap" title="Hintergrundfarbe">
+          <input type="color" value="${escapeAttr(bg)}" oninput="updateSectionColor(${i},'bg',this.value,'${panelId}')">
+          <span>BG</span>
+        </label>
+        <label class="sp-picker-wrap" title="Textfarbe">
+          <input type="color" value="${escapeAttr(c.title)}" oninput="updateSectionColor(${i},'title',this.value,'${panelId}')">
+          <span>Text</span>
+        </label>
+      </div>
+    </div>`;
+  });
+  html += `<div class="sp-divider"></div>
+    <div class="sp-row">
+      <span class="sp-slot-label">Schriftstärke</span>
+      <div class="sp-weight-btns">
+        <button class="sp-wbtn${!fw||fw==='300'?' active':''}" onclick="updateFontWeight('300','${panelId}')">Dünn</button>
+        <button class="sp-wbtn${fw==='400'?' active':''}" onclick="updateFontWeight('400','${panelId}')">Normal</button>
+        <button class="sp-wbtn${fw==='500'?' active':''}" onclick="updateFontWeight('500','${panelId}')">Fett</button>
+      </div>
+    </div>
+    <button class="sp-reset" onclick="resetStyleOverrides('${panelId}')">↺ Zurücksetzen</button>`;
+  panel.innerHTML = html;
+}
+
+function getOrInitOverrides() {
+  if (!styleOverrides) {
+    styleOverrides = {
+      sections: currentDesign.sectionColors.map(c => ({...c})),
+      fontWeight: null
+    };
+  }
+  return styleOverrides;
+}
+
+function updateSectionColor(slotIdx, key, val, panelId) {
+  const o = getOrInitOverrides();
+  o.sections[slotIdx][key] = val;
+  if (key === 'title') o.sections[slotIdx].dot = val;
+  ['modalStylePanel'].forEach(id => renderStylePanel(id));
+  renderStylePanel(panelId);
+  if (parsedDoc) renderPreview(parsedDoc);
+}
+
+function updateFontWeight(fw, panelId) {
+  const o = getOrInitOverrides();
+  o.fontWeight = fw;
+  ['modalStylePanel'].forEach(id => renderStylePanel(id));
+  renderStylePanel(panelId);
+  if (parsedDoc) renderPreview(parsedDoc);
+}
+
+function resetStyleOverrides(panelId) {
+  styleOverrides = null;
+  ['modalStylePanel'].forEach(id => renderStylePanel(id));
+  renderStylePanel(panelId);
+  if (parsedDoc) renderPreview(parsedDoc);
+}
+
+// ── IMAGE EXPORT POPUP ────────────────────────────────────────
+function toggleImgPopup(popupId) {
+  const popup = document.getElementById(popupId);
+  if (!popup) return;
+  // Close any other open popups
+  document.querySelectorAll('.img-export-popup').forEach(p => { if(p.id!==popupId) p.classList.remove('open'); });
+  popup.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.img-export-wrap')) {
+    document.querySelectorAll('.img-export-popup').forEach(p => p.classList.remove('open'));
+  }
+});
+
+// ── HISTORY ───────────────────────────────────────────────────
+const HISTORY_KEY = 'notefly_history';
+function saveHistory(doc) {
+  if (!doc || !doc.title) return;
+  let history = loadHistory();
+  const entry = { title: doc.title, text: document.getElementById('inputText').value, ts: Date.now() };
+  history = history.filter(h => h.title !== entry.title);
+  history.unshift(entry);
+  history = history.slice(0, 5);
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
+  renderHistoryUI();
+}
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; }
+}
+function renderHistoryUI() {
+  const history = loadHistory();
+  const toggle = document.getElementById('historyToggle');
+  const panel = document.getElementById('historyList');
+  const badge = document.getElementById('historyCount');
+  if (!toggle || !panel || !badge) return;
+  badge.textContent = history.length;
+  toggle.style.display = history.length ? 'flex' : 'none';
+  panel.innerHTML = history.map((h, i) => {
+    const d = new Date(h.ts);
+    const ts = d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="history-item" onclick="restoreHistory(${i})"><div class="history-item-title">${escapeText(h.title)}</div><div class="history-item-ts">${ts}</div></div>`;
+  }).join('');
+}
+function toggleHistory() {
+  const panel = document.getElementById('historyPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function restoreHistory(idx) {
+  const history = loadHistory();
+  if (!history[idx]) return;
+  document.getElementById('inputText').value = history[idx].text;
+  directExport();
+  document.getElementById('historyPanel').style.display = 'none';
+}
+
 function editField(el,type,sectionIdx,itemRef){
   if(!parsedDoc)return;
   const current=el.textContent;
@@ -1271,7 +1784,8 @@ function editField(el,type,sectionIdx,itemRef){
     if(type==='title'){parsedDoc.title=newVal;}
     else if(type==='section'&&sectionIdx!==null){parsedDoc.sections[sectionIdx].title=newVal;}
     else if(type==='bullet'){
-      outer:for(const sec of parsedDoc.sections){
+      const searchSecs=sectionIdx!==null?[parsedDoc.sections[sectionIdx]]:parsedDoc.sections;
+      outer:for(const sec of searchSecs){
         for(const item of sec.items){
           if(item.text===current){item.text=newVal;break outer;}
           for(const sub of(item.sub||[])){
@@ -1317,6 +1831,7 @@ function clearInput(){
   document.getElementById('lzPreview').style.display='none';
   document.getElementById('emptyState').style.display='flex';
   document.getElementById('exportBtn').disabled=true;
+  ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
   document.getElementById('aiBtn').textContent='✦ KI bereinigen';
   parsedDoc=null;
   setStatus('✓ Eingabe geleert','ok');
@@ -1351,21 +1866,100 @@ function directExport(){
   setStatus('✓ Vorschau erstellt — bereit zum Export','ok');
 }
 
-function exportPDF(){
+async function doExportImage(transparent, popupId){
+  if(popupId){const p=document.getElementById(popupId);if(p)p.classList.remove('open');}
+  if(!parsedDoc||typeof html2canvas==='undefined'){setStatus('Bild-Export nicht verfügbar','err');return;}
+  const lzPreview=document.getElementById('lzPreview');
+  if(!lzPreview||lzPreview.style.display==='none'){setStatus('Keine Vorschau vorhanden','err');return;}
+  const target=lzPreview.querySelector('.lz-page')||lzPreview;
+  setStatus('⏳ Bild wird erstellt…','');
+  // Always use design background for crisp rendering (transparent causes milky anti-aliasing)
+  const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
+  const bgColor = designBgMap[currentDesign.id] || '#ffffff';
+  try{
+    const canvas=await html2canvas(target,{
+      scale:2,
+      useCORS:true,
+      allowTaint:false,
+      backgroundColor:bgColor,
+      logging:false,
+      removeContainer:true,
+      onclone:(clonedDoc)=>{
+        clonedDoc.querySelectorAll('.lz-sec-controls,.lz-add-section-btn').forEach(el=>el.remove());
+        const s=clonedDoc.createElement('style');
+        s.textContent='.lz-editable:hover{background:transparent!important;outline:none!important}.lz-editable:hover::after{display:none!important}.lz-sec-controls{display:none!important}.lz-add-section-btn{display:none!important}';
+        clonedDoc.head.appendChild(s);
+      }
+    });
+    const dataUrl=canvas.toDataURL('image/png');
+    const a=document.createElement('a');
+    const title=(parsedDoc.title||'notefly').replace(/[^a-zA-Z0-9äöüÄÖÜß\-_ ]/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'notefly';
+    a.href=dataUrl;a.download=`${title}.png`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>document.body.removeChild(a),500);
+    setStatus('✓ Bild gespeichert!','ok');
+  }catch(e){
+    setStatus('Fehler beim Bild-Export: '+e.message,'err');
+  }
+}
+
+function docHasMath(doc){
+  if(!doc||doc._reportMode)return false;
+  const has$=s=>s&&/\$/.test(String(s));
+  if(has$(doc.title)||has$(doc.subtitle)||has$(doc.merksatz))return true;
+  return(doc.sections||[]).some(sec=>{
+    if(has$(sec.title)||has$(sec.callout))return true;
+    if((sec.items||[]).some(it=>has$(it.text)||(it.sub||[]).some(s=>has$(s.text)||(s.children||[]).some(ch=>has$(ch)))))return true;
+    if((sec.defs||[]).some(d=>has$(d.term)||has$(d.def)))return true;
+    if((sec.steps||[]).some(has$))return true;
+    if((sec.highlights||[]).some(h=>has$(h.value)||has$(h.label)))return true;
+    if((sec.cols||[]).some(c=>has$(c.left)||has$(c.right)))return true;
+    return false;
+  });
+}
+
+function showPdfModal(){
   if(!parsedDoc)return;
-  // If report mode, use print-based export for accurate rendering
+  // Reports always use browser print directly (no choice needed)
+  if(parsedDoc._reportMode){exportPdfBrowserPrint();return;}
+  document.getElementById('pdfExportModal').style.display='flex';
+}
+function closePdfModal(){
+  document.getElementById('pdfExportModal').style.display='none';
+}
+function exportPdfBrowserPrint(){
+  closePdfModal();
+  if(!parsedDoc)return;
+  const printArea=document.getElementById('printArea');
   if(parsedDoc._reportMode){
-    const printArea=document.getElementById('printArea');
     printArea.innerHTML=`<style>${previewStyles}
 .lz-page{max-width:100%;border-radius:0;box-shadow:none;animation:none}
 .lz-editable:hover{background:transparent!important;outline:none!important}
 .lz-editable:hover::after{display:none!important}
 </style>${renderReportHTML(parsedDoc,currentDesign)}`;
-    printArea.style.display='block';
-    setTimeout(()=>{ window.print(); setTimeout(()=>{printArea.style.display='none';},500); },100);
-    setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
-    return;
+  }else{
+    const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
+    const bg=designBgMap[currentDesign.id]||'#ffffff';
+    printArea.style.background=bg;
+    printArea.innerHTML=`<style>${previewStyles}
+.lz-page{width:100%;max-width:100%;border-radius:0;box-shadow:none;animation:none}
+.lz-editable:hover{background:transparent!important;outline:none!important}
+.lz-editable:hover::after{display:none!important}
+.lz-sec-controls,.lz-add-section-btn{display:none!important}
+@page{size:A4 portrait;margin:15mm 18mm}
+</style>${renderDocHTML(parsedDoc,currentDesign)}`;
+    applyMathInElement(printArea);
   }
+  printArea.style.display='block';
+  void printArea.offsetHeight; // force synchronous reflow — keeps user gesture context for window.print()
+  window.print();
+  setTimeout(()=>{printArea.style.display='none';printArea.style.background='';},300);
+  setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
+}
+function exportPdfDirect(){closePdfModal();exportPDF();}
+
+function exportPDF(){
+  if(!parsedDoc)return;
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'mm',format:'a4'});
   const pageW=210,pageH=297,margin=20,cw=pageW-margin*2,bottomLimit=278;
@@ -1417,6 +2011,8 @@ function exportPDF(){
   y+=4;
   const bodyFont = isRetro ? 'courier' : 'helvetica';
   parsedDoc.sections.forEach((sec,si)=>{
+    const secHasContent=(sec.items&&sec.items.length)||(sec.defs&&sec.defs.length)||(sec.steps&&sec.steps.length)||(sec.highlights&&sec.highlights.length)||(sec.cols&&sec.cols.length)||sec.callout||(sec.table&&sec.table.length);
+    if(!secHasContent)return;
     const c=C[si%C.length];
     const dotRgb=hexToRgbSafe(c.dot),titleRgb=hexToRgbSafe(c.title),secBgRgb=hexToRgbSafe(c.bg);
     checkPage(16);
@@ -1433,6 +2029,83 @@ function exportPDF(){
         pdf.text(`${si+1}.  ${sec.title}`,margin+5,y+5.5);
         y+=11;
       }
+    }
+    if(sec.defs&&sec.defs.length){
+      sec.defs.forEach(d=>{
+        const termW=cw*0.38,defW=cw*0.62;
+        pdf.setFontSize(7.5);
+        const termLines=pdf.splitTextToSize(String(d.term||''),termW-8);
+        const defLines=pdf.splitTextToSize(String(d.def||''),defW-6);
+        const rowH=Math.max(9,Math.max(termLines.length,defLines.length)*4.8+4);
+        checkPage(rowH+2);
+        setFill(secBgRgb);pdf.rect(margin,y,termW,rowH,'F');
+        const defBg=isDark?[28,28,28]:isRetro?[245,240,228]:[246,244,240];
+        setFill(defBg);pdf.rect(margin+termW,y,defW,rowH,'F');
+        pdf.setFont(bodyFont,'bold');setRGB(titleRgb);
+        pdf.text(termLines,margin+4,y+4.8);
+        pdf.setFont(bodyFont,'normal');setRGB(isDark?[200,197,192]:isRetro?[60,45,20]:[50,48,44]);
+        pdf.text(defLines,margin+termW+3,y+4.8);
+        y+=rowH+2;
+      });
+      y+=2;
+    }
+    if(sec.steps&&sec.steps.length){
+      sec.steps.forEach((step,si)=>{
+        pdf.setFontSize(8);
+        const stepLines=pdf.splitTextToSize(String(step||''),cw-18);
+        const stepH=Math.max(10,stepLines.length*4.8+4);
+        checkPage(stepH+2);
+        setFill(secBgRgb);pdf.circle(margin+4.5,y+5,4,'F');
+        pdf.setFontSize(6.5);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);
+        pdf.text(String(si+1),margin+4.5,y+6.5,{align:'center'});
+        if(si<sec.steps.length-1){
+          setFill(isDark?[60,60,60]:isRetro?[200,192,180]:[210,207,202]);
+          pdf.rect(margin+3.5,y+10,2,stepH-4,'F');
+        }
+        pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');
+        setRGB(isDark?[208,205,200]:isRetro?[42,31,10]:[42,40,38]);
+        pdf.text(stepLines,margin+13,y+5.5);
+        y+=stepH;
+      });
+      y+=4;
+    }
+    if(sec.highlights&&sec.highlights.length){
+      const hlRows=[];
+      for(let i=0;i<sec.highlights.length;i+=4)hlRows.push(sec.highlights.slice(i,i+4));
+      hlRows.forEach(row=>{
+        const hlW=(cw-(row.length-1)*3)/row.length,hlH=16;
+        checkPage(hlH+4);
+        row.forEach((h,hi)=>{
+          const hx=margin+hi*(hlW+3);
+          const hlBg=isDark?[24,24,34]:isRetro?[248,242,228]:[248,246,242];
+          setFill(hlBg);pdf.roundedRect(hx,y,hlW,hlH,2,2,'F');
+          setFill(dotRgb);pdf.rect(hx,y,2.5,hlH,'F');
+          pdf.setFontSize(9);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);
+          pdf.text(String(h.value||''),hx+6,y+7);
+          if(h.label){pdf.setFontSize(6.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[120,116,110]:[100,96,92]);pdf.text(String(h.label),hx+6,y+12.5);}
+        });
+        y+=hlH+4;
+      });
+      y+=2;
+    }
+    if(sec.cols&&sec.cols.length){
+      const colW=(cw-4)/2;
+      sec.cols.forEach(col=>{
+        const leftLines=pdf.splitTextToSize(stripMath(col.left)||'',colW-8);
+        const rightLines=pdf.splitTextToSize(stripMath(col.right)||'',colW-6);
+        const rowH=Math.max(9,Math.max(leftLines.length,rightLines.length)*4.8+4);
+        checkPage(rowH+2);
+        setFill(secBgRgb);pdf.rect(margin,y,colW,rowH,'F');
+        setFill(dotRgb);pdf.rect(margin,y,2,rowH,'F');
+        pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);
+        pdf.text(leftLines,margin+5,y+4.8);
+        const defBg=isDark?[28,28,28]:isRetro?[245,240,228]:[246,244,240];
+        setFill(defBg);pdf.rect(margin+colW+4,y,colW,rowH,'F');
+        pdf.setFont(bodyFont,'normal');setRGB(isDark?[200,197,192]:isRetro?[60,45,20]:[50,48,44]);
+        pdf.text(rightLines,margin+colW+7,y+4.8);
+        y+=rowH+2;
+      });
+      y+=2;
     }
     if(sec.table&&sec.table.length){
       const rows=sec.table;
@@ -1469,16 +2142,16 @@ function exportPDF(){
     }
     sec.items.forEach(item=>{
       const textColor=isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24];
-      function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(it.text,cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(s.text,cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}});}return t;}
+      function itemH(it){pdf.setFontSize(8);let t=pdf.splitTextToSize(stripMath(it.text),cw-8).length*4.5+2;if(it.sub){it.sub.forEach(s=>{pdf.setFontSize(7.5);t+=pdf.splitTextToSize(stripMath(s.text),cw-16).length*4.2+1.5;if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);t+=pdf.splitTextToSize(stripMath(ch),cw-24).length*4+1;});}});}return t;}
       checkPage(itemH(item));
-      if(item.isLabel){pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+2,y+3.5);y+=lines.length*4.5+1;}
-      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(item.text,cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
+      if(item.isLabel){y+=2;const lines=pdf.splitTextToSize(stripMath(item.text),cw-14);const lblH=lines.length*4.5+2;checkPage(lblH+2);setFill(dotRgb);pdf.rect(margin,y,2,lblH,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);pdf.text(lines,margin+6,y+3.5);y+=lblH+1;}
+      else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+1,y+1.5,2.5,2.5,'F'):pdf.circle(margin+2,y+2,1.5,'F');pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(textColor);const lines=pdf.splitTextToSize(stripMath(item.text),cw-8);pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
       if(item.sub){item.sub.forEach(s=>{
-        function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(sb.text,cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(ch,cw-24).length*4+1;});}return h;}
+        function subH(sb){pdf.setFontSize(7.5);let h=pdf.splitTextToSize(stripMath(sb.text),cw-16).length*4.2+1.5;if(sb.children){sb.children.forEach(ch=>{pdf.setFontSize(7);h+=pdf.splitTextToSize(stripMath(ch),cw-24).length*4+1;});}return h;}
         checkPage(subH(s));
-        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
-        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(s.text,cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
-        if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);const cl=pdf.splitTextToSize(ch,cw-24);checkPage(cl.length*4+1);setFill(dotRgb);pdf.circle(margin+16,y+1.6,0.9,'F');pdf.setFont('helvetica','normal');setRGB(isDark?[122,117,112]:[106,100,96]);pdf.text(cl,margin+20,y+2.8);y+=cl.length*4+1;});}
+        if(s.isLabel){pdf.setFontSize(7.5);pdf.setFont(bodyFont,'bold');setRGB(isDark?[240,237,232]:isRetro?[42,31,10]:[42,40,38]);const sl=pdf.splitTextToSize(stripMath(s.text),cw-16);pdf.text(sl,margin+10,y+3);y+=sl.length*4.2+1;}
+        else{setFill(dotRgb);id==='minimal'?pdf.rect(margin+7,y+1.2,2,2,'F'):pdf.circle(margin+8,y+1.8,1.1,'F');pdf.setFontSize(7.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:isRetro?[90,74,42]:[90,84,80]);const sl=pdf.splitTextToSize(stripMath(s.text),cw-16);pdf.text(sl,margin+12,y+3);y+=sl.length*4.2+1.5;}
+        if(s.children){s.children.forEach(ch=>{pdf.setFontSize(7);const cl=pdf.splitTextToSize(stripMath(ch),cw-24);checkPage(cl.length*4+1);setFill(dotRgb);pdf.circle(margin+16,y+1.6,0.9,'F');pdf.setFont('helvetica','normal');setRGB(isDark?[122,117,112]:[106,100,96]);pdf.text(cl,margin+20,y+2.8);y+=cl.length*4+1;});}
       });}
     });
     y+=4;
@@ -1511,6 +2184,32 @@ function exportPDF(){
     setStatus('✓ PDF gespeichert!','ok');
   }
 }
+
+/*
+=== TESTBERICHT (2026-03-28) ===
+
+1. parseText() orphaned ### Label:
+   - hasContentAfter-Check in renderDocHTML: isLabel-Items am Sektionsende werden übersprungen. ✓
+
+2. parseReportText() > Merksatz:
+   - Spezifischer /^>\s*Merksatz/i-Check zuerst, dann generischer >-Fallback.
+   - renderReportHTML rendert doc.merksatz als .lz-merksatz-Block. ✓
+
+3. renderMath / KaTeX:
+   - renderMath() ist im Remote-Branch implementiert (verarbeitet $...$ via KaTeX wenn geladen).
+   - Ohne KaTeX gibt renderMath den Text sicher zurück — kein Fehler. ✓
+
+4. Button-IDs in JS vs HTML:
+   - aiBtn, exportBtn, exportImgBtn, exportBtnGen, genSubmitBtn: alle vorhanden. ✓
+   - tabDesign, tabStyle, tabContentDesign, tabContentStyle, modalStylePanel: alle vorhanden. ✓
+
+5. doExportImage / onclone:
+   - doExportImage() ist im Remote-Branch implementiert (html2canvas mit onclone).
+   - Versteckt .lz-sec-controls und .lz-add-section-btn via onclone. ✓
+
+6. previewStyles enthält alle Klassen aus renderDocHTML:
+   - Alle lz-* Klassen enthalten. ✓
+*/
 </script>
 <footer style="background:#0a0a0a;border-top:1px solid #242220;padding:12px 48px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#5a5755;letter-spacing:0.05em;">
   <span>© 2026 <span style="color:#7a7775">Ben Hebling</span></span>

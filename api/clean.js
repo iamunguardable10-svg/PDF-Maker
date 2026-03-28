@@ -50,23 +50,39 @@ ${paramBlock}
 Diese Parameter sind verbindliche Stil- und Inhaltsvorgaben. Halte sie ein, aber verletze NIEMALS das Ausgabeformat.
 ` : ''}
 
-ZIELFORMAT:
-# Präziser Titel
+ZIELFORMAT (wähle pro Abschnitt das thematisch passende Format — Reihenfolge ist frei):
 
-## Optionaler Untertitel
+Format A — Definitionen (für Fachbegriffe):
+1. Themenspezifischer Abschnittsname
+>> Begriff :: Präzise Erklärung in einem Satz
+>> Weiterer Begriff :: Erklärung
 
-1. Konkreter Abschnittsname
+Format B — Ablauf/Prozess (für Schrittfolgen, Algorithmen):
+2. Themenspezifischer Abschnittsname
+=> Erster konkreter Schritt
+=> Zweiter konkreter Schritt
+
+Format C — Kennzahlen/Fakten (für Jahreszahlen, Werte, Formeln):
+3. Themenspezifischer Abschnittsname
+!! 1905 — Einsteins Relativitätstheorie
+!! $E = mc^2$ — Masse-Energie-Äquivalenz
+!! $F = m \cdot a$ — Newtonsches Gesetz
+
+Format D — Vergleich/Gegenüberstellung:
+4. Themenspezifischer Abschnittsname
+<> Merkmal A :: Merkmal B
+<> Aspekt X :: Aspekt Y
+
+Format E — Bulletpoints (für Aufzählungen, Erklärungen):
+5. Themenspezifischer Abschnittsname
 - Inhaltspunkt auf Ebene 1
   - Unterpunkt auf Ebene 2
     - Detailpunkt auf Ebene 3
 
-2. Konkreter Abschnittsname
-- Inhaltspunkt auf Ebene 1
-- Inhaltspunkt auf Ebene 1
-
-### Optionales Zwischenlabel
-
-**Optionaler wichtiger Hinweis**
+Format F — Tabelle (für strukturierte Vergleiche):
+6. Themenspezifischer Abschnittsname
+| Spalte 1 | Spalte 2 |
+| Wert A | Wert B |
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
 
@@ -74,28 +90,48 @@ PFLICHTREGELN:
 - Genau eine Titelzeile mit "# ".
 - Optional direkt danach genau eine Zeile mit "## ".
 - Danach nummerierte Hauptabschnitte im Format "1. ...", "2. ...", "3. ...".
-- Unter jedem Abschnitt Bulletpoints mit "- ".
-- Ebene 1 = 0 Leerzeichen vor "- "
-- Ebene 2 = genau 2 Leerzeichen vor "- "
-- Ebene 3 = genau 4 Leerzeichen vor "- "
-- Keine Tabs.
-- Nur echte Abschnittsnamen, keine Platzhalter wie "Erster Abschnitt" oder "Definition von X".
-- Nur echter Inhalt: Definitionen, Zusammenhänge, Beispiele, Anwendungen, Ursachen, Folgen.
-- Kein Fettdruck innerhalb normaler Bulletpoints, außer ein einzelnes Wort ist fachlich zwingend hervorzuheben.
-- Optional genau eine Zeile mit "### ".
+- Unter jedem Abschnitt entweder Bulletpoints ("- ") ODER eines der visuellen Elemente — nie beides mischen.
+- Ebene 1 = 0 Leerzeichen vor "- ", Ebene 2 = 2 Leerzeichen, Ebene 3 = 4 Leerzeichen. Keine Tabs.
+- Abschnittsnamen MÜSSEN themenspezifisch sein — NIEMALS generische Namen wie "Grundlagen", "Einleitung", "Übersicht", "Definition". Abschnittsnamen NIEMALS in **fett** schreiben.
+- "### Zwischenlabel" NUR wenn direkt danach Inhalt folgt — NIEMALS als letztes Element einer Sektion.
 - Optional genau eine vollständige Zeile mit "**...**" als Callout.
-- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn er fachlich Mehrwert hat.
-- Bei Vergleichen oder Kategorien darf eine Tabelle verwendet werden, im Format: | Spalte 1 | Spalte 2 |
-- Keine Emojis.
-- Keine JSON-Ausgabe.
-- Keine Floskeln wie "Hier ist dein Lernzettel".
-- Keine Platzhalter.
-- Keine erfundenen Fakten.
+- Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn fachlich sinnvoll.
+- Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
+- Keine Emojis, keine Floskeln, keine erfundenen Fakten.
+- NIEMALS einen Abschnitt ohne Inhalt generieren. Jeder nummerierte Abschnitt muss mindestens 2 Bulletpoints oder ein visuelles Element enthalten.
+- PFLICHT: Mindestens 3 verschiedene Formate (A–F) pro Lernzettel verwenden — kein Lernzettel darf nur Bulletpoints enthalten.
+- PFLICHT: Wähle Formate nach dem Thema, nicht nach der Reihenfolge im ZIELFORMAT.
+
+VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlich passt:
+- ">> Begriff :: Erklärung" — für Fachbegriffe (mehrere hintereinander, ersetzen Bullets komplett im Abschnitt)
+- "=> Schritt" — für Abläufe, Algorithmen, Prozesse (min. 2, max. 6 Schritte, ersetzen Bullets im Abschnitt)
+- "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernformeln (max. 4 pro Abschnitt, können vor Bullets stehen)
+- "<> Links :: Rechts" — für Vergleiche, Pro/Contra (mehrere hintereinander, ersetzen Bullets im Abschnitt)
+- WICHTIG für "<>": Immer dann verwenden wenn zwei Dinge verglichen, gegenübergestellt oder mit "und/&/vs./oder" in einem Bullet kombiniert werden. Beispiele die IMMER als <> geschrieben werden müssen:
+    × FALSCH:  - Schriftliche Tests & Mündliche Tests
+    ✓ RICHTIG: <> Schriftliche Tests :: Mündliche Tests
+    × FALSCH:  - Vor- und Nachteile
+    ✓ RICHTIG: <> Vorteile :: Nachteile
+    × FALSCH:  - Klassische vs. Quantenmechanik
+    ✓ RICHTIG: <> Klassische Mechanik :: Quantenmechanik
+- "$Formel$" inline oder "$$Formel$$" als Block — nur für echte Mathematik, in Bullets oder !! einbetten
 
 INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
 - Nutze die Parameter, um Detailgrad, Sprache, Niveau, Vorwissen und Formatierung zu steuern.
 - Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+- Verwende die visuellen Elemente so:
+  • ">>" für Definitionen/Fachbegriffe: >> Osmose :: Passiver Transport von Wasser durch semipermeable Membran
+  • "=>" für Prozessschritte: => Primer anlagern, => DNA-Polymerase synthetisiert neuen Strang
+  • "!!" für Zahlen/Daten/Formeln: !! 1953 — Watson & Crick entdecken Doppelhelix | !! $F = ma$ — Zweites Newtonsches Gesetz
+  • "<>" für Gegenüberstellungen: <> Mitose :: Zellteilung für Wachstum :: Meiose :: Zellteilung für Fortpflanzung
+
+UNTERSTÜTZTE SYNTAX (optional, nur wenn sinnvoll):
+- "### Label" als Zwischenüberschrift innerhalb eines Abschnitts (NUR wenn Inhalt folgt!)
+- "> Merksatz: ..." für einen prägnanten Kernsatz am Ende
+- "**Wichtiger Hinweis**" als Callout-Box
+- "| Spalte 1 | Spalte 2 |" für Vergleichstabellen
+- "$Formel$" für mathematische Ausdrücke in KaTeX-Syntax, z.B. "$E = mc^2$", "$\\frac{a}{b}$" — NIEMALS Formeln in normale Klammern schreiben
 
 THEMA:
 ${topic}
@@ -135,7 +171,7 @@ PFLICHTREGELN:
 
 2. STRUKTUR:
 - Inhalte logisch ordnen, verdichten und hierarchisch gliedern.
-- Nur echte Abschnittsnamen verwenden.
+- Abschnittsnamen MÜSSEN themenspezifisch sein — NIEMALS "Grundlagen", "Einleitung", "Übersicht", "Definition" oder andere generische Namen. Immer das konkrete Teilthema benennen.
 
 3. FORMAT:
 - Genau eine Zeile mit "# ".
@@ -150,13 +186,25 @@ PFLICHTREGELN:
 - Kein Fettdruck in normalen Bullets.
 - Keine Meta-Kommentare, keine KI-Floskeln, keine Emojis.
 
-5. OPTIONAL:
-- Genau eine "### " Zeile, wenn sie sinnvoll ist.
-- Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn sie echten Mehrwert hat.
+5. VISUELLE ELEMENTE — setze mindestens 1-2 davon ein, wo der Inhalt es hergibt:
+- ">> Begriff :: Erklärung" — wenn der Text Definitionen oder Fachbegriffe enthält (mehrere hintereinander, ersetzen Bullets im Abschnitt)
+- "=> Schritt" — wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6, ersetzen Bullets im Abschnitt)
+- "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernbegriffe im Text (max. 4 pro Abschnitt)
+- "<> Links :: Rechts" — wenn der Text Vergleiche oder Pro/Contra enthält (mehrere hintereinander möglich)
+- WICHTIG für "<>": Immer dann verwenden wenn zwei Dinge verglichen, gegenübergestellt oder mit "und/&/vs./oder" kombiniert werden. Beispiele:
+    × FALSCH:  - Schriftliche Tests & Mündliche Tests
+    ✓ RICHTIG: <> Schriftliche Tests :: Mündliche Tests
+    × FALSCH:  - Vor- und Nachteile
+    ✓ RICHTIG: <> Vorteile :: Nachteile
+- "$Formel$" inline oder "$$Formel$$" als Block — wenn der Text mathematische Ausdrücke enthält
+- Pro Abschnitt höchstens einen dieser Typen. Kein ### ohne nachfolgenden Inhalt.
+
+6. OPTIONAL:
+- Genau eine Zeile mit "**...**" als wichtiger Hinweis, wenn echten Mehrwert.
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 
-6. SICHERHEIT:
+7. SICHERHEIT:
 - Keine erfundenen Informationen.
 - Nur Inhalte aus dem gegebenen Text übernehmen und sauber ordnen.
 
@@ -199,6 +247,8 @@ Fließtext mit Schlussfolgerung und Einordnung.
 OPTIONAL:
 > Quellenhinweis: kurzer Hinweis
 > Merksatz: prägnanter Kernsatz mit echtem Mehrwert
+>> Begriff :: Erklärung — für Fachbegriffe im Bericht (mehrere hintereinander möglich)
+!! Wert — Beschriftung — für Schlüsselzahlen oder -fakten (max. 4 pro Abschnitt)
 
 PFLICHTREGELN:
 - Genau eine Zeile mit "# ".
@@ -220,6 +270,11 @@ PFLICHTREGELN:
 INHALTLICHE PRIORITÄT:
 - Nutze die Parameter, um Tiefe, Ton, Schwerpunkt und Zielgruppe zu steuern.
 - Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+
+UNTERSTÜTZTE SYNTAX:
+- "> Merksatz: ..." für einen prägnanten Kernsatz am Ende
+- "> Quellenhinweis: ..." für Quellenangaben
+- "| Spalte 1 | Spalte 2 |" für Vergleichstabellen
 
 THEMA:
 ${topic}
@@ -294,7 +349,7 @@ ${rawContent}
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       max_tokens: 3000,
-      temperature: 0.1,
+      temperature: 0.35,
       messages: [{ role: 'user', content: truncatedPrompt }],
     }),
   });
