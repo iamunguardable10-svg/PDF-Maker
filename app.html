@@ -437,7 +437,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
   html, body { margin: 0 !important; padding: 0 !important; background: transparent !important; }
   body > *:not(#printArea) { display: none !important; }
   #printArea { display: block !important; position: static !important; width: 100% !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
-  #printArea .lz-page { max-width: 100% !important; width: 100% !important; border-radius: 0 !important; box-shadow: none !important; animation: none !important; padding: 24px 32px !important; margin: 0 !important; }
+  #printArea .lz-page { max-width: 100% !important; width: 100% !important; border-radius: 0 !important; box-shadow: none !important; animation: none !important; padding: 20px 28px !important; margin: 0 !important; box-sizing: border-box !important; }
   /* Prevent sections from being cut mid-content */
   .lz-section { break-inside: avoid; page-break-inside: avoid; }
   .lz-section-title { break-after: avoid; page-break-after: avoid; }
@@ -1935,13 +1935,25 @@ function directExport(){
 async function doExportImage(transparent, popupId){
   if(popupId){const p=document.getElementById(popupId);if(p)p.classList.remove('open');}
   if(!parsedDoc||typeof html2canvas==='undefined'){setStatus('Bild-Export nicht verfügbar','err');return;}
-  const lzPreview=document.getElementById('lzPreview');
-  if(!lzPreview||lzPreview.style.display==='none'){setStatus('Keine Vorschau vorhanden','err');return;}
-  const target=lzPreview.querySelector('.lz-page')||lzPreview;
   setStatus('⏳ Bild wird erstellt…','');
-  // Always use design background for crisp rendering (transparent causes milky anti-aliasing)
   const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
-  const bgColor = designBgMap[currentDesign.id] || '#ffffff';
+  const bgColor=designBgMap[currentDesign.id]||'#ffffff';
+  // A4 at 96dpi = 794px wide — fixed regardless of screen size
+  const A4W=794;
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText=`position:fixed;left:-9999px;top:0;width:${A4W}px;z-index:-9999;overflow:visible;`;
+  wrapper.innerHTML=`<style>${previewStyles}
+.lz-page{width:${A4W}px!important;max-width:${A4W}px!important;border-radius:0!important;box-shadow:none!important;animation:none!important;box-sizing:border-box!important;}
+.lz-editable:hover{background:transparent!important;outline:none!important}
+.lz-editable:hover::after{display:none!important}
+.lz-sec-controls,.lz-add-section-btn{display:none!important}
+</style>${renderDocHTML(parsedDoc,currentDesign)}`;
+  document.body.appendChild(wrapper);
+  // Allow fonts/layout to settle
+  await document.fonts.ready;
+  await new Promise(r=>setTimeout(r,80));
+  if(typeof katex!=='undefined')applyMathInElement(wrapper);
+  const target=wrapper.querySelector('.lz-page')||wrapper;
   try{
     const canvas=await html2canvas(target,{
       scale:2,
@@ -1949,7 +1961,7 @@ async function doExportImage(transparent, popupId){
       allowTaint:false,
       backgroundColor:bgColor,
       logging:false,
-      removeContainer:true,
+      width:A4W,
       onclone:(clonedDoc)=>{
         clonedDoc.querySelectorAll('.lz-sec-controls,.lz-add-section-btn').forEach(el=>el.remove());
         const s=clonedDoc.createElement('style');
@@ -1957,14 +1969,16 @@ async function doExportImage(transparent, popupId){
         clonedDoc.head.appendChild(s);
       }
     });
+    document.body.removeChild(wrapper);
     const dataUrl=canvas.toDataURL('image/png');
     const a=document.createElement('a');
     const title=(parsedDoc.title||'notefly').replace(/[^a-zA-Z0-9äöüÄÖÜß\-_ ]/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'notefly';
     a.href=dataUrl;a.download=`${title}.png`;
     document.body.appendChild(a);a.click();
-    setTimeout(()=>document.body.removeChild(a),500);
+    setTimeout(()=>a.remove(),500);
     setStatus('✓ Bild gespeichert!','ok');
   }catch(e){
+    if(document.body.contains(wrapper))document.body.removeChild(wrapper);
     setStatus('Fehler beim Bild-Export: '+e.message,'err');
   }
 }
@@ -2015,7 +2029,6 @@ function exportPdfBrowserPrint(){
 .lz-editable:hover{background:transparent!important;outline:none!important}
 .lz-editable:hover::after{display:none!important}
 .lz-sec-controls,.lz-add-section-btn{display:none!important}
-@page{size:A4 portrait;margin:15mm 18mm}
 </style>${renderDocHTML(parsedDoc,currentDesign)}`;
     applyMathInElement(printArea);
   }
