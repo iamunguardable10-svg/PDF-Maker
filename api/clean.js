@@ -206,20 +206,22 @@ PFLICHTREGELN:
 - Kein Fettdruck in normalen Bullets.
 - Keine Meta-Kommentare, keine KI-Floskeln, keine Emojis.
 
-5. VISUELLE ELEMENTE — setze mindestens 1-2 davon ein, wo der Inhalt es hergibt:
-- ">> Begriff :: Erklärung" — wenn der Text Definitionen oder Fachbegriffe enthält (mehrere hintereinander, ersetzen Bullets im Abschnitt)
-- "=> Schritt" — wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6, ersetzen Bullets im Abschnitt)
-- "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernbegriffe im Text (max. 4 pro Abschnitt)
-- "<> Links :: Rechts" — wenn der Text Vergleiche oder Pro/Contra enthält (mehrere hintereinander möglich)
+5. VISUELLE ELEMENTE — setze mindestens 2-3 davon ein. Wenn der Inhalt es hergibt, bevorzuge sie gegenüber normalen Bullets:
+- ">> Begriff :: Erklärung" — Definitionen, Fachbegriffe, Anbieter/Produkte mit Beschreibung (mehrere hintereinander, ersetzen Bullets im Abschnitt vollständig)
+- "=> Schritt" — Ablauf, Prozess, Reihenfolge (min. 2, max. 6, ersetzen Bullets im Abschnitt)
+- "!! Wert — Beschriftung" — Jahreszahlen, Kennzahlen, Kernbegriffe, Preise, Prozentzahlen (max. 4 pro Abschnitt)
+- "<> Links :: Rechts" — Vergleiche, Gegenüberstellungen, Pro/Contra, Optionen (mehrere hintereinander)
 - WICHTIG für "<>": Immer dann verwenden wenn zwei Dinge verglichen, gegenübergestellt oder mit "und/&/vs./oder" kombiniert werden. Beispiele:
     × FALSCH:  - Schriftliche Tests & Mündliche Tests
     ✓ RICHTIG: <> Schriftliche Tests :: Mündliche Tests
     × FALSCH:  - Vor- und Nachteile
     ✓ RICHTIG: <> Vorteile :: Nachteile
-- "$Formel$" inline oder "$$Formel$$" als Block — wenn der Text mathematische Ausdrücke enthält
-- "~~ Datum :: Ereignis" — wenn der Text chronologische Ereignisse oder einen Zeitstrahl enthält
-- '"" Zitat — Autor" — wenn der Text wichtige Zitate oder Aussagen bekannter Personen enthält
-- "@@ $Formel$ — Bezeichnung" — für die 1-3 zentralsten Formeln als hervorgehobene Formelbox
+- "$Formel$" inline oder "$$Formel$$" als Block — mathematische Ausdrücke
+- "~~ Datum :: Ereignis" — chronologische Ereignisse, Zeitstrahl
+- '"" Zitat — Autor" — wichtige Zitate oder Aussagen bekannter Personen
+- "@@ $Formel$ — Bezeichnung" — 1-3 zentrale Formeln als hervorgehobene Formelbox
+- Tipp: Wenn ein Abschnitt Fakten über mehrere Anbieter/Personen/Orte enthält → ">>" verwenden.
+- Tipp: Wenn ein Abschnitt Vor- und Nachteile, Optionen oder Methoden gegenüberstellt → "<>" verwenden.
 - Pro Abschnitt höchstens einen dieser Typen. Kein ### ohne nachfolgenden Inhalt.
 
 6. OPTIONAL:
