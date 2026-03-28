@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script>window.addEventListener('load',function(){if(typeof katex!=='undefined'&&window.parsedDoc){if(window.parsedDoc._reportMode){if(typeof renderReportPreview==='function')renderReportPreview(window.parsedDoc);}else{if(typeof renderPreview==='function')renderPreview(window.parsedDoc);}}});</script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -1190,12 +1190,15 @@ function renderDesignGrid(){
   });
 }
 
+function applyMathInElement(el){if(typeof renderMathInElement!=='undefined')renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}
+
 function renderReportPreview(doc){
   const html=`<style>${previewStyles}</style>${renderReportHTML(doc,currentDesign)}`;
   document.getElementById('emptyState').style.display='none';
   const lzPreview=document.getElementById('lzPreview');
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
+  applyMathInElement(lzPreview);
   document.getElementById('exportBtn').disabled=false;
   const eb=document.getElementById('exportBtnGen'); if(eb) eb.disabled=false;
   ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
@@ -1209,6 +1212,7 @@ function renderPreview(doc){
   const lzPreview=document.getElementById('lzPreview');
   lzPreview.style.display='block';
   lzPreview.innerHTML=html;
+  applyMathInElement(lzPreview);
   document.getElementById('exportBtn').disabled=false;
   ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
   // Show render toggle
