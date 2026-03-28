@@ -392,6 +392,37 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .theme-neon .lz-col-right{background:rgba(255,255,255,0.03);color:#d0d8f0}
 .theme-retro .lz-col-right{color:#2a1f0a}
 .theme-retro .lz-col-left{font-family:'DM Mono',monospace}
+/* Timeline */
+.lz-timeline{display:flex;flex-direction:column;margin:8px 0;padding:0 6px}
+.lz-timeline-entry{display:flex;gap:14px;align-items:flex-start}
+.lz-timeline-marker{display:flex;flex-direction:column;align-items:center;width:20px;flex-shrink:0}
+.lz-timeline-dot{width:12px;height:12px;border-radius:50%;border:2px solid;background:white;flex-shrink:0;margin-top:4px;z-index:1}
+.lz-timeline-line{width:2px;flex:1;background:rgba(0,0,0,0.12);margin-top:2px;min-height:16px}
+.lz-timeline-last .lz-timeline-line{display:none}
+.lz-timeline-content{padding-bottom:16px;flex:1;min-width:0}
+.lz-timeline-date{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:800;margin-bottom:2px}
+.lz-timeline-event{font-size:0.79rem;line-height:1.55;color:#1c1a18}
+.theme-dark .lz-timeline-event{color:#d0cdc8}.theme-dark .lz-timeline-line{background:rgba(255,255,255,0.12)}.theme-dark .lz-timeline-dot{background:#1e1e1e}
+.theme-neon .lz-timeline-event{color:#d0d8f0}.theme-neon .lz-timeline-line{background:rgba(0,255,204,0.15)}.theme-neon .lz-timeline-dot{background:#0a0a12}
+.theme-retro .lz-timeline-event{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-retro .lz-timeline-date{font-family:'DM Mono',monospace}
+.theme-editorial .lz-timeline-event{color:#3a3835}
+/* Quote */
+.lz-quote{margin:10px 6px;padding:14px 16px 14px 14px;border-left:3px solid;border-radius:0 8px 8px 0;background:rgba(0,0,0,0.02);display:flex;gap:10px;align-items:flex-start}
+.lz-quote-mark{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:0.85;flex-shrink:0;margin-top:2px;opacity:0.5}
+.lz-quote-text{font-size:0.82rem;line-height:1.65;font-style:italic;color:#1c1a18;flex:1;min-width:0}
+.lz-quote-author{font-size:0.7rem;margin-top:8px;font-weight:600;opacity:0.65;font-style:normal}
+.theme-dark .lz-quote{background:rgba(255,255,255,0.03)}.theme-dark .lz-quote-text{color:#d0cdc8}
+.theme-neon .lz-quote{background:rgba(255,255,255,0.02)}.theme-neon .lz-quote-text{color:#d0d8f0}
+.theme-retro .lz-quote-text{color:#2a1f0a;font-family:'DM Mono',monospace}
+.theme-editorial .lz-quote{background:#faf8f4}.theme-editorial .lz-quote-text{color:#3a3835}
+/* Formula box */
+.lz-formulas{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;padding:0 6px}
+.lz-formula-box{border:1.5px solid;border-radius:10px;padding:14px 20px;text-align:center;flex:1;min-width:160px;background:rgba(0,0,0,0.02)}
+.lz-formula-content{font-size:1.05rem;line-height:1.6}
+.lz-formula-label{font-size:0.65rem;margin-top:8px;opacity:0.65;font-weight:700;text-transform:uppercase;letter-spacing:0.08em}
+.theme-dark .lz-formula-box{background:rgba(255,255,255,0.03)}
+.theme-neon .lz-formula-box{background:rgba(255,255,255,0.02)}
+.theme-retro .lz-formula-content{font-family:'DM Mono',monospace}
 .history-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0;font-size:0.72rem;font-weight:600;color:var(--muted2);border-top:1px solid var(--border);margin-top:12px;transition:color 0.15s}
 .history-toggle:hover{color:var(--ink)}
 .history-badge{background:var(--accent-dim);color:var(--accent);border-radius:10px;padding:1px 7px;font-size:0.62rem;font-weight:700}
@@ -410,9 +441,9 @@ textarea::placeholder { color: #383532; font-style: italic; }
   /* Prevent sections from being cut mid-content */
   .lz-section { break-inside: avoid; page-break-inside: avoid; }
   .lz-section-title { break-after: avoid; page-break-after: avoid; }
-  .lz-highlights,.lz-highlight,.lz-def-grid,.lz-def-row,.lz-steps,.lz-step,.lz-cols,.lz-col-row,.lz-merksatz,.lz-callout { break-inside: avoid; page-break-inside: avoid; }
+  .lz-highlights,.lz-highlight,.lz-def-grid,.lz-def-row,.lz-steps,.lz-step,.lz-cols,.lz-col-row,.lz-merksatz,.lz-callout,.lz-timeline,.lz-timeline-entry,.lz-quote,.lz-formulas,.lz-formula-box { break-inside: avoid; page-break-inside: avoid; }
   .lz-sec-controls, .lz-add-section-btn, .render-toggle { display: none !important; }
-  /* Hide jsPDF page number — browser adds its own */
+  /* Hide hardcoded page number — browser adds its own */
   .lz-page-num { display: none !important; }
   .lz-editable:hover { background: transparent !important; outline: none !important; }
   .lz-editable:hover::after { display: none !important; }
@@ -981,6 +1012,9 @@ const previewStyles = `
 .theme-neon .lz-col-right{background:rgba(255,255,255,0.03);color:#d0d8f0}
 .theme-retro .lz-col-right{color:#2a1f0a}
 .theme-retro .lz-col-left{font-family:'DM Mono',monospace}
+.lz-timeline{display:flex;flex-direction:column;margin:8px 0;padding:0 6px}.lz-timeline-entry{display:flex;gap:14px;align-items:flex-start}.lz-timeline-marker{display:flex;flex-direction:column;align-items:center;width:20px;flex-shrink:0}.lz-timeline-dot{width:12px;height:12px;border-radius:50%;border:2px solid;background:white;flex-shrink:0;margin-top:4px;z-index:1}.lz-timeline-line{width:2px;flex:1;background:rgba(0,0,0,0.12);margin-top:2px;min-height:16px}.lz-timeline-last .lz-timeline-line{display:none}.lz-timeline-content{padding-bottom:16px;flex:1;min-width:0}.lz-timeline-date{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:800;margin-bottom:2px}.lz-timeline-event{font-size:0.79rem;line-height:1.55;color:#1c1a18}.theme-dark .lz-timeline-event{color:#d0cdc8}.theme-dark .lz-timeline-line{background:rgba(255,255,255,0.12)}.theme-dark .lz-timeline-dot{background:#1e1e1e}.theme-neon .lz-timeline-event{color:#d0d8f0}.theme-neon .lz-timeline-line{background:rgba(0,255,204,0.15)}.theme-neon .lz-timeline-dot{background:#0a0a12}.theme-retro .lz-timeline-event{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-retro .lz-timeline-date{font-family:'DM Mono',monospace}.theme-editorial .lz-timeline-event{color:#3a3835}
+.lz-quote{margin:10px 6px;padding:14px 16px 14px 14px;border-left:3px solid;border-radius:0 8px 8px 0;background:rgba(0,0,0,0.02);display:flex;gap:10px;align-items:flex-start}.lz-quote-mark{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:0.85;flex-shrink:0;margin-top:2px;opacity:0.5}.lz-quote-text{font-size:0.82rem;line-height:1.65;font-style:italic;color:#1c1a18;flex:1;min-width:0}.lz-quote-author{font-size:0.7rem;margin-top:8px;font-weight:600;opacity:0.65;font-style:normal}.theme-dark .lz-quote{background:rgba(255,255,255,0.03)}.theme-dark .lz-quote-text{color:#d0cdc8}.theme-neon .lz-quote{background:rgba(255,255,255,0.02)}.theme-neon .lz-quote-text{color:#d0d8f0}.theme-retro .lz-quote-text{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-editorial .lz-quote{background:#faf8f4}.theme-editorial .lz-quote-text{color:#3a3835}
+.lz-formulas{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;padding:0 6px}.lz-formula-box{border:1.5px solid;border-radius:10px;padding:14px 20px;text-align:center;flex:1;min-width:160px;background:rgba(0,0,0,0.02)}.lz-formula-content{font-size:1.05rem;line-height:1.6}.lz-formula-label{font-size:0.65rem;margin-top:8px;opacity:0.65;font-weight:700;text-transform:uppercase;letter-spacing:0.08em}.theme-dark .lz-formula-box{background:rgba(255,255,255,0.03)}.theme-neon .lz-formula-box{background:rgba(255,255,255,0.02)}.theme-retro .lz-formula-content{font-family:'DM Mono',monospace}
 .katex-display{display:block;text-align:center;margin:4px 0}
 .katex{font-size:1em}
 `;
@@ -1115,7 +1149,7 @@ function parseText(raw){
   const lines=String(raw||'').replace(/\r\n/g,'\n').replace(/\t/g,'  ').split('\n');
   const doc={title:'',subtitle:'',sections:[],merksatz:null};
   let currentSection=null,subtitleAlreadyUsed=false,lastTopItem=null,lastSubItem=null,lastCreatedSectionTitle='';
-  function newSection(title=''){currentSection={title,items:[],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[]};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
+  function newSection(title=''){currentSection={title,items:[],callout:null,table:null,defs:[],steps:[],highlights:[],cols:[],timeline:[],quotes:[],formulas:[]};doc.sections.push(currentSection);lastTopItem=null;lastSubItem=null;return currentSection;}
   function ensureSection(){if(!currentSection)return newSection('');return currentSection;}
   function pushTopItem(text,isLabel=false){const sec=ensureSection();const item={text,isLabel,sub:[]};sec.items.push(item);lastTopItem=item;lastSubItem=null;return item;}
   function pushSubItem(text,isLabel=false){if(!lastTopItem)return pushTopItem(text,isLabel);const sub={text,isLabel,children:[]};lastTopItem.sub.push(sub);lastSubItem=sub;return sub;}
@@ -1137,6 +1171,12 @@ function parseText(raw){
     if(/^=>\s+/.test(trimmed)){ensureSection();currentSection.steps.push(trimmed.replace(/^=>\s+/,'').trim());continue;}
     if(/^!!\s+/.test(trimmed)){const content=trimmed.replace(/^!!\s+/,'').trim();const m=content.match(/^(.*?)\s*(?:[—–-]|::)\s*(.*)/);ensureSection();currentSection.highlights.push(m?{value:m[1].trim(),label:m[2].trim()}:{value:content,label:''});continue;}
     if(/^<>\s+/.test(trimmed)){const content=trimmed.replace(/^<>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.cols)currentSection.cols=[];currentSection.cols.push(sep>-1?{left:content.slice(0,sep).trim(),right:content.slice(sep+2).trim()}:{left:content,right:''});continue;}
+    // Timeline: ~~ date :: event
+    if(/^~~\s+/.test(trimmed)){const content=trimmed.replace(/^~~\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.timeline)currentSection.timeline=[];currentSection.timeline.push(sep>-1?{date:content.slice(0,sep).trim(),event:content.slice(sep+2).trim()}:{date:'',event:content});continue;}
+    // Quote: "" text — author
+    if(/^""\s+/.test(trimmed)){const content=trimmed.replace(/^""\s+/,'').trim();const m=content.match(/^(.*?)\s*[—–-]{1,2}\s*([^—–]+)$/);ensureSection();if(!currentSection.quotes)currentSection.quotes=[];currentSection.quotes.push(m?{text:m[1].trim(),author:m[2].trim()}:{text:content,author:''});continue;}
+    // Formula box: @@ $formula$ — label
+    if(/^@@\s+/.test(trimmed)){const content=trimmed.replace(/^@@\s+/,'').trim();const m=content.match(/^(.*?)\s*[—–-]{1,2}\s*([^—–]+)$/);ensureSection();if(!currentSection.formulas)currentSection.formulas=[];currentSection.formulas.push(m?{formula:m[1].trim(),label:m[2].trim()}:{formula:content,label:''});continue;}
     const nm=line.match(/^(\s*)(\d+)\.\s+(.*)$/);
     if(nm){
       const indent=nm[1].length,text=nm[3].replace(/\*\*/g,'').trim();
@@ -1188,7 +1228,7 @@ function renderDocHTML(doc,design){
     const base=C[si%C.length];
     const c=styleOverrides?styleOverrides.sections[si%styleOverrides.sections.length]:base;
     // Skip completely empty sections (title only, no content) — AI sometimes generates these
-    const hasContent=!!(sec.items?.length||sec.defs?.length||sec.steps?.length||sec.highlights?.length||sec.cols?.length||sec.callout||sec.table?.length);
+    const hasContent=!!(sec.items?.length||sec.defs?.length||sec.steps?.length||sec.highlights?.length||sec.cols?.length||sec.callout||sec.table?.length||sec.timeline?.length||sec.quotes?.length||sec.formulas?.length);
     if(!hasContent&&sec.title&&!sec._userAdded)return;
     html+=`<div class="lz-section">`;
     if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span><span class="lz-sec-controls"><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},-1)" title="Nach oben">↑</button><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},1)" title="Nach unten">↓</button><button class="lz-sec-btn lz-sec-del" onclick="event.stopPropagation();deleteSection(${si})" title="Abschnitt löschen">✕</button></span></div>`;
@@ -1197,6 +1237,9 @@ function renderDocHTML(doc,design){
     if(sec.steps&&sec.steps.length){html+=`<div class="lz-steps">`;sec.steps.forEach((step,si)=>{html+=`<div class="lz-step"><div class="lz-step-num" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}">${si+1}</div><div class="lz-step-text">${renderMath(step)}</div></div>`;});html+=`</div>`;}
     if(sec.highlights&&sec.highlights.length){html+=`<div class="lz-highlights">`;sec.highlights.forEach(h=>{html+=`<div class="lz-highlight" style="border-color:${escapeAttr(c.dot)}"><div class="lz-highlight-value" style="color:${escapeAttr(c.title)}">${renderMath(h.value)}</div>${h.label?`<div class="lz-highlight-label">${renderMath(h.label)}</div>`:''}</div>`;});html+=`</div>`;}
     if(sec.cols&&sec.cols.length){html+=`<div class="lz-cols">`;sec.cols.forEach(col=>{html+=`<div class="lz-col-row"><div class="lz-col-left" style="border-color:${escapeAttr(c.dot)};color:${escapeAttr(c.title)}">${renderMath(col.left)}</div><div class="lz-col-right">${renderMath(col.right)}</div></div>`;});html+=`</div>`;}
+    if(sec.timeline&&sec.timeline.length){html+=`<div class="lz-timeline">`;sec.timeline.forEach((entry,ti)=>{const isLast=ti===sec.timeline.length-1;html+=`<div class="lz-timeline-entry${isLast?' lz-timeline-last':''}"><div class="lz-timeline-marker"><div class="lz-timeline-dot" style="border-color:${escapeAttr(c.dot)}"></div>${!isLast?`<div class="lz-timeline-line"></div>`:''}</div><div class="lz-timeline-content">${entry.date?`<div class="lz-timeline-date" style="color:${escapeAttr(c.title)}">${renderMath(entry.date)}</div>`:''}<div class="lz-timeline-event">${renderMath(entry.event)}</div></div></div>`;});html+=`</div>`;}
+    if(sec.quotes&&sec.quotes.length){sec.quotes.forEach(q=>{html+=`<div class="lz-quote" style="border-color:${escapeAttr(c.dot)}"><div class="lz-quote-mark" style="color:${escapeAttr(c.dot)}">"</div><div class="lz-quote-body" style="flex:1;min-width:0"><div class="lz-quote-text">${renderMath(q.text)}</div>${q.author?`<div class="lz-quote-author" style="color:${escapeAttr(c.title)}">— ${escapeText(q.author)}</div>`:''}</div></div>`;});}
+    if(sec.formulas&&sec.formulas.length){html+=`<div class="lz-formulas">`;sec.formulas.forEach(f=>{html+=`<div class="lz-formula-box" style="border-color:${escapeAttr(c.dot)};background:${escapeAttr(c.bg)}"><div class="lz-formula-content">${renderMath(f.formula)}</div>${f.label?`<div class="lz-formula-label" style="color:${escapeAttr(c.title)}">${escapeText(f.label)}</div>`:''}</div>`;});html+=`</div>`;}
     if(sec.table&&sec.table.length){
       html+=`<div style="padding:0 6px 8px"><table class="lz-table" style="border-color:${escapeAttr(c.dot)}">`;
       sec.table.forEach((row,ri)=>{
@@ -1937,6 +1980,9 @@ function docHasMath(doc){
     if((sec.steps||[]).some(has$))return true;
     if((sec.highlights||[]).some(h=>has$(h.value)||has$(h.label)))return true;
     if((sec.cols||[]).some(c=>has$(c.left)||has$(c.right)))return true;
+    if((sec.timeline||[]).some(e=>has$(e.date)||has$(e.event)))return true;
+    if((sec.quotes||[]).some(q=>has$(q.text)))return true;
+    if((sec.formulas||[]).some(f=>has$(f.formula)||has$(f.label)))return true;
     return false;
   });
 }
@@ -2034,7 +2080,7 @@ function exportPDF(){
   y+=4;
   const bodyFont = isRetro ? 'courier' : 'helvetica';
   parsedDoc.sections.forEach((sec,si)=>{
-    const secHasContent=(sec.items&&sec.items.length)||(sec.defs&&sec.defs.length)||(sec.steps&&sec.steps.length)||(sec.highlights&&sec.highlights.length)||(sec.cols&&sec.cols.length)||sec.callout||(sec.table&&sec.table.length);
+    const secHasContent=(sec.items&&sec.items.length)||(sec.defs&&sec.defs.length)||(sec.steps&&sec.steps.length)||(sec.highlights&&sec.highlights.length)||(sec.cols&&sec.cols.length)||sec.callout||(sec.table&&sec.table.length)||(sec.timeline&&sec.timeline.length)||(sec.quotes&&sec.quotes.length)||(sec.formulas&&sec.formulas.length);
     if(!secHasContent)return;
     const c=C[si%C.length];
     const dotRgb=hexToRgbSafe(c.dot),titleRgb=hexToRgbSafe(c.title),secBgRgb=hexToRgbSafe(c.bg);
@@ -2162,6 +2208,44 @@ function exportPDF(){
       const cLines=pdf.splitTextToSize(sec.callout,cw-10),boxH=Math.max(8,cLines.length*5+3);
       checkPage(boxH+2);setFill(secBgRgb);pdf.rect(margin,y,cw,boxH,'F');setFill(dotRgb);pdf.rect(margin,y,2,boxH,'F');
       pdf.setFontSize(8);pdf.setFont('helvetica','bolditalic');setRGB(titleRgb);pdf.text(cLines,margin+6,y+5.5);y+=boxH+2;
+    }
+    // Timeline — plain text in jsPDF
+    if(sec.timeline&&sec.timeline.length){
+      sec.timeline.forEach(entry=>{
+        const label=entry.date?`${stripMath(entry.date)}: ${stripMath(entry.event)}`:stripMath(entry.event);
+        const lines=pdf.splitTextToSize(label,cw-10);
+        checkPage(lines.length*4.5+3);
+        setFill(dotRgb);pdf.circle(margin+2,y+2,1.5,'F');
+        pdf.setFontSize(8);pdf.setFont(bodyFont,'normal');setRGB(isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24]);
+        if(entry.date){pdf.setFont(bodyFont,'bold');setRGB(titleRgb);const dl=pdf.splitTextToSize(stripMath(entry.date),30);pdf.text(dl,margin+6,y+3.5);pdf.setFont(bodyFont,'normal');setRGB(isDark?[208,205,200]:[28,26,24]);const el=pdf.splitTextToSize(stripMath(entry.event),cw-42);pdf.text(el,margin+38,y+3.5);y+=Math.max(dl.length,el.length)*4.5+2;}
+        else{pdf.text(lines,margin+6,y+3.5);y+=lines.length*4.5+2;}
+      });
+      y+=2;
+    }
+    // Quotes — plain text in jsPDF
+    if(sec.quotes&&sec.quotes.length){
+      sec.quotes.forEach(q=>{
+        const lines=pdf.splitTextToSize(stripMath(q.text),cw-10);
+        const boxH=Math.max(10,lines.length*4.5+(q.author?8:0)+6);
+        checkPage(boxH+2);setFill(secBgRgb);pdf.rect(margin,y,cw,boxH,'F');setFill(dotRgb);pdf.rect(margin,y,2,boxH,'F');
+        pdf.setFontSize(8);pdf.setFont(bodyFont,'italic');setRGB(isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24]);
+        pdf.text(lines,margin+6,y+5);
+        if(q.author){pdf.setFont(bodyFont,'bold');setRGB(titleRgb);pdf.text('— '+q.author,margin+6,y+boxH-4);}
+        y+=boxH+2;
+      });
+    }
+    // Formula boxes — plain text in jsPDF
+    if(sec.formulas&&sec.formulas.length){
+      sec.formulas.forEach(f=>{
+        const fl=pdf.splitTextToSize(stripMath(f.formula),cw-12);
+        const boxH=Math.max(12,fl.length*5+(f.label?6:0)+6);
+        checkPage(boxH+2);setFill(secBgRgb);pdf.roundedRect(margin,y,cw,boxH,2,2,'F');
+        setFill(dotRgb);pdf.setDrawColor(...dotRgb);pdf.setLineWidth(0.5);pdf.roundedRect(margin,y,cw,boxH,2,2,'S');
+        pdf.setFontSize(9);pdf.setFont(bodyFont,'bold');setRGB(titleRgb);
+        const textY=y+(boxH-fl.length*5)/2+4;pdf.text(fl,margin+cw/2,textY,{align:'center'});
+        if(f.label){pdf.setFontSize(7);pdf.setFont(bodyFont,'normal');setRGB(isDark?[154,149,144]:[106,100,96]);pdf.text(f.label.toUpperCase(),margin+cw/2,y+boxH-3,{align:'center'});}
+        y+=boxH+3;
+      });
     }
     sec.items.forEach(item=>{
       const textColor=isDark?[208,205,200]:isRetro?[42,31,10]:[28,26,24];
