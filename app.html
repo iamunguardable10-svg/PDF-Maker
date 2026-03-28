@@ -477,6 +477,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-export" id="exportBtn" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
           <button class="btn" id="exportImgBtn" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
+        <div id="mathHint" style="display:none;font-size:0.67rem;color:var(--muted);text-align:center;padding:3px 0">📐 Formeln erkannt — PDF öffnet Druckdialog</div>
         <button class="btn" onclick="clearInput()" style="background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:7px">✕ Eingabe leeren</button>
       </div>
 
@@ -618,6 +619,7 @@ textarea::placeholder { color: #383532; font-style: italic; }
           <button class="btn btn-export" id="exportBtnGen" onclick="exportPDF()" disabled style="flex:1">⬇ PDF</button>
           <button class="btn" id="exportImgBtnGen" onclick="doExportImage(false)" disabled style="flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:0.78rem">⬡ Als Bild</button>
         </div>
+        <div id="mathHintGen" style="display:none;font-size:0.67rem;color:var(--muted);text-align:center;padding:3px 0">📐 Formeln erkannt — PDF öffnet Druckdialog</div>
       </div>
       <div class="status-msg" id="status"></div>
     </div>
@@ -1245,6 +1247,8 @@ function renderPreview(doc){
   applyMathInElement(lzPreview);
   document.getElementById('exportBtn').disabled=false;
   ['exportImgBtn','exportImgBtnGen'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
+  const hasMath=docHasMath(doc);
+  ['mathHint','mathHintGen'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=hasMath?'block':'none';});
   // Show render toggle
   const toggle=document.getElementById('renderToggle');
   if(toggle) toggle.classList.add('visible');
@@ -1855,6 +1859,21 @@ async function doExportImage(transparent, popupId){
   }
 }
 
+function docHasMath(doc){
+  if(!doc||doc._reportMode)return false;
+  const has$=s=>s&&/\$/.test(String(s));
+  if(has$(doc.title)||has$(doc.subtitle)||has$(doc.merksatz))return true;
+  return(doc.sections||[]).some(sec=>{
+    if(has$(sec.title)||has$(sec.callout))return true;
+    if((sec.items||[]).some(it=>has$(it.text)||(it.sub||[]).some(s=>has$(s.text)||(s.children||[]).some(ch=>has$(ch)))))return true;
+    if((sec.defs||[]).some(d=>has$(d.term)||has$(d.def)))return true;
+    if((sec.steps||[]).some(has$))return true;
+    if((sec.highlights||[]).some(h=>has$(h.value)||has$(h.label)))return true;
+    if((sec.cols||[]).some(c=>has$(c.left)||has$(c.right)))return true;
+    return false;
+  });
+}
+
 function exportPDF(){
   if(!parsedDoc)return;
   // If report mode, use print-based export for accurate rendering
@@ -1867,6 +1886,24 @@ function exportPDF(){
 </style>${renderReportHTML(parsedDoc,currentDesign)}`;
     printArea.style.display='block';
     setTimeout(()=>{ window.print(); setTimeout(()=>{printArea.style.display='none';},500); },100);
+    setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
+    return;
+  }
+  // If document contains math formulas, use browser print for proper KaTeX rendering
+  if(docHasMath(parsedDoc)){
+    const printArea=document.getElementById('printArea');
+    const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
+    const bg=designBgMap[currentDesign.id]||'#ffffff';
+    printArea.style.background=bg;
+    printArea.innerHTML=`<style>${previewStyles}
+.lz-page{max-width:680px;border-radius:0;box-shadow:none;animation:none;margin:0 auto}
+.lz-editable:hover{background:transparent!important;outline:none!important}
+.lz-editable:hover::after{display:none!important}
+.lz-sec-controls,.lz-add-section-btn{display:none!important}
+</style>${renderDocHTML(parsedDoc,currentDesign)}`;
+    applyMathInElement(printArea);
+    printArea.style.display='block';
+    setTimeout(()=>{window.print();setTimeout(()=>{printArea.style.display='none';printArea.style.background='';},500);},200);
     setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
     return;
   }
