@@ -2010,12 +2010,63 @@ function showPdfModal(){
 function closePdfModal(){
   document.getElementById('pdfExportModal').style.display='none';
 }
+// Returns smart page break Y positions in DOM pixels relative to pageEl top.
+// Avoids splitting atomic elements; prefers breaking at section boundaries.
+function computePageBreaks(pageEl, A4H){
+  const cRect=pageEl.getBoundingClientRect();
+  const totalH=cRect.height;
+  if(totalH<=A4H)return[];
+
+  // Atomic elements that must not be split across pages
+  const atomEls=pageEl.querySelectorAll(
+    '.lz-merksatz,.lz-callout,.lz-def-row,.lz-step,.lz-col-row,.lz-highlights,.lz-section-title,.lz-item'
+  );
+  const forbidden=[];
+  atomEls.forEach(el=>{
+    const r=el.getBoundingClientRect();
+    const top=r.top-cRect.top, bot=r.bottom-cRect.top;
+    if(bot>0&&top<totalH) forbidden.push([top,bot]);
+  });
+  forbidden.sort((a,b)=>a[0]-b[0]);
+
+  // Preferred break points: start of each section block (except first)
+  const sectionEls=pageEl.querySelectorAll('.lz-section');
+  const preferred=[];
+  Array.from(sectionEls).forEach((el,i)=>{
+    if(i===0)return;
+    const top=el.getBoundingClientRect().top-cRect.top;
+    if(top>0&&top<totalH) preferred.push(top);
+  });
+
+  const breaks=[];
+  let cursor=0;
+  while(cursor+A4H<totalH){
+    const ideal=cursor+A4H;
+    // Prefer the section boundary closest to (but not past) the ideal cut
+    const near=preferred.filter(p=>p>cursor+A4H*0.25&&p<=ideal).sort((a,b)=>b-a);
+    let bp=near.length>0?near[0]:ideal;
+
+    // If bp lands inside an atomic element, snap to its top (or bottom if top is too close to cursor)
+    const hit=forbidden.find(([t,b])=>t<bp&&b>bp);
+    if(hit){
+      const before=hit[0];
+      bp=before>cursor+30?before:hit[1];
+      if(bp>cursor+A4H*2)bp=ideal; // fallback: element taller than a page, just cut
+    }
+
+    bp=Math.round(Math.max(bp,cursor+50)); // always advance
+    breaks.push(bp);
+    cursor=bp;
+  }
+  return breaks;
+}
+
 async function exportPdfBrowserPrint(){
   closePdfModal();
   if(!parsedDoc)return;
   if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){setStatus('Export-Bibliotheken nicht geladen','err');return;}
   setStatus('⏳ PDF wird erstellt…','');
-  const A4W=794,A4H=1123;
+  const A4W=794,A4H=1123,scale=2;
   const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
   const bgColor=designBgMap[currentDesign.id]||'#ffffff';
   const htmlContent=parsedDoc._reportMode?renderReportHTML(parsedDoc,currentDesign):renderDocHTML(parsedDoc,currentDesign);
@@ -2032,10 +2083,14 @@ async function exportPdfBrowserPrint(){
   await document.fonts.ready;
   await new Promise(r=>setTimeout(r,80));
   if(typeof katex!=='undefined')applyMathInElement(wrapper);
-  await new Promise(r=>setTimeout(r,60));// let KaTeX finish rendering
+  await new Promise(r=>setTimeout(r,60));
   const target=wrapper.querySelector('.lz-page')||wrapper;
+
+  // Compute smart breaks from DOM layout before html2canvas clones the tree
+  const domBreaks=computePageBreaks(target,A4H);
+  const canvasBreaks=domBreaks.map(b=>Math.round(b*scale)); // scale to canvas pixels
+
   try{
-    const scale=2;
     const canvas=await html2canvas(target,{
       scale,useCORS:true,allowTaint:false,backgroundColor:bgColor,logging:false,width:A4W,
       onclone:(clonedDoc)=>{
@@ -2049,24 +2104,23 @@ async function exportPdfBrowserPrint(){
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({unit:'mm',format:'a4',compress:true});
     const pageW=210,pageH=297;
-    const mmPerPx=pageW/canvas.width;
-    const contentH=canvas.height*mmPerPx;
-    if(contentH<=pageH+1){
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,Math.min(contentH,pageH));
-    }else{
-      const pageHpx=Math.floor(pageH/mmPerPx);
-      let offsetY=0,first=true;
-      while(offsetY<canvas.height){
-        const sliceH=Math.min(pageHpx,canvas.height-offsetY);
-        const pc=document.createElement('canvas');
-        pc.width=canvas.width;pc.height=pageHpx;
-        const ctx=pc.getContext('2d');
-        ctx.fillStyle=bgColor;ctx.fillRect(0,0,pc.width,pc.height);
-        ctx.drawImage(canvas,0,offsetY,canvas.width,sliceH,0,0,canvas.width,sliceH);
-        if(!first)pdf.addPage();
-        pdf.addImage(pc.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,pageH);
-        offsetY+=pageHpx;first=false;
-      }
+    const pageHpx=A4H*scale; // canvas px per A4 page
+
+    const allBreaks=[0,...canvasBreaks,canvas.height];
+    let first=true;
+    for(let i=0;i<allBreaks.length-1;i++){
+      const sliceTop=allBreaks[i];
+      const sliceH=Math.min(allBreaks[i+1]-sliceTop,canvas.height-sliceTop);
+      if(sliceH<=0)continue;
+      const pc=document.createElement('canvas');
+      pc.width=canvas.width;pc.height=pageHpx;
+      const ctx=pc.getContext('2d');
+      ctx.fillStyle=bgColor;
+      ctx.fillRect(0,0,pc.width,pc.height); // fill remainder with design bg
+      ctx.drawImage(canvas,0,sliceTop,canvas.width,sliceH,0,0,canvas.width,sliceH);
+      if(!first)pdf.addPage();
+      pdf.addImage(pc.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,pageH);
+      first=false;
     }
     const title=(parsedDoc.title||'notefly').replace(/[^a-zA-Z0-9äöüÄÖÜß\-_ ]/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'notefly';
     pdf.save(`${title}.pdf`);
