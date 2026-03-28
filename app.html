@@ -513,14 +513,14 @@ textarea::placeholder { color: #383532; font-style: italic; }
     <div class="pdf-modal-grid">
       <div class="pdf-modal-option pdf-option-rec" onclick="exportPdfBrowserPrint()">
         <div class="pdf-modal-badge">⭐ Empfohlen</div>
-        <div class="pdf-modal-icon">🖨</div>
-        <div class="pdf-modal-title">Browser-Druck</div>
-        <div class="pdf-modal-desc">Pixel-perfekte Ausgabe über den Druckdialog — sieht exakt wie die Vorschau aus</div>
+        <div class="pdf-modal-icon">✦</div>
+        <div class="pdf-modal-title">Hochqualität PDF</div>
+        <div class="pdf-modal-desc">Direkter Download — keine Browser-Ränder, kein Footer, pixel-perfekt</div>
         <ul class="pdf-modal-list">
           <li class="ok">✓ Echte Schriften (Syne, DM Sans)</li>
           <li class="ok">✓ Mathe-Formeln vollständig gerendert</li>
           <li class="ok">✓ Farben &amp; Design 1:1 wie Vorschau</li>
-          <li class="ok">✓ Vektorgrafiken — beliebig skalierbar</li>
+          <li class="ok">✓ Null Ränder — echtes Full-Bleed A4</li>
         </ul>
         <button class="pdf-modal-btn pdf-modal-btn-primary">Als PDF speichern →</button>
       </div>
@@ -2010,33 +2010,71 @@ function showPdfModal(){
 function closePdfModal(){
   document.getElementById('pdfExportModal').style.display='none';
 }
-function exportPdfBrowserPrint(){
+async function exportPdfBrowserPrint(){
   closePdfModal();
   if(!parsedDoc)return;
-  const printArea=document.getElementById('printArea');
-  if(parsedDoc._reportMode){
-    printArea.innerHTML=`<style>${previewStyles}
-.lz-page{max-width:100%;border-radius:0;box-shadow:none;animation:none}
-.lz-editable:hover{background:transparent!important;outline:none!important}
-.lz-editable:hover::after{display:none!important}
-</style>${renderReportHTML(parsedDoc,currentDesign)}`;
-  }else{
-    const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
-    const bg=designBgMap[currentDesign.id]||'#ffffff';
-    printArea.style.background=bg;
-    printArea.innerHTML=`<style>${previewStyles}
-.lz-page{width:100%;max-width:100%;border-radius:0;box-shadow:none;animation:none}
+  if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){setStatus('Export-Bibliotheken nicht geladen','err');return;}
+  setStatus('⏳ PDF wird erstellt…','');
+  const A4W=794,A4H=1123;
+  const designBgMap={dark:'#141414',neon:'#0a0a12',retro:'#faf7f2',editorial:'#faf9f6',pastell:'#ffffff',minimal:'#ffffff',lernzettel:'#ffffff'};
+  const bgColor=designBgMap[currentDesign.id]||'#ffffff';
+  const htmlContent=parsedDoc._reportMode?renderReportHTML(parsedDoc,currentDesign):renderDocHTML(parsedDoc,currentDesign);
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText=`position:fixed;left:-9999px;top:0;width:${A4W}px;z-index:-9999;overflow:visible;`;
+  wrapper.innerHTML=`<style>${previewStyles}
+.lz-page{width:${A4W}px!important;max-width:${A4W}px!important;border-radius:0!important;box-shadow:none!important;animation:none!important;box-sizing:border-box!important;}
 .lz-editable:hover{background:transparent!important;outline:none!important}
 .lz-editable:hover::after{display:none!important}
 .lz-sec-controls,.lz-add-section-btn{display:none!important}
-</style>${renderDocHTML(parsedDoc,currentDesign)}`;
-    applyMathInElement(printArea);
+.lz-page-num{display:none!important}
+</style>${htmlContent}`;
+  document.body.appendChild(wrapper);
+  await document.fonts.ready;
+  await new Promise(r=>setTimeout(r,80));
+  if(typeof katex!=='undefined')applyMathInElement(wrapper);
+  await new Promise(r=>setTimeout(r,60));// let KaTeX finish rendering
+  const target=wrapper.querySelector('.lz-page')||wrapper;
+  try{
+    const scale=2;
+    const canvas=await html2canvas(target,{
+      scale,useCORS:true,allowTaint:false,backgroundColor:bgColor,logging:false,width:A4W,
+      onclone:(clonedDoc)=>{
+        clonedDoc.querySelectorAll('.lz-sec-controls,.lz-add-section-btn').forEach(el=>el.remove());
+        const s=clonedDoc.createElement('style');
+        s.textContent='.lz-editable:hover{background:transparent!important}.lz-sec-controls{display:none!important}.lz-add-section-btn{display:none!important}';
+        clonedDoc.head.appendChild(s);
+      }
+    });
+    document.body.removeChild(wrapper);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'mm',format:'a4',compress:true});
+    const pageW=210,pageH=297;
+    const mmPerPx=pageW/canvas.width;
+    const contentH=canvas.height*mmPerPx;
+    if(contentH<=pageH+1){
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,Math.min(contentH,pageH));
+    }else{
+      const pageHpx=Math.floor(pageH/mmPerPx);
+      let offsetY=0,first=true;
+      while(offsetY<canvas.height){
+        const sliceH=Math.min(pageHpx,canvas.height-offsetY);
+        const pc=document.createElement('canvas');
+        pc.width=canvas.width;pc.height=pageHpx;
+        const ctx=pc.getContext('2d');
+        ctx.fillStyle=bgColor;ctx.fillRect(0,0,pc.width,pc.height);
+        ctx.drawImage(canvas,0,offsetY,canvas.width,sliceH,0,0,canvas.width,sliceH);
+        if(!first)pdf.addPage();
+        pdf.addImage(pc.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,pageH);
+        offsetY+=pageHpx;first=false;
+      }
+    }
+    const title=(parsedDoc.title||'notefly').replace(/[^a-zA-Z0-9äöüÄÖÜß\-_ ]/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'notefly';
+    pdf.save(`${title}.pdf`);
+    setStatus('✓ PDF heruntergeladen!','ok');
+  }catch(e){
+    if(document.body.contains(wrapper))document.body.removeChild(wrapper);
+    setStatus('Fehler beim PDF-Export: '+e.message,'err');
   }
-  printArea.style.display='block';
-  void printArea.offsetHeight; // force synchronous reflow — keeps user gesture context for window.print()
-  window.print();
-  setTimeout(()=>{printArea.style.display='none';printArea.style.background='';},300);
-  setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
 }
 function exportPdfDirect(){closePdfModal();exportPDF();}
 
