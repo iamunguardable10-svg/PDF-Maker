@@ -240,8 +240,8 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;line-height:1.4;padding:2px 8px;margin-top:14px;margin-bottom:4px;opacity:0.65}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;line-height:1.4;padding:2px 8px 2px 26px;margin-top:10px;margin-bottom:3px;opacity:0.6}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
@@ -957,8 +957,8 @@ const previewStyles = `
 .lz-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .lz-sub-bullet{display:flex;align-items:flex-start;gap:8px;font-size:0.76rem;line-height:1.5;padding-left:18px;color:#5a5755;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .lz-subdot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;opacity:0.65}
-.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;line-height:1.55;padding:3px 8px;margin-top:12px;margin-bottom:2px;border-left:2.5px solid currentColor;border-radius:0 3px 3px 0}
-.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;line-height:1.5;padding:2px 8px 2px 26px;margin-top:8px;margin-bottom:1px;border-left:2px solid currentColor;border-radius:0 3px 3px 0}
+.lz-label-bullet{font-family:'Syne',sans-serif;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;line-height:1.4;padding:2px 8px;margin-top:14px;margin-bottom:4px;opacity:0.65}
+.lz-sub-label{font-family:'Syne',sans-serif;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;line-height:1.4;padding:2px 8px 2px 26px;margin-top:10px;margin-bottom:3px;opacity:0.6}
 .lz-sub-sub-bullet{display:flex;align-items:flex-start;gap:7px;font-size:0.73rem;line-height:1.5;padding-left:34px;color:#6a6460}
 .lz-callout{margin:10px 0;padding:10px 14px;border-radius:6px;font-size:0.77rem;font-weight:600;font-style:italic;display:flex;align-items:flex-start;gap:8px;border-left:3px solid}
 .lz-callout::before{content:'■';font-size:0.5rem;margin-top:4px;flex-shrink:0}
@@ -1273,7 +1273,7 @@ function renderDocHTML(doc,design){
           // Skip orphaned trailing labels (no non-label items follow)
           const hasContentAfter = sec.items.slice(itemIdx+1).some(it=>!it.isLabel);
           if(!hasContentAfter) return; // skip this orphaned label
-          html+=`<div class="lz-label-bullet" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
+          html+=`<div class="lz-label-bullet"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
         } else if(nb&&isSentence(item.text)){
           html+=`<div class="lz-notebook-text"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(item.text)}</span></div>`;
         } else {
@@ -1282,7 +1282,7 @@ function renderDocHTML(doc,design){
         if(item.sub&&item.sub.length){
           item.sub.forEach(s=>{
             if(s.isLabel){
-              html+=`<div class="lz-sub-label" style="color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
+              html+=`<div class="lz-sub-label"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
             } else if(nb&&isSentence(s.text)){
               html+=`<div class="lz-notebook-sub"><span class="lz-editable" onclick="editField(this,'bullet',${si},null)">${renderMath(s.text)}</span></div>`;
             } else {
