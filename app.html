@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script>window.addEventListener('load',function(){if(typeof katex!=='undefined'&&window.parsedDoc){if(window.parsedDoc._reportMode){if(typeof renderReportPreview==='function')renderReportPreview(window.parsedDoc);}else{if(typeof renderPreview==='function')renderPreview(window.parsedDoc);}}});</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -909,6 +910,8 @@ const previewStyles = `
 .theme-neon .lz-col-right{background:rgba(255,255,255,0.03);color:#d0d8f0}
 .theme-retro .lz-col-right{color:#2a1f0a}
 .theme-retro .lz-col-left{font-family:'DM Mono',monospace}
+.katex-display{display:block;text-align:center;margin:4px 0}
+.katex{font-size:1em}
 `;
 
 // ── DESIGNS ──────────────────────────────────────────────────
@@ -1884,6 +1887,8 @@ function exportPDF(){
   y+=4;
   const bodyFont = isRetro ? 'courier' : 'helvetica';
   parsedDoc.sections.forEach((sec,si)=>{
+    const secHasContent=(sec.items&&sec.items.length)||(sec.defs&&sec.defs.length)||(sec.steps&&sec.steps.length)||(sec.highlights&&sec.highlights.length)||(sec.cols&&sec.cols.length)||sec.callout||(sec.table&&sec.table.length);
+    if(!secHasContent)return;
     const c=C[si%C.length];
     const dotRgb=hexToRgbSafe(c.dot),titleRgb=hexToRgbSafe(c.title),secBgRgb=hexToRgbSafe(c.bg);
     checkPage(16);

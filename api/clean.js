@@ -50,33 +50,38 @@ ${paramBlock}
 Diese Parameter sind verbindliche Stil- und Inhaltsvorgaben. Halte sie ein, aber verletze NIEMALS das Ausgabeformat.
 ` : ''}
 
-ZIELFORMAT (zeigt alle erlaubten Elemente — wähle passende für das Thema):
-# Präziser Titel
+ZIELFORMAT (wähle pro Abschnitt das thematisch passende Format — Reihenfolge ist frei):
 
-## Optionaler Untertitel
-
-1. Abschnitt mit Definitionen
->> Fachbegriff :: Präzise Erklärung in einem Satz
+Format A — Definitionen (für Fachbegriffe):
+1. Themenspezifischer Abschnittsname
+>> Begriff :: Präzise Erklärung in einem Satz
 >> Weiterer Begriff :: Erklärung
 
-2. Abschnitt mit Ablauf
+Format B — Ablauf/Prozess (für Schrittfolgen, Algorithmen):
+2. Themenspezifischer Abschnittsname
 => Erster konkreter Schritt
 => Zweiter konkreter Schritt
-=> Dritter konkreter Schritt
 
-3. Abschnitt mit Kennzahlen
+Format C — Kennzahlen/Fakten (für Jahreszahlen, Werte, Formeln):
+3. Themenspezifischer Abschnittsname
 !! 1905 — Einsteins Relativitätstheorie
 !! $E = mc^2$ — Masse-Energie-Äquivalenz
-- Zusätzlicher Bulletpoint mit Erklärung
 
-4. Abschnitt mit Vergleich
-<> Vorteil A :: Nachteil A
-<> Vorteil B :: Nachteil B
+Format D — Vergleich/Gegenüberstellung:
+4. Themenspezifischer Abschnittsname
+<> Merkmal A :: Merkmal B
+<> Aspekt X :: Aspekt Y
 
-5. Abschnitt mit Bulletpoints
+Format E — Bulletpoints (für Aufzählungen, Erklärungen):
+5. Themenspezifischer Abschnittsname
 - Inhaltspunkt auf Ebene 1
   - Unterpunkt auf Ebene 2
     - Detailpunkt auf Ebene 3
+
+Format F — Tabelle (für strukturierte Vergleiche):
+6. Themenspezifischer Abschnittsname
+| Spalte 1 | Spalte 2 |
+| Wert A | Wert B |
 
 > Merksatz: Genau ein prägnanter, fachlich sinnvoller Kernsatz
 
@@ -93,6 +98,8 @@ PFLICHTREGELN:
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 - Keine Emojis, keine Floskeln, keine erfundenen Fakten.
 - NIEMALS einen Abschnitt ohne Inhalt generieren. Jeder nummerierte Abschnitt muss mindestens 2 Bulletpoints oder ein visuelles Element enthalten.
+- PFLICHT: Mindestens 3 verschiedene Formate (A–F) pro Lernzettel verwenden — kein Lernzettel darf nur Bulletpoints enthalten.
+- PFLICHT: Wähle Formate nach dem Thema, nicht nach der Reihenfolge im ZIELFORMAT.
 
 VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlich passt:
 - ">> Begriff :: Erklärung" — für Fachbegriffe (mehrere hintereinander, ersetzen Bullets komplett im Abschnitt)
@@ -105,6 +112,11 @@ INHALTLICHE PRIORITÄT:
 - Erkläre das Thema fachlich korrekt, lernorientiert und konkret.
 - Nutze die Parameter, um Detailgrad, Sprache, Niveau, Vorwissen und Formatierung zu steuern.
 - Wenn Parameter und Format in Konflikt geraten, gilt immer das Ausgabeformat zuerst.
+- Verwende die visuellen Elemente so:
+  • ">>" für Definitionen/Fachbegriffe: >> Osmose :: Passiver Transport von Wasser durch semipermeable Membran
+  • "=>" für Prozessschritte: => Primer anlagern, => DNA-Polymerase synthetisiert neuen Strang
+  • "!!" für Zahlen/Daten/Formeln: !! 1953 — Watson & Crick entdecken Doppelhelix | !! $F = ma$ — Zweites Newtonsches Gesetz
+  • "<>" für Gegenüberstellungen: <> Mitose :: Zellteilung für Wachstum :: Meiose :: Zellteilung für Fortpflanzung
 
 UNTERSTÜTZTE SYNTAX (optional, nur wenn sinnvoll):
 - "### Label" als Zwischenüberschrift innerhalb eines Abschnitts (NUR wenn Inhalt folgt!)
