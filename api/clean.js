@@ -66,6 +66,7 @@ Format C — Kennzahlen/Fakten (für Jahreszahlen, Werte, Formeln):
 3. Themenspezifischer Abschnittsname
 !! 1905 — Einsteins Relativitätstheorie
 !! $E = mc^2$ — Masse-Energie-Äquivalenz
+!! $F = m \cdot a$ — Newtonsches Gesetz
 
 Format D — Vergleich/Gegenüberstellung:
 4. Themenspezifischer Abschnittsname
@@ -106,6 +107,13 @@ VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlic
 - "=> Schritt" — für Abläufe, Algorithmen, Prozesse (min. 2, max. 6 Schritte, ersetzen Bullets im Abschnitt)
 - "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernformeln (max. 4 pro Abschnitt, können vor Bullets stehen)
 - "<> Links :: Rechts" — für Vergleiche, Pro/Contra (mehrere hintereinander, ersetzen Bullets im Abschnitt)
+- WICHTIG für "<>": Immer dann verwenden wenn zwei Dinge verglichen, gegenübergestellt oder mit "und/&/vs./oder" in einem Bullet kombiniert werden. Beispiele die IMMER als <> geschrieben werden müssen:
+    × FALSCH:  - Schriftliche Tests & Mündliche Tests
+    ✓ RICHTIG: <> Schriftliche Tests :: Mündliche Tests
+    × FALSCH:  - Vor- und Nachteile
+    ✓ RICHTIG: <> Vorteile :: Nachteile
+    × FALSCH:  - Klassische vs. Quantenmechanik
+    ✓ RICHTIG: <> Klassische Mechanik :: Quantenmechanik
 - "$Formel$" inline oder "$$Formel$$" als Block — nur für echte Mathematik, in Bullets oder !! einbetten
 
 INHALTLICHE PRIORITÄT:
@@ -183,6 +191,11 @@ PFLICHTREGELN:
 - "=> Schritt" — wenn der Text einen Ablauf oder Prozess beschreibt (min. 2, max. 6, ersetzen Bullets im Abschnitt)
 - "!! Wert — Beschriftung" — für Jahreszahlen, Kennzahlen, Kernbegriffe im Text (max. 4 pro Abschnitt)
 - "<> Links :: Rechts" — wenn der Text Vergleiche oder Pro/Contra enthält (mehrere hintereinander möglich)
+- WICHTIG für "<>": Immer dann verwenden wenn zwei Dinge verglichen, gegenübergestellt oder mit "und/&/vs./oder" kombiniert werden. Beispiele:
+    × FALSCH:  - Schriftliche Tests & Mündliche Tests
+    ✓ RICHTIG: <> Schriftliche Tests :: Mündliche Tests
+    × FALSCH:  - Vor- und Nachteile
+    ✓ RICHTIG: <> Vorteile :: Nachteile
 - "$Formel$" inline oder "$$Formel$$" als Block — wenn der Text mathematische Ausdrücke enthält
 - Pro Abschnitt höchstens einen dieser Typen. Kein ### ohne nachfolgenden Inhalt.
 
