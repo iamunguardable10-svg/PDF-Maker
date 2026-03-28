@@ -1203,9 +1203,17 @@ function parseText(raw){
       currentSection.table.push(cells);
       continue;
     }
-    const bm=line.match(/^(\s*)[-•]\s+(.*)$/);
+    const bm=line.match(/^(\s*)[-•*]\s+(.*)$/);
     if(bm){
-      const indent=bm[1].length,text=bm[2].trim(),isLabel=/:$/.test(text);
+      const indent=bm[1].length;const text=bm[2].trim();const isLabel=/:$/.test(text);
+      // Re-route if AI wrapped a visual element in a bullet
+      if(/^>>\s+/.test(text)){const content=text.replace(/^>>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();currentSection.defs.push(sep>-1?{term:content.slice(0,sep).trim(),def:content.slice(sep+2).trim()}:{term:content,def:''});continue;}
+      if(/^=>\s+/.test(text)){ensureSection();currentSection.steps.push(text.replace(/^=>\s+/,'').trim());continue;}
+      if(/^!!\s+/.test(text)){const content=text.replace(/^!!\s+/,'').trim();const m=content.match(/^(.*?)\s*(?:[—–-]|::)\s*(.*)/);ensureSection();currentSection.highlights.push(m?{value:m[1].trim(),label:m[2].trim()}:{value:content,label:''});continue;}
+      if(/^<>\s+/.test(text)){const content=text.replace(/^<>\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.cols)currentSection.cols=[];currentSection.cols.push(sep>-1?{left:content.slice(0,sep).trim(),right:content.slice(sep+2).trim()}:{left:content,right:''});continue;}
+      if(/^~~\s+/.test(text)){const content=text.replace(/^~~\s+/,'').trim();const sep=content.indexOf('::');ensureSection();if(!currentSection.timeline)currentSection.timeline=[];currentSection.timeline.push(sep>-1?{date:content.slice(0,sep).trim(),event:content.slice(sep+2).trim()}:{date:'',event:content});continue;}
+      if(/^""\s+/.test(text)){const content=text.replace(/^""\s+/,'').trim();const m=content.match(/^(.*?)\s*[—–-]{1,2}\s*([^—–]+)$/);ensureSection();if(!currentSection.quotes)currentSection.quotes=[];currentSection.quotes.push(m?{text:m[1].trim(),author:m[2].trim()}:{text:content,author:''});continue;}
+      if(/^@@\s+/.test(text)){const content=text.replace(/^@@\s+/,'').trim();const m=content.match(/^(.*?)\s*[—–-]{1,2}\s*([^—–]+)$/);ensureSection();if(!currentSection.formulas)currentSection.formulas=[];currentSection.formulas.push(m?{formula:m[1].trim(),label:m[2].trim()}:{formula:content,label:''});continue;}
       if(indent>=4)pushSubSubItem(text);
       else if(indent>=2)pushSubItem(text,isLabel);
       else pushTopItem(text,isLabel);
@@ -2106,18 +2114,21 @@ async function exportPdfBrowserPrint(){
     const pageW=210,pageH=297;
     const pageHpx=A4H*scale; // canvas px per A4 page
 
+    const topPadPx=32*scale; // 32px breathing room at top of pages 2+
     const allBreaks=[0,...canvasBreaks,canvas.height];
     let first=true;
     for(let i=0;i<allBreaks.length-1;i++){
       const sliceTop=allBreaks[i];
-      const sliceH=Math.min(allBreaks[i+1]-sliceTop,canvas.height-sliceTop);
+      const drawY=first?0:topPadPx; // indent content on pages 2+
+      const maxSliceH=pageHpx-drawY;
+      const sliceH=Math.min(allBreaks[i+1]-sliceTop,canvas.height-sliceTop,maxSliceH);
       if(sliceH<=0)continue;
       const pc=document.createElement('canvas');
       pc.width=canvas.width;pc.height=pageHpx;
       const ctx=pc.getContext('2d');
       ctx.fillStyle=bgColor;
-      ctx.fillRect(0,0,pc.width,pc.height); // fill remainder with design bg
-      ctx.drawImage(canvas,0,sliceTop,canvas.width,sliceH,0,0,canvas.width,sliceH);
+      ctx.fillRect(0,0,pc.width,pc.height); // design bg fills entire page incl. top padding & bottom remainder
+      ctx.drawImage(canvas,0,sliceTop,canvas.width,sliceH,0,drawY,canvas.width,sliceH);
       if(!first)pdf.addPage();
       pdf.addImage(pc.toDataURL('image/jpeg',0.96),'JPEG',0,0,pageW,pageH);
       first=false;
