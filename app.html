@@ -379,12 +379,13 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .history-item-ts{font-size:0.65rem;color:var(--muted);margin-top:2px}
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  body { margin: 0 !important; padding: 0 !important; }
   body > *:not(#printArea) { display: none !important; }
-  #printArea { display: block !important; position: fixed; inset: 0; background: white; z-index: 9999; padding: 20px; margin: 0; }
-  #printArea .lz-page { max-width: 100%; border-radius: 0; box-shadow: none; animation: none; }
+  #printArea { display: block !important; position: static !important; width: 100% !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+  #printArea .lz-page { max-width: 100% !important; width: 100% !important; border-radius: 0 !important; box-shadow: none !important; animation: none !important; }
   .lz-editable:hover { background: transparent !important; outline: none !important; }
   .lz-editable:hover::after { display: none !important; }
-  @page { margin: 0; size: A4; }
+  @page { size: A4 portrait; margin: 15mm 18mm; }
 }
 /* PDF Export Modal */
 .pdf-modal-overlay{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px)}
@@ -412,6 +413,12 @@ textarea::placeholder { color: #383532; font-style: italic; }
 .pdf-modal-btn-primary:hover{opacity:0.88}
 .pdf-modal-btn-secondary{background:var(--border2);color:var(--muted2)}
 .pdf-modal-btn-secondary:hover{background:var(--border);color:var(--ink)}
+@media(max-width:600px){
+  .pdf-modal{padding:22px 18px}
+  .pdf-modal-grid{grid-template-columns:1fr}
+  .pdf-modal-option{padding:22px 18px}
+  .pdf-modal-head h2{font-size:1.15rem}
+}
 /* Modal tabs */
 .modal-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border2)}
 .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--muted2);cursor:pointer;transition:all 0.15s;margin-bottom:-1px}
@@ -1960,15 +1967,18 @@ function exportPdfBrowserPrint(){
     const bg=designBgMap[currentDesign.id]||'#ffffff';
     printArea.style.background=bg;
     printArea.innerHTML=`<style>${previewStyles}
-.lz-page{max-width:680px;border-radius:0;box-shadow:none;animation:none;margin:0 auto}
+.lz-page{width:100%;max-width:100%;border-radius:0;box-shadow:none;animation:none}
 .lz-editable:hover{background:transparent!important;outline:none!important}
 .lz-editable:hover::after{display:none!important}
 .lz-sec-controls,.lz-add-section-btn{display:none!important}
+@page{size:A4 portrait;margin:15mm 18mm}
 </style>${renderDocHTML(parsedDoc,currentDesign)}`;
     applyMathInElement(printArea);
   }
   printArea.style.display='block';
-  setTimeout(()=>{window.print();setTimeout(()=>{printArea.style.display='none';printArea.style.background='';},500);},200);
+  void printArea.offsetHeight; // force synchronous reflow — keeps user gesture context for window.print()
+  window.print();
+  setTimeout(()=>{printArea.style.display='none';printArea.style.background='';},300);
   setStatus('✓ Druckdialog geöffnet — als PDF speichern','ok');
 }
 function exportPdfDirect(){closePdfModal();exportPDF();}
