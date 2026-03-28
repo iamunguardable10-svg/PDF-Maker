@@ -92,6 +92,7 @@ PFLICHTREGELN:
 - Genau ein Merksatz am Ende im Format "> Merksatz: ...", nur wenn fachlich sinnvoll.
 - Bei Vergleichen darf eine Tabelle verwendet werden: | Spalte 1 | Spalte 2 |
 - Keine Emojis, keine Floskeln, keine erfundenen Fakten.
+- NIEMALS einen Abschnitt ohne Inhalt generieren. Jeder nummerierte Abschnitt muss mindestens 2 Bulletpoints oder ein visuelles Element enthalten.
 
 VISUELLE ELEMENTE — setze mindestens 2 davon pro Lernzettel ein, wo es fachlich passt:
 - ">> Begriff :: Erklärung" — für Fachbegriffe (mehrere hintereinander, ersetzen Bullets komplett im Abschnitt)

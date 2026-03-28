@@ -6,7 +6,7 @@
 <title>Notefly — Lernzettel Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -226,8 +226,8 @@ textarea::placeholder { color: #383532; font-style: italic; }
 /* Definition cards */
 .lz-def-grid{display:flex;flex-direction:column;gap:3px;margin:8px 0}
 .lz-def-row{display:flex;align-items:stretch;border-radius:6px;overflow:hidden;font-size:0.78rem;line-height:1.5;min-height:30px}
-.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0}
-.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18}
+.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0;word-break:break-word;overflow-wrap:break-word}
+.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18;word-break:break-word;overflow-wrap:break-word;min-width:0}
 .theme-dark .lz-def-desc{background:rgba(255,255,255,0.04);color:#d0cdc8}
 .theme-neon .lz-def-desc{background:rgba(255,255,255,0.03);color:#d0d8f0}
 .theme-retro .lz-def-desc{color:#2a1f0a;font-family:'DM Mono',monospace}
@@ -888,9 +888,9 @@ const previewStyles = `
 .theme-retro .lz-table td,.theme-retro .lz-table th{font-family:'DM Mono',monospace}.theme-retro .lz-table td{color:#2a1f0a}
 .lz-doc-subtitle{font-size:0.75rem;margin-top:6px;font-weight:500;padding-left:8px;opacity:0.85}
 .theme-lernzettel .lz-doc-subtitle{color:#2d6a4f}.theme-minimal .lz-doc-subtitle{color:#8a8580;padding-left:0}.theme-dark .lz-doc-subtitle{color:#52b788}.theme-pastell .lz-doc-subtitle{color:#a0608a}.theme-editorial .lz-doc-subtitle{color:#c9a84c}.theme-neon .lz-doc-subtitle{color:#00ffcc}.theme-retro .lz-doc-subtitle{color:#8b5e3c;font-family:'DM Mono',monospace}
-.lz-def-grid{display:flex;flex-direction:column;gap:3px;margin:8px 0}.lz-def-row{display:flex;align-items:stretch;border-radius:6px;overflow:hidden;font-size:0.78rem;line-height:1.5;min-height:30px}.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0}.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18}.theme-dark .lz-def-desc{background:rgba(255,255,255,0.04);color:#d0cdc8}.theme-neon .lz-def-desc{background:rgba(255,255,255,0.03);color:#d0d8f0}.theme-retro .lz-def-desc{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-retro .lz-def-term{font-family:'DM Mono',monospace}.theme-editorial .lz-def-desc{color:#3a3835}
+.lz-def-grid{display:flex;flex-direction:column;gap:3px;margin:8px 0}.lz-def-row{display:flex;align-items:stretch;border-radius:6px;overflow:hidden;font-size:0.78rem;line-height:1.5;min-height:30px}.lz-def-term{padding:6px 12px;font-family:'Syne',sans-serif;font-weight:700;min-width:90px;max-width:40%;display:flex;align-items:center;flex-shrink:0;word-break:break-word;overflow-wrap:break-word}.lz-def-desc{padding:6px 12px;flex:1;display:flex;align-items:center;background:rgba(0,0,0,0.025);color:#1c1a18;word-break:break-word;overflow-wrap:break-word;min-width:0}.theme-dark .lz-def-desc{background:rgba(255,255,255,0.04);color:#d0cdc8}.theme-neon .lz-def-desc{background:rgba(255,255,255,0.03);color:#d0d8f0}.theme-retro .lz-def-desc{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-retro .lz-def-term{font-family:'DM Mono',monospace}.theme-editorial .lz-def-desc{color:#3a3835}
 .lz-steps{display:flex;flex-direction:column;margin:8px 0;padding:0 6px}.lz-step{display:flex;align-items:flex-start;gap:12px;position:relative;padding-bottom:14px}.lz-step:last-child{padding-bottom:4px}.lz-step:not(:last-child)::after{content:'';position:absolute;left:10px;top:24px;bottom:0;width:2px;background:rgba(0,0,0,0.1);border-radius:1px}.lz-step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:800;flex-shrink:0;border:2px solid currentColor}.lz-step-text{font-size:0.79rem;line-height:1.55;color:#1c1a18;padding-top:2px;flex:1}.theme-dark .lz-step-text{color:#d0cdc8}.theme-dark .lz-step:not(:last-child)::after{background:rgba(255,255,255,0.1)}.theme-neon .lz-step-text{color:#d0d8f0}.theme-neon .lz-step:not(:last-child)::after{background:rgba(0,255,204,0.2)}.theme-retro .lz-step-text{color:#2a1f0a;font-family:'DM Mono',monospace}.theme-editorial .lz-step-text{color:#3a3835}
-.lz-highlights{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;padding:0 6px}.lz-highlight{border-radius:8px;padding:10px 14px;border-left:3px solid;background:rgba(0,0,0,0.02);flex:1;min-width:80px}.lz-highlight-value{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;line-height:1.2}.lz-highlight-label{font-size:0.7rem;color:#6a6460;margin-top:3px;line-height:1.4}.theme-dark .lz-highlight{background:rgba(255,255,255,0.03)}.theme-dark .lz-highlight-label{color:#7a7570}.theme-neon .lz-highlight{background:rgba(255,255,255,0.02)}.theme-neon .lz-highlight-label{color:#6060a0}.theme-retro .lz-highlight{background:rgba(0,0,0,0.03)}.theme-retro .lz-highlight-label{color:#8b6a42}.theme-retro .lz-highlight-value{font-family:'DM Mono',monospace}.theme-editorial .lz-highlight-label{color:#7a7570}
+.lz-highlights{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;padding:0 6px}.lz-highlight{border-radius:8px;padding:10px 14px;border-left:3px solid;background:rgba(0,0,0,0.02);flex:1;min-width:120px;max-width:100%;overflow:hidden;word-wrap:break-word;overflow-wrap:break-word}.lz-highlight-value{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;line-height:1.2;word-break:break-word;overflow-wrap:break-word}.lz-highlight-label{font-size:0.7rem;color:#6a6460;margin-top:3px;line-height:1.4;word-wrap:break-word;overflow-wrap:break-word}.theme-dark .lz-highlight{background:rgba(255,255,255,0.03)}.theme-dark .lz-highlight-label{color:#7a7570}.theme-neon .lz-highlight{background:rgba(255,255,255,0.02)}.theme-neon .lz-highlight-label{color:#6060a0}.theme-retro .lz-highlight{background:rgba(0,0,0,0.03)}.theme-retro .lz-highlight-label{color:#8b6a42}.theme-retro .lz-highlight-value{font-family:'DM Mono',monospace}.theme-editorial .lz-highlight-label{color:#7a7570}
 .lz-sec-controls{display:none;align-items:center;gap:3px;margin-left:auto;flex-shrink:0}
 .lz-section-title:hover .lz-sec-controls{display:flex}
 .lz-sec-btn{background:rgba(255,255,255,0.25);border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;color:inherit;line-height:1;padding:0}
@@ -951,14 +951,20 @@ function escapeText(str=''){return String(str).replace(/&/g,'&amp;').replace(/</
 function escapeAttr(str=''){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 
 function renderMath(str){
-  if(typeof katex==='undefined')return escapeText(str);
-  const parts=String(str).split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
+  const s=String(str||'');
+  if(typeof katex==='undefined'){
+    // KaTeX not loaded — strip $...$ markers so formulas still read cleanly
+    return escapeText(s.replace(/\$\$(.+?)\$\$/gs,'$1').replace(/\$([^$\n]+?)\$/g,'$1'));
+  }
+  const parts=s.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
   return parts.map(p=>{
     if(p.startsWith('$$')&&p.endsWith('$$')){
-      try{return katex.renderToString(p.slice(2,-2),{displayMode:true,throwOnError:false});}catch(e){return escapeText(p);}
+      try{return katex.renderToString(p.slice(2,-2),{displayMode:true,throwOnError:false});}
+      catch(e){return escapeText(p.slice(2,-2));}
     }
     if(p.startsWith('$')&&p.endsWith('$')&&p.length>2){
-      try{return katex.renderToString(p.slice(1,-1),{displayMode:false,throwOnError:false});}catch(e){return escapeText(p);}
+      try{return katex.renderToString(p.slice(1,-1),{displayMode:false,throwOnError:false});}
+      catch(e){return escapeText(p.slice(1,-1));}
     }
     return escapeText(p);
   }).join('');
@@ -1077,6 +1083,9 @@ function renderDocHTML(doc,design){
   doc.sections.forEach((sec,si)=>{
     const base=C[si%C.length];
     const c=styleOverrides?styleOverrides.sections[si%styleOverrides.sections.length]:base;
+    // Skip completely empty sections (title only, no content) — AI sometimes generates these
+    const hasContent=!!(sec.items?.length||sec.defs?.length||sec.steps?.length||sec.highlights?.length||sec.cols?.length||sec.callout||sec.table?.length);
+    if(!hasContent&&sec.title&&!sec._userAdded)return;
     html+=`<div class="lz-section">`;
     if(sec.title)html+=`<div class="lz-section-title" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)}"><span class="lz-editable" onclick="editField(this,'section',${si},null)">${escapeText(sec.title)}</span><span class="lz-sec-controls"><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},-1)" title="Nach oben">↑</button><button class="lz-sec-btn" onclick="event.stopPropagation();moveSection(${si},1)" title="Nach unten">↓</button><button class="lz-sec-btn lz-sec-del" onclick="event.stopPropagation();deleteSection(${si})" title="Abschnitt löschen">✕</button></span></div>`;
     if(sec.callout)html+=`<div class="lz-callout" style="background:${escapeAttr(c.bg)};color:${escapeAttr(c.title)};border-color:${escapeAttr(c.dot)}">${escapeText(sec.callout)}</div>`;
